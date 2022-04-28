@@ -13,6 +13,8 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
         lastSnap = maxSnap
     else:
         lastSnap = min(lastSnap, maxSnap)
+    print("doing from snapshot ", firstSnap, " to snapshot ", lastSnap)
+
     if firstSnap > lastSnap:
         print("cannot do firstSnap > lastSnap")
         return
@@ -21,6 +23,7 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
         os.mkdir(plottingDir)
 
     for snap in range(firstSnap,lastSnap + 1,skipSteps):
+        print("doing snapshot ",snap)
         loaded_snap = gadget_readsnap(snap, snapshotDir)
         loaded_snap.plot_Aslice(value,logplot=logplot,colorbar=True, center= center, vrange=vrange, box=box, res=res)
 
