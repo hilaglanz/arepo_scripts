@@ -7,7 +7,8 @@ from loadmodules import *
 
 def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSnap=0,lastSnap=-1,skipSteps=1,box=False,vrange=False,logplot=True, res=1024,
                center=True,plot_points=True, additional_points_size=30,additional_points_shape='X', additional_points_color='w', units_length = 'cm'):
-    snapshots = glob.glob(snapshotDir + './snapshot_*')
+    snapshots = glob.glob(snapshotDir + '/./snapshot_*')
+    print("found snapshots: ", snapshots)
     maxSnap=len(snapshots)
     if lastSnap == -1:
         lastSnap = maxSnap
