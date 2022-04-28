@@ -27,19 +27,11 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
         if box == False:
             box=[loaded_snap.boxsize,loaded_snap.boxsize]
         if plot_points:
-<<<<<<< HEAD
-            points = np.where(loaded_snap.type > 0)
-            for point in points:
-                point_pos = loaded_snap.pos[point]
-                print(point,point_pos)
-                np.scatter(point_pos[0], point_pos[1],additional_points_size, additional_points_color, additional_points_shape)
-=======
             points, = np.where(loaded_snap.type > 0)
             if len(points) > 0:
                 print("plotting points")
                 for point in points:
                     point_pos = loaded_snap.pos[point]
->>>>>>> 5a0fdc4670941f87156510aae95dbcc1c7b76ac1
 
                     scatter(point_pos[0], point_pos[1],additional_points_size, additional_points_color, additional_points_shape)
 
