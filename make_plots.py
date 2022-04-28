@@ -27,16 +27,17 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
         if box == False:
             box=[loaded_snap.boxsize,loaded_snap.boxsize]
         if plot_points:
-            points = np.where(loaded_snap.type > 0)
-            print("plotting points")
-            for point in points:
-                point_pos = loaded_snap.pos[point]
-                np.scatter(point_pos[0], point_pos[1],additional_points_size, additional_points_color, additional_points_shape)
+            points, = np.where(loaded_snap.type > 0)
+            if len(points) > 0:
+                print("plotting points")
+                for point in points:
+                    point_pos = loaded_snap.pos[point]
 
-                if loaded_snap.type[point] == 5:
-                    np.Circle((point_pos[0], point_pos[1]), loaded_snap.parameters['SinkFormationRadius']*res/box[0],
-                              fill=False, color='white', linestyle='dashed', linewidth=3.0)
+                    scatter(point_pos[0], point_pos[1],additional_points_size, additional_points_color, additional_points_shape)
 
+                    if loaded_snap.type[point] == 5:
+                        np.Circle((point_pos[0], point_pos[1]), loaded_snap.parameters['SinkFormationRadius']*res/box[0]
+                                  , fill=False, color='white', linestyle='dashed', linewidth=3.0)
 
         np.x_label('x [' + units_length + ']' )
         np.y_label('y [' + units_length + ']' )
