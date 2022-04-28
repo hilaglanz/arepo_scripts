@@ -27,8 +27,8 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
     for snap in range(firstSnap,lastSnap,skipSteps):
         print("doing snapshot ",snap)
         loaded_snap = gadget_readsnap(snap, snapshotDir)
-        fig, pl = loaded_snap.plot_Aslice(value,logplot=logplot,colorbar=True, center= center, vrange=vrange, box=box, res=res, numthreads=numthreads)
-        print(fig,pl)
+        fig = loaded_snap.plot_Aslice(value,logplot=logplot,colorbar=True, center= center, vrange=vrange, box=box, res=res, numthreads=numthreads)
+        print(fig)
         if box == False:
             box=[loaded_snap.boxsize,loaded_snap.boxsize]
         if plot_points:
