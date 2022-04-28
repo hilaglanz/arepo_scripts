@@ -29,7 +29,6 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
         loaded_snap = gadget_readsnap(snap, snapshotDir)
         pc = loaded_snap.plot_Aslice(value,logplot=logplot,colorbar=True, center= center, vrange=vrange, box=box, res=res, numthreads=numthreads)
         print(pc)
-        savefig("fig.jpg")
         if box == False:
             box=[loaded_snap.boxsize,loaded_snap.boxsize]
         if plot_points:
@@ -50,7 +49,7 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
         title('time : '+ str(loaded_snap.parameters['TimeBetSnapshot'] * skipSteps * snap) + ' [s]' )
         filename = plottingDir + '/Aslice_' + value + '_' + str(snap) + '.jpg'
         print("saving to: ", filename)
-        savefig(filename)
+        savefig("fig.jpg")
         print("saved fig")
 
 def InitParser():
