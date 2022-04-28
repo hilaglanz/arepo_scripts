@@ -40,7 +40,7 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
                     scatter(point_pos[0], point_pos[1],additional_points_size, additional_points_color, additional_points_shape)
 
                     if loaded_snap.type[point] == 5:
-                        np.Circle((point_pos[0], point_pos[1]), loaded_snap.parameters['SinkFormationRadius']*res/box[0]
+                        Circle((point_pos[0], point_pos[1]), loaded_snap.parameters['SinkFormationRadius']*res/box[0]
                                   , fill=False, color='white', linestyle='dashed', linewidth=3.0)
 
         xlabel('x [' + units_length + ']' )
