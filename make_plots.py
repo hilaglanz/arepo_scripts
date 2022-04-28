@@ -87,7 +87,7 @@ if __name__ == "__main__":
     if args.center_x is not None and args.center_y is not None:
         center = [args.center_x, args.center_y]
 
-    plot_range(args.value, args.source_dir, args.saving_dir, args.beginStep, args.lastStep, args.skipSteps, box=box,
+    plot_range(args.value, args.source_dir, args.saving_dir, args.beginStep, args.lastStep, args.skipStep, box=box,
                vrange=vrange, logplot=args.logplot, res=args.res, center=center, plot_points=args.plot_points,
                additional_points_size=args.additional_points_size, additional_points_shape=args.additional_points_shape,
                additional_points_color=args.additional_points_color)
