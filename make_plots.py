@@ -23,7 +23,7 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
     if not os.path.exists(plottingDir):
         os.mkdir(plottingDir)
 
-    for snap in range(firstSnap,lastSnap + 1,skipSteps):
+    for snap in range(firstSnap,lastSnap,skipSteps):
         print("doing snapshot ",snap)
         loaded_snap = gadget_readsnap(snap, snapshotDir)
         loaded_snap.plot_Aslice(value,logplot=logplot,colorbar=True, center= center, vrange=vrange, box=box, res=res)
