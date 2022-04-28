@@ -39,8 +39,8 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
                         np.Circle((point_pos[0], point_pos[1]), loaded_snap.parameters['SinkFormationRadius']*res/box[0]
                                   , fill=False, color='white', linestyle='dashed', linewidth=3.0)
 
-        x_label('x [' + units_length + ']' )
-        y_label('y [' + units_length + ']' )
+        xlabel('x [' + units_length + ']' )
+        ylabel('y [' + units_length + ']' )
         title('time : '+ str(loaded_snap.parameters['TimeBetSnapshot'] * skipSteps * snap) + ' [s]' )
         savefig(plottingDir + 'Aslice_' + value + '_' + str(snap) + '.jpg')
         print("saved fig")
