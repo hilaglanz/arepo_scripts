@@ -5,8 +5,9 @@ import numpy as np
 from loadmodules import *
 
 
-def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSnap=0,lastSnap=-1,skipSteps=1,box=False,vrange=False,logplot=True, res=1024,
-               center=True,plot_points=True, additional_points_size=30,additional_points_shape='X', additional_points_color='w', units_length = 'cm'):
+def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSnap=0,lastSnap=-1,skipSteps=1,box=False,
+               vrange=False,logplot=True, res=1024, numthreads=1, center=True,plot_points=True,
+               additional_points_size=30,additional_points_shape='X', additional_points_color='w', units_length = 'cm'):
     snapshots = glob.glob(snapshotDir + '/./snapshot_*')
     print("found snapshots: ", snapshots)
     maxSnap=len(snapshots)
@@ -26,8 +27,7 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
     for snap in range(firstSnap,lastSnap,skipSteps):
         print("doing snapshot ",snap)
         loaded_snap = gadget_readsnap(snap, snapshotDir)
-        print(loaded_snap.npart)
-        pc = loaded_snap.plot_Aslice(value,logplot=logplot,colorbar=True, center= center, vrange=vrange, box=box, res=res)
+        pc = loaded_snap.plot_Aslice(value,logplot=logplot,colorbar=True, center= center, vrange=vrange, box=box, res=res, numthreads=numthreads)
         print(pc)
         if box == False:
             box=[loaded_snap.boxsize,loaded_snap.boxsize]
@@ -64,6 +64,7 @@ def InitParser():
     parser.add_argument('--logplot', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),  help='logplot',
                         default=True)
     parser.add_argument('--res', type=int, help='plotting resolution', default=1024)
+    parser.add_argument('--numthreads', type=int, help='threads for plotting', default=1)
     parser.add_argument('--center_x', type=float, help='point on x axis to be the center of the plot', default=None)
     parser.add_argument('--center_y', type=float, help='point on y axis to be the center of the plot', default=None)
     parser.add_argument('--plot_points', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),  help='logplot',
@@ -94,6 +95,6 @@ if __name__ == "__main__":
         center = [args.center_x, args.center_y]
 
     plot_range(args.value, args.source_dir, args.saving_dir, args.beginStep, args.lastStep, args.skipStep, box=box,
-               vrange=vrange, logplot=args.logplot, res=args.res, center=center, plot_points=args.plot_points,
+               vrange=vrange, logplot=args.logplot, res=args.res, numthreads= args.numthreads, center=center, plot_points=args.plot_points,
                additional_points_size=args.additional_points_size, additional_points_shape=args.additional_points_shape,
                additional_points_color=args.additional_points_color)
