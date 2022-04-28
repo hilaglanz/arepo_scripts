@@ -28,9 +28,9 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
             box=[loaded_snap.boxsize,loaded_snap.boxsize]
         if plot_points:
             points = np.where(loaded_snap.type > 0)
-            print("plotting points")
             for point in points:
                 point_pos = loaded_snap.pos[point]
+                print(point,point_pos)
                 np.scatter(point_pos[0], point_pos[1],additional_points_size, additional_points_color, additional_points_shape)
 
                 if loaded_snap.type[point] == 5:
