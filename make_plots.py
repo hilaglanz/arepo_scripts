@@ -27,8 +27,8 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
     for snap in range(firstSnap,lastSnap,skipSteps):
         print("doing snapshot ",snap)
         loaded_snap = gadget_readsnap(snap, snapshotDir)
-        pc = loaded_snap.plot_Aslice(value,logplot=logplot,colorbar=True, center= center, vrange=vrange, box=box, res=res, numthreads=numthreads)
-        print(pc)
+        fig, pl = loaded_snap.plot_Aslice(value,logplot=logplot,colorbar=True, center= center, vrange=vrange, box=box, res=res, numthreads=numthreads)
+        print(fig,pl)
         if box == False:
             box=[loaded_snap.boxsize,loaded_snap.boxsize]
         if plot_points:
@@ -47,7 +47,7 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
         xlabel('x [' + units_length + ']' )
         ylabel('y [' + units_length + ']' )
         title('time : '+ str(loaded_snap.parameters['TimeBetSnapshot'] * skipSteps * snap) + ' [s]' )
-        filename = plottingDir + '/Aslice_' + value + '_' + str(snap) + '.jpg'
+        filename = plottingDir + "/Aslice_" + value + "_{0}.jpg".format(snap)
         print("saving to: ", filename)
         savefig(filename)
         print("saved fig")
