@@ -46,7 +46,7 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
         xlabel('x [' + units_length + ']' )
         ylabel('y [' + units_length + ']' )
         title('time : '+ str(loaded_snap.parameters['TimeBetSnapshot'] * skipSteps * snap) + ' [s]' )
-        savefig(plottingDir + 'Aslice_' + value + '_' + str(snap) + '.jpg')
+        savefig(plottingDir + '/Aslice_' + value + '_' + str(snap) + '.jpg')
         print("saved fig")
 
 def InitParser():
