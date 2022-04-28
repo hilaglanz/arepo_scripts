@@ -21,7 +21,7 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
         os.mkdir(plottingDir)
 
     for snap in range(firstSnap,lastSnap + 1,skipSteps):
-        loaded_snap = gadget_readsnap(snap,plottingDir)
+        loaded_snap = gadget_readsnap(snap, snapshotDir)
         loaded_snap.plot_Aslice(value,logplot=logplot,colorbar=True, center= center, vrange=vrange, box=box, res=res)
 
         if box == False:
