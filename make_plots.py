@@ -1,5 +1,6 @@
 import os
 import glob
+import argparse
 import numpy as np
 from loadmodules import *
 
@@ -67,7 +68,11 @@ def InitParser():
 
     return parser
 
-def main(args):
+
+if __name__ == "__main__":
+    for arg in sys.argv:
+        print(arg)
+    print(len(sys.argv))
     parser = InitParser()
     args = parser.parse_args()
     box = False
@@ -83,12 +88,6 @@ def main(args):
         center = [args.center_x, args.center_y]
 
     plot_range(args.value, args.source_dir, args.saving_dir, args.beginStep, args.lastStep, args.skipSteps, box=box,
-               vrange=vrange,logplot=args.logplot, res=args.res, center=center, plot_points=args.plot_points,
+               vrange=vrange, logplot=args.logplot, res=args.res, center=center, plot_points=args.plot_points,
                additional_points_size=args.additional_points_size, additional_points_shape=args.additional_points_shape,
                additional_points_color=args.additional_points_color)
-
-if __name__ == "__main__":
-    for arg in sys.argv:
-        print(arg)
-    print(len(sys.argv))
-    main(sys.argv)
