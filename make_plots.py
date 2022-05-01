@@ -108,9 +108,5 @@ if __name__ == "__main__":
     plot_range(args.value, args.source_dir, args.saving_dir, args.beginStep, args.lastStep, args.skipStep, box=box,
                vrange=vrange, logplot=args.logplot, res=args.res, numthreads= args.numthreads, center=center, plot_points=args.plot_points,
                additional_points_size=args.additional_points_size, additional_points_shape=args.additional_points_shape,
-<<<<<<< HEAD
-               additional_points_color=args.additional_points_color)
-=======
                additional_points_color=args.additional_points_color, units_length=args.units_length,
                plot_velocities=args.plot_velocities)
->>>>>>> 430ffc8b1adcf49a8700dc33ae6b43374c902041
