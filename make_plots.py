@@ -7,12 +7,13 @@ from loadmodules import *
 
 def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSnap=0,lastSnap=-1,skipSteps=1,box=False,
                vrange=False,logplot=True, res=1024, numthreads=1, center=True,plot_points=True,
-               additional_points_size=30,additional_points_shape='X', additional_points_color='w', units_length = 'cm'):
+               additional_points_size=30,additional_points_shape='X', additional_points_color='w', units_length = 'cm',
+               plot_velocities=False):
     snapshots = glob.glob(snapshotDir + '/./snapshot_*')
     print("found snapshots: ", snapshots)
     maxSnap=len(snapshots)
     if lastSnap == -1:
-        lastSnap = maxSnap
+        lastSnap = maxSnap - 1
     else:
         lastSnap = min(lastSnap, maxSnap)
     print("doing from snapshot ", firstSnap, " to snapshot ", lastSnap)
@@ -24,11 +25,10 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
     if not os.path.exists(plottingDir):
         os.mkdir(plottingDir)
 
-    for snap in range(firstSnap,lastSnap,skipSteps):
+    for snap in range(firstSnap,lastSnap+1,skipSteps):
         print("doing snapshot ",snap)
         loaded_snap = gadget_readsnap(snap, snapshotDir)
         fig = loaded_snap.plot_Aslice(value,logplot=logplot,colorbar=True, center= center, vrange=vrange, box=box, res=res, numthreads=numthreads)
-        print(fig)
         if box == False:
             box=[loaded_snap.boxsize,loaded_snap.boxsize]
         if plot_points:
@@ -43,6 +43,8 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
                     if loaded_snap.type[point] == 5:
                         Circle((point_pos[0], point_pos[1]), loaded_snap.parameters['SinkFormationRadius']*res/box[0]
                                   , fill=False, color='white', linestyle='dashed', linewidth=3.0)
+        if plot_velocities:
+            quiver(loaded_snap.pos[:,0],loaded_snap.pos[:,1],loaded_snap.vel[:,0], loaded_snap.vel[:,1])
 
         xlabel('x [' + units_length + ']' )
         ylabel('y [' + units_length + ']' )
@@ -69,11 +71,15 @@ def InitParser():
     parser.add_argument('--numthreads', type=int, help='threads for plotting', default=1)
     parser.add_argument('--center_x', type=float, help='point on x axis to be the center of the plot', default=None)
     parser.add_argument('--center_y', type=float, help='point on y axis to be the center of the plot', default=None)
-    parser.add_argument('--plot_points', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),  help='logplot',
+    parser.add_argument('--center_z', type=float, help='point on z axis to be the center of the plot', default=0)
+    parser.add_argument('--plot_points', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),  help='should plot other than gas?',
                         default=True)
+    parser.add_argument('--plot_velocities', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),  help='plot velocity field',
+                        default=False)
     parser.add_argument('--additional_points_size', type=float,  help='point sizes in plot', default = 30)
     parser.add_argument('--additional_points_shape', type=str,  help='point shapes in plot', default= "X")
     parser.add_argument('--additional_points_color', type=str,  help='point colors in plot', default= "w")
+    parser.add_argument('--units_length', type=str,  help='name of the length units', default= "cm")
 
     return parser
 
@@ -94,9 +100,10 @@ if __name__ == "__main__":
 
     center = False
     if args.center_x is not None and args.center_y is not None:
-        center = [args.center_x, args.center_y]
+        center = [args.center_x, args.center_y,args.center_z]
 
     plot_range(args.value, args.source_dir, args.saving_dir, args.beginStep, args.lastStep, args.skipStep, box=box,
                vrange=vrange, logplot=args.logplot, res=args.res, numthreads= args.numthreads, center=center, plot_points=args.plot_points,
                additional_points_size=args.additional_points_size, additional_points_shape=args.additional_points_shape,
-               additional_points_color=args.additional_points_color)
+               additional_points_color=args.additional_points_color, units_length=args.units_length,
+               plot_velocities=args.plot_velocities)
