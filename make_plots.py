@@ -41,13 +41,16 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
                     scatter(point_pos[0], point_pos[1],additional_points_size, additional_points_color, additional_points_shape)
 
                     if loaded_snap.type[point] == 5:
-                        Circle((point_pos[0], point_pos[1]), loaded_snap.parameters['SinkFormationRadius']*res/box[0]
+                        print("plotting accretion radius of: ", loaded_snap.parameters['SinkFormationRadius']*res/box[0])
+                        circ = Circle((point_pos[0], point_pos[1]), loaded_snap.parameters['SinkFormationRadius']*res/box[0]
                                   , fill=False, color='white', linestyle='dashed', linewidth=3.0)
+                        print(circ)
+                        gca().add_patch(circ)
 
         xlabel('x [' + units_length + ']' )
         ylabel('y [' + units_length + ']' )
         title('time : '+ str(loaded_snap.parameters['TimeBetSnapshot'] * skipSteps * snap) + ' [s]' )
-        filename = plottingDir + "/Aslice_" + value + "_{0}.jpg".format(snap)
+        filename = plottingDir + "/Aslice_" + value + "_{0}.png".format(snap)
         print("saving to: ", filename)
         savefig(filename)
         print("saved fig")
