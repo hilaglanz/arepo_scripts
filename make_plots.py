@@ -47,7 +47,9 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
                         print(circ)
                         gca().add_patch(circ)
         if plot_velocities:
-            quiver(loaded_snap.pos[:,0],loaded_snap.pos[:,1],loaded_snap.vel[:,0], loaded_snap.vel[:,1], scale=1, headaxislength=5)
+            quiver(loaded_snap.pos[:,0],loaded_snap.pos[:,1],loaded_snap.vel[:,0], loaded_snap.vel[:,1],
+                   scale=box[0]/loaded_snap.parameters['boxsize'],
+                   headaxislength=10, headlength=10)
 
         xlabel('x [' + units_length + ']' )
         ylabel('y [' + units_length + ']' )
