@@ -41,15 +41,14 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
                     scatter(point_pos[0], point_pos[1],additional_points_size, additional_points_color, additional_points_shape)
 
                     if loaded_snap.type[point] == 5:
-                        print("plotting accretion radius of: ", loaded_snap.parameters['SinkFormationRadius']*res/box[0])
-                        circ = Circle((point_pos[0], point_pos[1]), loaded_snap.parameters['SinkFormationRadius']*res/box[0]
+                        print("plotting accretion radius of: ", loaded_snap.parameters['SinkFormationRadius'])
+                        circ = Circle((point_pos[0], point_pos[1]), loaded_snap.parameters['SinkFormationRadius']
                                   , fill=False, color='white', linestyle='dashed', linewidth=3.0)
                         print(circ)
                         gca().add_patch(circ)
         if plot_velocities:
             quiver(loaded_snap.pos[:,0],loaded_snap.pos[:,1],loaded_snap.vel[:,0], loaded_snap.vel[:,1],
-                   scale=0.001*box[0]/loaded_snap.parameters['BoxSize'],
-                   headaxislength=10, headlength=10)
+                   scale=50)#*loaded_snap.parameters['BoxSize']/box[0])
 
         xlabel('x [' + units_length + ']' )
         ylabel('y [' + units_length + ']' )
