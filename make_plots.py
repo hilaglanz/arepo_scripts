@@ -47,7 +47,16 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
                         print(circ)
                         gca().add_patch(circ)
         if plot_velocities:
-            quiver(loaded_snap.pos[:,0],loaded_snap.pos[:,1],loaded_snap.vel[:,0], loaded_snap.vel[:,1],
+            loaded_snap.data['velx'] = loaded_snap.vel[:,0]
+            loaded_snap.data['vely'] = loaded_snap.vel[:,1]
+            slice_velx = loaded_snap.plot_Aslice('velx',box=box, res=res, numthreads=numthreads)
+            slice_vely = loaded_snap.plot_Aslice('vely',box=box, res=res, numthreads=numthreads)
+            posx = slice_velx['x'][:-1]
+            posy = slice_velx['y'][:-1]
+            velx = slice_velx['grid']
+            vely = slice_vely['grid']
+            streamplot(posx,posy,velx,vely,density=2,color='black')
+            #quiver(loaded_snap.pos[:,0],loaded_snap.pos[:,1],loaded_snap.vel[:,0], loaded_snap.vel[:,1],
                    scale=50)#*loaded_snap.parameters['BoxSize']/box[0])
 
         xlabel('x [' + units_length + ']' )
