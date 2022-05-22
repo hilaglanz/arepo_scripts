@@ -57,7 +57,7 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
             vely = slice_vely['grid']
             streamplot(posx,posy,velx,vely,density=2,color='black')
             #quiver(loaded_snap.pos[:,0],loaded_snap.pos[:,1],loaded_snap.vel[:,0], loaded_snap.vel[:,1],
-                   scale=50)#*loaded_snap.parameters['BoxSize']/box[0])
+            # scale=50)#*loaded_snap.parameters['BoxSize']/box[0])
 
         xlabel('x [' + units_length + ']' )
         ylabel('y [' + units_length + ']' )
