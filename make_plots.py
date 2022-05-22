@@ -49,8 +49,8 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
         if plot_velocities:
             loaded_snap.data['velx'] = loaded_snap.vel[:,0]
             loaded_snap.data['vely'] = loaded_snap.vel[:,1]
-            slice_velx = loaded_snap.plot_Aslice('velx',box=box, res=res, numthreads=numthreads)
-            slice_vely = loaded_snap.plot_Aslice('vely',box=box, res=res, numthreads=numthreads)
+            slice_velx = loaded_snap.get_Aslice('velx',box=box, res=res, numthreads=numthreads)
+            slice_vely = loaded_snap.get_Aslice('vely',box=box, res=res, numthreads=numthreads)
             posx = slice_velx['x'][:-1]
             posy = slice_velx['y'][:-1]
             velx = slice_velx['grid']
