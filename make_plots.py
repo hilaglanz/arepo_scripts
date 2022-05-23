@@ -61,7 +61,7 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
 
         xlabel('x [' + units_length + ']' )
         ylabel('y [' + units_length + ']' )
-        title('time : '+ str(loaded_snap.parameters['TimeBetSnapshot'] * skipSteps * snap) + ' [s]' )
+        title('time : {%.2f} [s]'.format(loaded_snap.parameters['TimeBetSnapshot'] * skipSteps * snap) )
         filename = plottingDir + "/Aslice_" + value + "_{0}.png".format(snap)
         print("saving to: ", filename)
         savefig(filename)
