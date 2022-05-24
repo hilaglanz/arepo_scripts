@@ -39,7 +39,7 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
                     label += "[" + name_and_units[value][1] + "]"
                     break
 
-        fig = loaded_snap.plot_Aslice(value,logplot=logplot,colorbar=True, clabel=label , center= center, vrange=vrange,
+        fig = loaded_snap.plot_Aslice(value,logplot=logplot,colorbar=True, cblabel=label , center= center, vrange=vrange,
                                       box=box, res=res, numthreads=numthreads)
         if box == False:
             box=[loaded_snap.boxsize,loaded_snap.boxsize]
