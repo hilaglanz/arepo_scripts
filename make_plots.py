@@ -4,6 +4,7 @@ import argparse
 import numpy as np
 from loadmodules import *
 
+name_and_units = {"rho":("density","g/cm^3"), "temp":("Temperature","K"), "vel":("Velocity","cm/s"), "mass":("Mass","g")}
 
 def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSnap=0,lastSnap=-1,skipSteps=1,box=False,
                vrange=False,logplot=True, res=1024, numthreads=1, center=True,plot_points=True,
@@ -28,7 +29,18 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
     for snap in range(firstSnap,lastSnap+1,skipSteps):
         print("doing snapshot ",snap)
         loaded_snap = gadget_readsnap(snap, snapshotDir)
-        fig = loaded_snap.plot_Aslice(value,logplot=logplot,colorbar=True, center= center, vrange=vrange, box=box, res=res, numthreads=numthreads)
+        label = value
+        if value in name_and_units.key():
+            label = name_and_units[value][0]
+            label += "[" + name_and_units[value][1] + "]"
+        else:
+            for val in name_and_units.keys():
+                if value in val:
+                    label += "[" + name_and_units[value][1] + "]"
+                    break
+
+        fig = loaded_snap.plot_Aslice(value,logplot=logplot,colorbar=True, clabel=label , center= center, vrange=vrange,
+                                      box=box, res=res, numthreads=numthreads)
         if box == False:
             box=[loaded_snap.boxsize,loaded_snap.boxsize]
         if plot_points:
