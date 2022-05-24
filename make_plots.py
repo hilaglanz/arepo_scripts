@@ -30,7 +30,7 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
         print("doing snapshot ",snap)
         loaded_snap = gadget_readsnap(snap, snapshotDir)
         label = value
-        if value in name_and_units.key():
+        if value in name_and_units.keys():
             label = name_and_units[value][0]
             label += "[" + name_and_units[value][1] + "]"
         else:
