@@ -15,12 +15,15 @@ def plot_single_value(loaded_snap, value='rho', snapshotDir= "output", plottingD
         label = name_and_units[value][0]
         label += "[" + name_and_units[value][1] + "]"
     else:
-        for val in name_and_units.keys():
+        '''for val in name_and_units.keys():
             if value in val:
                 label += "[" + name_and_units[value][1] + "]"
-                break
-
-    fig = loaded_snap.plot_Aslice(value, logplot=logplot, colorbar=True, cblabel=label, center=center, vrange=vrange,
+                break'''
+    if "xnuc" in value:
+        loaded_snap.data["rho"+value] = loaded_snap.rho * rho.data[value]
+        value = "rho" + value
+        label += "[" + name_and_units["rho"][1] + "]"
+    loaded_snap.plot_Aslice(value, logplot=logplot, colorbar=True, cblabel=label, center=center, vrange=vrange,
                                   box=box, res=res, numthreads=numthreads)
     if box == False:
         box = [loaded_snap.boxsize, loaded_snap.boxsize]
