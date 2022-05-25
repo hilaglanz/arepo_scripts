@@ -91,6 +91,7 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
         print(type(value), value)
         if len(value) == 1:
             value = value[0]
+            print(value)
             plot_single_value(loaded_snap, snap_num=snap, value=value, snapshotDir=snapshotDir, plottingDir=plottingDir,
                               firstSnap=firstSnap,
                               lastSnap=lastSnap, skipSteps=skipSteps, box=box, vrange=vrange, logplot=logplot, res=res,
