@@ -100,7 +100,7 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
         else:
             fig = figure()
             fig.subplots_adjust(hspace=0.4, top=0.98, bottom=.15)
-            num_figures = int(len(val)/2)
+            num_figures = int(len(value)/2)
             for index,val in enumerate(value):
                 subplot(int(num_figures*100 + 21 + index))
                 plot_single_value(loaded_snap, snap_num=snap, value=val, snapshotDir=snapshotDir, plottingDir=plottingDir,
