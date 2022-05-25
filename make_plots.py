@@ -150,7 +150,7 @@ def InitParser():
     parser.add_argument('--vmax', type=float,  nargs='+', help='maximum range plotting', default=None)
     parser.add_argument('--boxsize', type=float,  nargs='+', help='boxsize', default=None)
     parser.add_argument('--logplot', nargs='+', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),  help='logplot',
-                        default=True)
+                        default=[True])
     parser.add_argument('--res', type=int, help='plotting resolution', default=1024)
     parser.add_argument('--numthreads', type=int, help='threads for plotting', default=1)
     parser.add_argument('--center_x', type=float, help='point on x axis to be the center of the plot', default=None)
