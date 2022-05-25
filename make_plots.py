@@ -27,7 +27,7 @@ def plot_single_value(loaded_snap, snap_num, value='rho', snapshotDir= "output",
 
     print(value)
     loaded_snap.plot_Aslice(value, logplot=logplot, colorbar=True, cblabel=label, center=center, vrange=vrange,
-                                  box=box, res=res, numthreads=numthreads)
+                                  box=box, res=res, numthreads=numthreads, newfig=newfig)
     if box == False:
         box = [loaded_snap.boxsize, loaded_snap.boxsize]
     if plot_points:
@@ -108,7 +108,9 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
             fig.subplots_adjust(hspace=0.4, top=0.98, bottom=.15)
             num_figures = int(ceil(len(value)/2))
             for index,val in enumerate(value):
-                subplot(int(num_figures*100 + 21 + index))
+                curr_subplot = int(num_figures*100 + 21 + index)
+                print("curr subplot: ", curr_subplot)
+                subplot(curr_subplot)
                 plot_single_value(loaded_snap, snap_num=snap, value=val, snapshotDir=snapshotDir, plottingDir=plottingDir,
                                   firstSnap=firstSnap,
                                   lastSnap=lastSnap, skipSteps=skipSteps, box=box, vrange=vrange, logplot=logplot,
