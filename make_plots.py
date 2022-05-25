@@ -115,7 +115,7 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
         else:
             fig = figure(figsize=(36,20))
             fig.subplots_adjust(hspace=0.4,wspace=0.4)
-            pyplot.rcParams.update({'font.size': 60, 'font.family': 'Serif'})
+            rcParams.update({'font.size': 60, 'font.family': 'Serif'})
             num_figures = int(ceil(len(value)/2))
             for index,val in enumerate(value):
                 curr_subplot = int(num_figures*100 + 21 + index)
@@ -131,10 +131,10 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
                                   additional_points_shape=additional_points_shape,
                                   additional_points_color=additional_points_color, units_length=units_length,
                                   plot_velocities=plot_velocities, newfig=False)
-                pyplot.rcParams.update({'font.size': 60, 'font.family': 'Serif'})
+                rcParams.update({'font.size': 60, 'font.family': 'Serif'})
             #title('time : {:.2f} [s]'.format(loaded_snap.time))
             suptitle('time : {:.2f} [s]'.format(loaded_snap.time), fontsize='x-large')
-            pyplot.rcParams.update({'font.size': 60, 'font.family': 'Serif'})
+            rcParams.update({'font.size': 60, 'font.family': 'Serif'})
             filename = plottingDir + "/Aslice_" + "_".join(value) + "_{0}.png".format(snap)
             print("saving to: ", filename)
             savefig(filename)
