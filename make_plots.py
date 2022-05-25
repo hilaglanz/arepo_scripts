@@ -6,6 +6,61 @@ from loadmodules import *
 
 name_and_units = {"rho":("density","g/cm^3"), "temp":("Temperature","K"), "vel":("Velocity","cm/s"), "mass":("Mass","g")}
 
+def plot_single_value(loaded_snap, value='rho', snapshotDir= "output", plottingDir="plots", firstSnap=0,lastSnap=-1,skipSteps=1,box=False,
+               vrange=False,logplot=True, res=1024, numthreads=1, center=True,plot_points=True,
+               additional_points_size=30,additional_points_shape='X', additional_points_color='w', units_length = 'cm',
+               plot_velocities=False, newfig=True):
+    label = value
+    if value in name_and_units.keys():
+        label = name_and_units[value][0]
+        label += "[" + name_and_units[value][1] + "]"
+    else:
+        for val in name_and_units.keys():
+            if value in val:
+                label += "[" + name_and_units[value][1] + "]"
+                break
+
+    fig = loaded_snap.plot_Aslice(value, logplot=logplot, colorbar=True, cblabel=label, center=center, vrange=vrange,
+                                  box=box, res=res, numthreads=numthreads)
+    if box == False:
+        box = [loaded_snap.boxsize, loaded_snap.boxsize]
+    if plot_points:
+        points, = np.where(loaded_snap.type > 0)
+        if len(points) > 0:
+            print("plotting points")
+            for point in points:
+                point_pos = loaded_snap.pos[point]
+
+                scatter(point_pos[0], point_pos[1], additional_points_size, additional_points_color,
+                        additional_points_shape)
+
+                if loaded_snap.type[point] == 5:
+                    print("plotting accretion radius of: ", loaded_snap.parameters['SinkFormationRadius'])
+                    circ = Circle((point_pos[0], point_pos[1]), loaded_snap.parameters['SinkFormationRadius']
+                                  , fill=False, color='white', linestyle='dashed', linewidth=3.0)
+                    print(circ)
+                    gca().add_patch(circ)
+    if plot_velocities:
+        loaded_snap.data['velx'] = loaded_snap.vel[:, 0]
+        loaded_snap.data['vely'] = loaded_snap.vel[:, 1]
+        slice_velx = loaded_snap.get_Aslice('velx', box=box, res=res, numthreads=numthreads)
+        slice_vely = loaded_snap.get_Aslice('vely', box=box, res=res, numthreads=numthreads)
+        posx = slice_velx['x'][:-1]
+        posy = slice_velx['y'][:-1]
+        velx = slice_velx['grid']
+        vely = slice_vely['grid']
+        streamplot(posx, posy, velx, vely, density=2, color='black')
+        # quiver(loaded_snap.pos[:,0],loaded_snap.pos[:,1],loaded_snap.vel[:,0], loaded_snap.vel[:,1],
+        # scale=50)#*loaded_snap.parameters['BoxSize']/box[0])
+
+    xlabel('x [' + units_length + ']')
+    ylabel('y [' + units_length + ']')
+    title('time : {:.2f} [s]'.format(loaded_snap.time))
+    filename = plottingDir + "/Aslice_" + value + "_{0}.png".format(snap)
+    print("saving to: ", filename)
+    savefig(filename)
+    print("saved fig")
+
 def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSnap=0,lastSnap=-1,skipSteps=1,box=False,
                vrange=False,logplot=True, res=1024, numthreads=1, center=True,plot_points=True,
                additional_points_size=30,additional_points_shape='X', additional_points_color='w', units_length = 'cm',
@@ -29,55 +84,31 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
     for snap in range(firstSnap,lastSnap+1,skipSteps):
         print("doing snapshot ",snap)
         loaded_snap = gadget_readsnap(snap, snapshotDir)
-        label = value
-        if value in name_and_units.keys():
-            label = name_and_units[value][0]
-            label += "[" + name_and_units[value][1] + "]"
+        if type(value) == type("rho"):
+            plot_single_value(loaded_snap, value=value, snapshotDir=snapshotDir, plottingDir=plottingDir,
+                              firstSnap=firstSnap,
+                              lastSnap=lastSnap, skipSteps=skipSteps, box=box, vrange=vrange, logplot=logplot, res=res,
+                              numthreads=numthreads, center=center, plot_points=plot_points,
+                              additional_points_size=additional_points_size,
+                              additional_points_shape=additional_points_shape,
+                              additional_points_color=additional_points_color, units_length=units_length,
+                              plot_velocities=plot_velocities)
         else:
-            for val in name_and_units.keys():
-                if value in val:
-                    label += "[" + name_and_units[value][1] + "]"
-                    break
+            fig = figure()
+            fig.subplots_adjust(hspace=0.4, top=0.98, bottom=.15)
+            num_figures = int(len(val)/2)
+            for index,val in enumerate(value):
+                subplot(int(num_figures*100 + 21 + index))
+                plot_single_value(loaded_snap, value=val, snapshotDir=snapshotDir, plottingDir=plottingDir,
+                                  firstSnap=firstSnap,
+                                  lastSnap=lastSnap, skipSteps=skipSteps, box=box, vrange=vrange, logplot=logplot,
+                                  res=res,
+                                  numthreads=numthreads, center=center, plot_points=plot_points,
+                                  additional_points_size=additional_points_size,
+                                  additional_points_shape=additional_points_shape,
+                                  additional_points_color=additional_points_color, units_length=units_length,
+                                  plot_velocities=plot_velocities, newfig=False)
 
-        fig = loaded_snap.plot_Aslice(value,logplot=logplot,colorbar=True, cblabel=label , center= center, vrange=vrange,
-                                      box=box, res=res, numthreads=numthreads)
-        if box == False:
-            box=[loaded_snap.boxsize,loaded_snap.boxsize]
-        if plot_points:
-            points, = np.where(loaded_snap.type > 0)
-            if len(points) > 0:
-                print("plotting points")
-                for point in points:
-                    point_pos = loaded_snap.pos[point]
-
-                    scatter(point_pos[0], point_pos[1],additional_points_size, additional_points_color, additional_points_shape)
-
-                    if loaded_snap.type[point] == 5:
-                        print("plotting accretion radius of: ", loaded_snap.parameters['SinkFormationRadius'])
-                        circ = Circle((point_pos[0], point_pos[1]), loaded_snap.parameters['SinkFormationRadius']
-                                  , fill=False, color='white', linestyle='dashed', linewidth=3.0)
-                        print(circ)
-                        gca().add_patch(circ)
-        if plot_velocities:
-            loaded_snap.data['velx'] = loaded_snap.vel[:,0]
-            loaded_snap.data['vely'] = loaded_snap.vel[:,1]
-            slice_velx = loaded_snap.get_Aslice('velx',box=box, res=res, numthreads=numthreads)
-            slice_vely = loaded_snap.get_Aslice('vely',box=box, res=res, numthreads=numthreads)
-            posx = slice_velx['x'][:-1]
-            posy = slice_velx['y'][:-1]
-            velx = slice_velx['grid']
-            vely = slice_vely['grid']
-            streamplot(posx,posy,velx,vely,density=2,color='black')
-            #quiver(loaded_snap.pos[:,0],loaded_snap.pos[:,1],loaded_snap.vel[:,0], loaded_snap.vel[:,1],
-            # scale=50)#*loaded_snap.parameters['BoxSize']/box[0])
-
-        xlabel('x [' + units_length + ']' )
-        ylabel('y [' + units_length + ']' )
-        title('time : {:.2f} [s]'.format(loaded_snap.time) )
-        filename = plottingDir + "/Aslice_" + value + "_{0}.png".format(snap)
-        print("saving to: ", filename)
-        savefig(filename)
-        print("saved fig")
 
 def InitParser():
     parser = argparse.ArgumentParser(description='')
