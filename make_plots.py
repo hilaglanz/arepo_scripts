@@ -62,6 +62,14 @@ def plot_single_value(loaded_snap, snap_num, value='rho', snapshotDir= "output",
     xlabel('x [' + units_length + ']')
     ylabel('y [' + units_length + ']')
 
+def get_single_value(value,index=0):
+    if value is None:
+        return value
+
+    if len(value) > index:
+        return value[index]
+
+    return value[0]
 
 def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSnap=0,lastSnap=-1,skipSteps=1,box=False,
                vrange=False,logplot=True, res=1024, numthreads=1, center=True,plot_points=True,
@@ -92,7 +100,8 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
             print(val)
             plot_single_value(loaded_snap, snap_num=snap, value=val, snapshotDir=snapshotDir, plottingDir=plottingDir,
                               firstSnap=firstSnap,
-                              lastSnap=lastSnap, skipSteps=skipSteps, box=box, vrange=vrange, logplot=logplot, res=res,
+                              lastSnap=lastSnap, skipSteps=skipSteps, box=get_single_value(box),
+                              vrange=get_single_value(vrange), logplot=get_single_value(logplot), res=res,
                               numthreads=numthreads, center=center, plot_points=plot_points,
                               additional_points_size=additional_points_size,
                               additional_points_shape=additional_points_shape,
@@ -105,7 +114,7 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
             print("saved fig")
         else:
             fig = figure()
-            fig.subplots_adjust(hspace=0.4, top=0.98, bottom=.15)
+            fig.subplots_adjust(hspace=0.2,wspace=0.2)
             num_figures = int(ceil(len(value)/2))
             for index,val in enumerate(value):
                 curr_subplot = int(num_figures*100 + 21 + index)
@@ -113,7 +122,8 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
                 subplot(curr_subplot)
                 plot_single_value(loaded_snap, snap_num=snap, value=val, snapshotDir=snapshotDir, plottingDir=plottingDir,
                                   firstSnap=firstSnap,
-                                  lastSnap=lastSnap, skipSteps=skipSteps, box=box, vrange=vrange, logplot=logplot,
+                                  lastSnap=lastSnap, skipSteps=skipSteps, box=get_single_value(box,index),
+                                  vrange=get_single_value(vrange,index), logplot=get_single_value(logplot,index),
                                   res=res,
                                   numthreads=numthreads, center=center, plot_points=plot_points,
                                   additional_points_size=additional_points_size,
@@ -136,10 +146,10 @@ def InitParser():
     parser.add_argument('--source_dir', type=str,  help='path to snapshot files directory', default= sys.argv[0])
     parser.add_argument('--saving_dir', type=str,  help='path to output directory', default= "plots")
     parser.add_argument('--value', nargs='+', type=str,  help='value to be plotted', default= ["rho"])
-    parser.add_argument('--vmin', type=float,  help='minimal range plotting', default=None)
-    parser.add_argument('--vmax', type=float,  help='maximum range plotting', default=None)
-    parser.add_argument('--boxsize', type=float,  help='boxsize', default=None)
-    parser.add_argument('--logplot', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),  help='logplot',
+    parser.add_argument('--vmin', type=float,  nargs='+', help='minimal range plotting', default=None)
+    parser.add_argument('--vmax', type=float,  nargs='+', help='maximum range plotting', default=None)
+    parser.add_argument('--boxsize', type=float,  nargs='+', help='boxsize', default=None)
+    parser.add_argument('--logplot', nargs='+', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),  help='logplot',
                         default=True)
     parser.add_argument('--res', type=int, help='plotting resolution', default=1024)
     parser.add_argument('--numthreads', type=int, help='threads for plotting', default=1)
@@ -166,11 +176,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
     box = False
     if args.boxsize is not None:
-        box = [args.boxsize, args.boxsize]
+        box = [[args.boxsize[i], args.boxsize[i]] for i in range(len(args.boxsize))]
 
     vrange = False
     if args.vmin is not None and args.vmax is not None:
-        vrange = [args.vmin, args.vmax]
+        vrange = [[args.vmin[i], args.vmax[i]] for i in range(len(args.vmin))]
 
     center = False
     if args.center_x is not None and args.center_y is not None:
