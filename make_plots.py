@@ -20,7 +20,7 @@ def plot_single_value(loaded_snap, snap_num, value='rho', snapshotDir= "output",
                 label += "[" + name_and_units[value][1] + "]"
                 break'''
     if "xnuc" in value:
-        loaded_snap.data["rho"+value] = loaded_snap.rho * rho.data[value]
+        loaded_snap.data["rho"+value] = loaded_snap.rho * loaded_snap.data[value]
         value = "rho" + value
         label += "[" + name_and_units["rho"][1] + "]"
     loaded_snap.plot_Aslice(value, logplot=logplot, colorbar=True, cblabel=label, center=center, vrange=vrange,
