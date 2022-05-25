@@ -99,7 +99,7 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
                               additional_points_color=additional_points_color, units_length=units_length,
                               plot_velocities=plot_velocities)
             title('time : {:.2f} [s]'.format(loaded_snap.time))
-            filename = plottingDir + "/Aslice_" + value + "_{0}.png".format(snap)
+            filename = plottingDir + "/Aslice_" + val + "_{0}.png".format(snap)
             print("saving to: ", filename)
             savefig(filename)
             print("saved fig")
