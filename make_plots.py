@@ -113,7 +113,7 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
             savefig(filename)
             print("saved fig")
         else:
-            fig = figure()
+            fig = figure(36,20)
             fig.subplots_adjust(hspace=0.5,wspace=0.5)
             num_figures = int(ceil(len(value)/2))
             for index,val in enumerate(value):
