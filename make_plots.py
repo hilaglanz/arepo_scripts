@@ -22,7 +22,7 @@ def plot_single_value(loaded_snap, snap_num, value='rho', snapshotDir= "output",
     if "xnuc" in value:
         loaded_snap.data["rho"+value] = loaded_snap.rho * loaded_snap.data[value]
         value = "rho" + value
-        label += "[" + name_and_units["rho"][1] + "]"
+        label += " [" + name_and_units["rho"][1] + "]"
         print(value)
 
     print(value)
@@ -130,7 +130,7 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
                                   additional_points_shape=additional_points_shape,
                                   additional_points_color=additional_points_color, units_length=units_length,
                                   plot_velocities=plot_velocities, newfig=False)
-            title('time : {:.2f} [s]'.format(loaded_snap.time))
+            #title('time : {:.2f} [s]'.format(loaded_snap.time))
             suptitle('time : {:.2f} [s]'.format(loaded_snap.time))
             filename = plottingDir + "/Aslice_" + "_".join(value) + "_{0}.png".format(snap)
             print("saving to: ", filename)
