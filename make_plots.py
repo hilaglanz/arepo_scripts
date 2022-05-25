@@ -61,11 +61,7 @@ def plot_single_value(loaded_snap, snap_num, value='rho', snapshotDir= "output",
 
     xlabel('x [' + units_length + ']')
     ylabel('y [' + units_length + ']')
-    title('time : {:.2f} [s]'.format(loaded_snap.time))
-    filename = plottingDir + "/Aslice_" + value + "_{0}.png".format(snap_num)
-    print("saving to: ", filename)
-    savefig(filename)
-    print("saved fig")
+
 
 def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSnap=0,lastSnap=-1,skipSteps=1,box=False,
                vrange=False,logplot=True, res=1024, numthreads=1, center=True,plot_points=True,
@@ -102,6 +98,11 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
                               additional_points_shape=additional_points_shape,
                               additional_points_color=additional_points_color, units_length=units_length,
                               plot_velocities=plot_velocities)
+            title('time : {:.2f} [s]'.format(loaded_snap.time))
+            filename = plottingDir + "/Aslice_" + value + "_{0}.png".format(snap)
+            print("saving to: ", filename)
+            savefig(filename)
+            print("saved fig")
         else:
             fig = figure()
             fig.subplots_adjust(hspace=0.4, top=0.98, bottom=.15)
@@ -117,6 +118,12 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
                                   additional_points_shape=additional_points_shape,
                                   additional_points_color=additional_points_color, units_length=units_length,
                                   plot_velocities=plot_velocities, newfig=False)
+            title('time : {:.2f} [s]'.format(loaded_snap.time))
+            suptitle('time : {:.2f} [s]'.format(loaded_snap.time))
+            filename = plottingDir + "/Aslice_" + "_".join(value) + "_{0}.png".format(snap)
+            print("saving to: ", filename)
+            savefig(filename)
+            print("saved fig")
 
 
 def InitParser():
