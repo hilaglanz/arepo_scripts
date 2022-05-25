@@ -88,6 +88,7 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
     for snap in range(firstSnap,lastSnap+1,skipSteps):
         print("doing snapshot ",snap)
         loaded_snap = gadget_readsnap(snap, snapshotDir)
+        print(type(value), value)
         if len(value) == 1:
             value = value[0]
             plot_single_value(loaded_snap, snap_num=snap, value=value, snapshotDir=snapshotDir, plottingDir=plottingDir,
