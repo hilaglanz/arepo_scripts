@@ -87,15 +87,14 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
     if not os.path.exists(plottingDir):
         os.mkdir(plottingDir)
 
-    print(type(value), value)
-    if len(value) == 1:
-        value = value[0]
-        print(value)
-        
     for snap in range(firstSnap,lastSnap+1,skipSteps):
         print("doing snapshot ",snap)
         loaded_snap = gadget_readsnap(snap, snapshotDir)
-            plot_single_value(loaded_snap, snap_num=snap, value=value, snapshotDir=snapshotDir, plottingDir=plottingDir,
+        print(type(value), value)
+        if len(value) == 1:
+            val = value[0]
+            print(val)
+            plot_single_value(loaded_snap, snap_num=snap, value=val, snapshotDir=snapshotDir, plottingDir=plottingDir,
                               firstSnap=firstSnap,
                               lastSnap=lastSnap, skipSteps=skipSteps, box=box, vrange=vrange, logplot=logplot, res=res,
                               numthreads=numthreads, center=center, plot_points=plot_points,
