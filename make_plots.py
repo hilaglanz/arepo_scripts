@@ -87,7 +87,8 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
     for snap in range(firstSnap,lastSnap+1,skipSteps):
         print("doing snapshot ",snap)
         loaded_snap = gadget_readsnap(snap, snapshotDir)
-        if type(value) == type("rho"):
+        if len(value) == 1:
+            value = value[0]
             plot_single_value(loaded_snap, snap_num=snap, value=value, snapshotDir=snapshotDir, plottingDir=plottingDir,
                               firstSnap=firstSnap,
                               lastSnap=lastSnap, skipSteps=skipSteps, box=box, vrange=vrange, logplot=logplot, res=res,
@@ -120,7 +121,7 @@ def InitParser():
     parser.add_argument('--skipStep', type=int, help='number of steps to skip', default=1)
     parser.add_argument('--source_dir', type=str,  help='path to snapshot files directory', default= sys.argv[0])
     parser.add_argument('--saving_dir', type=str,  help='path to output directory', default= "plots")
-    parser.add_argument('--value', type=str,  help='value to be plotted', default= "rho")
+    parser.add_argument('--value', nargs='+', type=str,  help='value to be plotted', default= ["rho"])
     parser.add_argument('--vmin', type=float,  help='minimal range plotting', default=None)
     parser.add_argument('--vmax', type=float,  help='maximum range plotting', default=None)
     parser.add_argument('--boxsize', type=float,  help='boxsize', default=None)
