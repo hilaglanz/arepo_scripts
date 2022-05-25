@@ -88,7 +88,7 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
         print("doing snapshot ",snap)
         loaded_snap = gadget_readsnap(snap, snapshotDir)
         if type(value) == type("rho"):
-            plot_single_value(loaded_snap, value=value, snapshotDir=snapshotDir, plottingDir=plottingDir,
+            plot_single_value(loaded_snap, snap_num=snap, value=value, snapshotDir=snapshotDir, plottingDir=plottingDir,
                               firstSnap=firstSnap,
                               lastSnap=lastSnap, skipSteps=skipSteps, box=box, vrange=vrange, logplot=logplot, res=res,
                               numthreads=numthreads, center=center, plot_points=plot_points,
@@ -102,7 +102,7 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
             num_figures = int(len(val)/2)
             for index,val in enumerate(value):
                 subplot(int(num_figures*100 + 21 + index))
-                plot_single_value(loaded_snap,snap, value=val, snapshotDir=snapshotDir, plottingDir=plottingDir,
+                plot_single_value(loaded_snap, snap_num=snap, value=val, snapshotDir=snapshotDir, plottingDir=plottingDir,
                                   firstSnap=firstSnap,
                                   lastSnap=lastSnap, skipSteps=skipSteps, box=box, vrange=vrange, logplot=logplot,
                                   res=res,
