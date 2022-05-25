@@ -6,7 +6,7 @@ from loadmodules import *
 
 name_and_units = {"rho":("density","g/cm^3"), "temp":("Temperature","K"), "vel":("Velocity","cm/s"), "mass":("Mass","g")}
 
-def plot_single_value(loaded_snap, value='rho', snapshotDir= "output", plottingDir="plots", firstSnap=0,lastSnap=-1,skipSteps=1,box=False,
+def plot_single_value(loaded_snap, snap_num, value='rho', snapshotDir= "output", plottingDir="plots", firstSnap=0,lastSnap=-1,skipSteps=1,box=False,
                vrange=False,logplot=True, res=1024, numthreads=1, center=True,plot_points=True,
                additional_points_size=30,additional_points_shape='X', additional_points_color='w', units_length = 'cm',
                plot_velocities=False, newfig=True):
@@ -59,7 +59,7 @@ def plot_single_value(loaded_snap, value='rho', snapshotDir= "output", plottingD
     xlabel('x [' + units_length + ']')
     ylabel('y [' + units_length + ']')
     title('time : {:.2f} [s]'.format(loaded_snap.time))
-    filename = plottingDir + "/Aslice_" + value + "_{0}.png".format(snap)
+    filename = plottingDir + "/Aslice_" + value + "_{0}.png".format(snap_num)
     print("saving to: ", filename)
     savefig(filename)
     print("saved fig")
@@ -102,7 +102,7 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
             num_figures = int(len(val)/2)
             for index,val in enumerate(value):
                 subplot(int(num_figures*100 + 21 + index))
-                plot_single_value(loaded_snap, value=val, snapshotDir=snapshotDir, plottingDir=plottingDir,
+                plot_single_value(loaded_snap,snap, value=val, snapshotDir=snapshotDir, plottingDir=plottingDir,
                                   firstSnap=firstSnap,
                                   lastSnap=lastSnap, skipSteps=skipSteps, box=box, vrange=vrange, logplot=logplot,
                                   res=res,
