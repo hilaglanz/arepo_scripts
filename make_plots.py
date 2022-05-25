@@ -23,6 +23,7 @@ def plot_single_value(loaded_snap, snap_num, value='rho', snapshotDir= "output",
         loaded_snap.data["rho"+value] = loaded_snap.rho * loaded_snap.data[value]
         value = "rho" + value
         label += "[" + name_and_units["rho"][1] + "]"
+        print(value)
     loaded_snap.plot_Aslice(value, logplot=logplot, colorbar=True, cblabel=label, center=center, vrange=vrange,
                                   box=box, res=res, numthreads=numthreads)
     if box == False:
