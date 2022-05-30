@@ -4,7 +4,14 @@ import argparse
 import numpy as np
 from loadmodules import *
 
-name_and_units = {"rho":("density","g/cm^3"), "temp":("Temperature","K"), "vel":("Velocity","cm/s"), "mass":("Mass","g")}
+name_and_units = {"rho":(r'$\rho$',r'$g/cm^3$'), "temp":("Temperature","K"), "vel":("Velocity","$cm/s$"),
+                  "mass":("Mass","g")}
+species = ['n', 'p', r'$He_4$', r'$B_11$', r'$C_12$', r'$C_13$', r'$N_13$', r'$N_14$', r'$N_15$', r'$O_15$',
+           r'$O_16$', r'$O_17$', r'$F_18$', r'$Ne_19$', r'$Ne_20$', r'$Ne_21$', r'$Ne_22$', r'$Na_22$', r'$Na_23$',
+           r'$Mg_23$', r'$Mg_24$', r'$Mg_25$', r'$Mg_26$', r'$Al_25$', r'$Al_26$', r'$Al_27$', r'$Si_28$', r'$Si_29$',
+           r'$Si_30$', r'$P_29$', r'$P_30$', r'$P_31$', r'$S_31$', r'$S_32$', r'$S_33$', r'$Cl_33$', r'$Cl_34$',
+           r'$Cl_35$', r'$Ar_36$', r'$Ar_37$', r'$Ar_38$', r'$Ar_39$', r'$K_39$', r'$Ca_40$', r'$Sc_43$', r'$Ti_44$',
+           r'$V_47$', r'$Cr_48$', r'$Mn_51$', r'$Fe_52$', r'$Fe_56$', r'$Co_55$', r'$Ni_56$', r'$Ni_58$', r'$Ni_59$']
 
 def plot_single_value(loaded_snap, snap_num, value='rho', snapshotDir= "output", plottingDir="plots", firstSnap=0,lastSnap=-1,skipSteps=1,box=False,
                vrange=False,logplot=True, res=1024, numthreads=1, center=True,plot_points=True,
@@ -22,7 +29,7 @@ def plot_single_value(loaded_snap, snap_num, value='rho', snapshotDir= "output",
     if "xnuc" in value:
         loaded_snap.data["rho"+value] = loaded_snap.rho * loaded_snap.data[value]
         value = "rho" + value
-        label += " [" + name_and_units["rho"][1] + "]"
+        label = r'$\rho_$' + species[int(value.split("xnuc")[-1])] + " [" + name_and_units["rho"][1] + "]"
         print(value)
 
     print(value)
@@ -115,7 +122,7 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
         else:
             fig = figure(figsize=(36,20))
             fig.subplots_adjust(hspace=0.4,wspace=0.4)
-            rcParams.update({'font.size': 40, 'font.family': 'Serif'})
+            rcParams.update({'font.size': 35, 'font.family': 'Serif'})
             num_figures = int(ceil(len(value)/2))
             for index,val in enumerate(value):
                 curr_subplot = int(num_figures*100 + 21 + index)
@@ -131,10 +138,10 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
                                   additional_points_shape=additional_points_shape,
                                   additional_points_color=additional_points_color, units_length=units_length,
                                   plot_velocities=plot_velocities, newfig=False)
-                rcParams.update({'font.size': 40, 'font.family': 'Serif'})
+                rcParams.update({'font.size': 35, 'font.family': 'Serif'})
             #title('time : {:.2f} [s]'.format(loaded_snap.time))
             suptitle('time : {:.2f} [s]'.format(loaded_snap.time), fontsize='x-large')
-            rcParams.update({'font.size': 40, 'font.family': 'Serif'})
+            rcParams.update({'font.size': 35, 'font.family': 'Serif'})
             filename = plottingDir + "/Aslice_" + "_".join(value) + "_{0}.png".format(snap)
             print("saving to: ", filename)
             savefig(filename)
