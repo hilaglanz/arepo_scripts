@@ -6,13 +6,13 @@ from loadmodules import *
 
 name_and_units = {"rho":(r'$\rho$',r'$g/cm^3$'), "temp":("Temperature","K"), "vel":("Velocity","$cm/s$"),
                   "mass":("Mass","g")}
-species = ['n', 'p', '^4$He', '^{11}$B', '^{12}$C$', '^{13}$C', 'N_13', 'N_14', 'N_15', 'O_15',
-           'O_{16}', 'O_{17}', 'F_{18}', 'Ne_{19}', 'Ne_{20}', 'Ne_{21}', 'Ne_{22}', 'Na_{22}',
-           'Na_{23}', 'Mg_{23$}', 'Mg_{24}', 'Mg_{25}', 'Mg_{26}', 'Al_{25}', 'Al_{26}',
-           'Al_{27}', '^{28}Si', 'Si_{29}', 'Si_{30}', 'P_{29}', 'P_{30}', 'P_{31}', 'S_{31}',
-           'S_{32}', 'S_{33}', 'Cl_{33}', 'Cl_{34}', 'Cl_{35}', 'Ar_{36}', 'Ar_{37}', 'Ar_{38}',
-           'Ar_{39}', 'K_{39}', 'Ca_{40}', 'Sc_{43}', 'Ti_{44}', 'V_{47}', 'Cr_{48}', 'Mn_{51}',
-           'Fe_{52}', 'Fe_{56}', 'Co_{55}', '^{56}Ni', 'Ni_{58}', 'Ni_{59}']
+species = ['n', 'p', '^{4}He', '^{11}B', '^{12}C', '^{13}C', '^{13}N', '^{14}N', '^{15}N', '^{15}O',
+           '^{16}O', '^{17}O', '^{18}F', '^{19}Ne', '^{20}Ne', '^{21}Ne', '^{22}Ne', '^{22}Na',
+           '^{23}Na', '^{23}Mg', '^{24}Mg', '^{25}Mg', '^{26}Mg', '^{25}Al', '^{26}Al',
+           '^{27}Al', '^{28}Si', '^{29}Si', '^{30}Si', '^{29}P', '^{30}P', '^{31}P', '^{31}S',
+           '^{32}S', '^{33}S', '^{33}Cl', '^{34}Cl', '^{35}Cl', '^{36}Ar', '^{37}Ar', '^{38}Ar',
+           '^{39}Ar', '^{39}K', '^{40}Ca', '^{43}Sc', '^{44}Ti', '^{47}V', '^{48}Cr', '^{51}Mn',
+           '^{52}Fe', '^{56}Fe', '^{55}Co', '^{56}Ni', '^{58}Ni', '^{59}Ni']
 
 
 def plot_single_value(loaded_snap, snap_num, value='rho', snapshotDir= "output", plottingDir="plots", firstSnap=0,lastSnap=-1,skipSteps=1,box=False,
@@ -68,7 +68,7 @@ def plot_single_value(loaded_snap, snap_num, value='rho', snapshotDir= "output",
         # quiver(loaded_snap.pos[:,0],loaded_snap.pos[:,1],loaded_snap.vel[:,0], loaded_snap.vel[:,1],
         # scale=50)#*loaded_snap.parameters['BoxSize']/box[0])
 
-    xlabel('x [' + units_length + ']')
+    xlabel('x [' + units_length + ']',loc="left")
     ylabel('y [' + units_length + ']')
 
 def get_single_value(value,index=0):
@@ -124,7 +124,7 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
         else:
             fig = figure(figsize=(36,20))
             fig.subplots_adjust(hspace=0.4,wspace=0.4)
-            rcParams.update({'font.size': 35, 'font.family': 'Serif'})
+            rcParams.update({'font.size': 40, 'font.family': 'Serif'})
             rcParams['text.usetex'] = True
             num_figures = int(ceil(len(value)/2))
             for index,val in enumerate(value):
@@ -141,12 +141,12 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
                                   additional_points_shape=additional_points_shape,
                                   additional_points_color=additional_points_color, units_length=units_length,
                                   plot_velocities=plot_velocities, newfig=False)
-                rcParams.update({'font.size': 35, 'font.family': 'Serif'})
+                rcParams.update({'font.size': 40, 'font.family': 'Serif'})
                 rcParams['text.usetex'] = True
 
             #title('time : {:.2f} [s]'.format(loaded_snap.time))
             suptitle('time : {:.2f} [s]'.format(loaded_snap.time), fontsize='x-large')
-            rcParams.update({'font.size': 35, 'font.family': 'Serif'})
+            rcParams.update({'font.size': 40, 'font.family': 'Serif'})
             rcParams['text.usetex'] = True
             filename = plottingDir + "/Aslice_" + "_".join(value) + "_{0}.png".format(snap)
             print("saving to: ", filename)
