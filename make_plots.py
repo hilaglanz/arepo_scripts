@@ -9,10 +9,10 @@ name_and_units = {"rho":(r'$\rho$',r'$g/cm^3$'), "temp":("Temperature","K"), "ve
 species = ['n', 'p', '^4$He', '^{11}$B', '^{12}$C$', '^{13}$C', 'N_13', 'N_14', 'N_15', 'O_15',
            'O_{16}', 'O_{17}', 'F_{18}', 'Ne_{19}', 'Ne_{20}', 'Ne_{21}', 'Ne_{22}', 'Na_{22}',
            'Na_{23}', 'Mg_{23$}', 'Mg_{24}', 'Mg_{25}', 'Mg_{26}', 'Al_{25}', 'Al_{26}',
-           'Al_{27}', '^{28}$Si$', 'Si_{29}', 'Si_{30}', 'P_{29}', 'P_{30}', 'P_{31}', 'S_{31}',
+           'Al_{27}', '^{28}Si', 'Si_{29}', 'Si_{30}', 'P_{29}', 'P_{30}', 'P_{31}', 'S_{31}',
            'S_{32}', 'S_{33}', 'Cl_{33}', 'Cl_{34}', 'Cl_{35}', 'Ar_{36}', 'Ar_{37}', 'Ar_{38}',
            'Ar_{39}', 'K_{39}', 'Ca_{40}', 'Sc_{43}', 'Ti_{44}', 'V_{47}', 'Cr_{48}', 'Mn_{51}',
-           'Fe_{52}', 'Fe_{56}', 'Co_{55}', '^{56}$Ni$', 'Ni_{58}', 'Ni_{59}']
+           'Fe_{52}', 'Fe_{56}', 'Co_{55}', '^{56}Ni', 'Ni_{58}', 'Ni_{59}']
 
 
 def plot_single_value(loaded_snap, snap_num, value='rho', snapshotDir= "output", plottingDir="plots", firstSnap=0,lastSnap=-1,skipSteps=1,box=False,
