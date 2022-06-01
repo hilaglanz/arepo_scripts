@@ -86,9 +86,11 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
                plot_velocities=False):
     snapshots = glob.glob(snapshotDir + '/./snapshot_*')
     print("found snapshots: ", snapshots)
-    maxSnap=len(snapshots)
+    snapshots.sort()
+    sorted(snapshots)
+    maxSnap = int((snapshots[-1].split('snapshot_')[-1]).split('.hdf5')[0])
     if lastSnap == -1:
-        lastSnap = maxSnap - 1
+        lastSnap = maxSnap
     else:
         lastSnap = min(lastSnap, maxSnap)
     print("doing from snapshot ", firstSnap, " to snapshot ", lastSnap)
