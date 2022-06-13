@@ -4,7 +4,16 @@ import argparse
 import numpy as np
 from loadmodules import *
 
-name_and_units = {"rho":("density","g/cm^3"), "temp":("Temperature","K"), "vel":("Velocity","cm/s"), "mass":("Mass","g")}
+name_and_units = {"rho":(r'$\rho$',r'$g/cm^3$'), "temp":("Temperature","K"), "vel":("Velocity","$cm/s$"),
+                  "mass":("Mass","g")}
+species = ['n', 'p', '^{4}He', '^{11}B', '^{12}C', '^{13}C', '^{13}N', '^{14}N', '^{15}N', '^{15}O',
+           '^{16}O', '^{17}O', '^{18}F', '^{19}Ne', '^{20}Ne', '^{21}Ne', '^{22}Ne', '^{22}Na',
+           '^{23}Na', '^{23}Mg', '^{24}Mg', '^{25}Mg', '^{26}Mg', '^{25}Al', '^{26}Al',
+           '^{27}Al', '^{28}Si', '^{29}Si', '^{30}Si', '^{29}P', '^{30}P', '^{31}P', '^{31}S',
+           '^{32}S', '^{33}S', '^{33}Cl', '^{34}Cl', '^{35}Cl', '^{36}Ar', '^{37}Ar', '^{38}Ar',
+           '^{39}Ar', '^{39}K', '^{40}Ca', '^{43}Sc', '^{44}Ti', '^{47}V', '^{48}Cr', '^{51}Mn',
+           '^{52}Fe', '^{56}Fe', '^{55}Co', '^{56}Ni', '^{58}Ni', '^{59}Ni']
+
 
 def plot_single_value(loaded_snap, snap_num, value='rho', snapshotDir= "output", plottingDir="plots", firstSnap=0,lastSnap=-1,skipSteps=1,box=False,
                vrange=False,logplot=True, res=1024, numthreads=1, center=True,plot_points=True,
@@ -13,7 +22,7 @@ def plot_single_value(loaded_snap, snap_num, value='rho', snapshotDir= "output",
     label = value
     if value in name_and_units.keys():
         label = name_and_units[value][0]
-        label += "[" + name_and_units[value][1] + "]"
+        label += " [" + name_and_units[value][1] + "]"
     else:
         '''for val in name_and_units.keys():
             if value in val:
@@ -22,7 +31,7 @@ def plot_single_value(loaded_snap, snap_num, value='rho', snapshotDir= "output",
     if "xnuc" in value:
         loaded_snap.data["rho"+value] = loaded_snap.rho * loaded_snap.data[value]
         value = "rho" + value
-        label += " [" + name_and_units["rho"][1] + "]"
+        label = r'$\rho \left(' + species[int(value.split("xnuc")[-1])] + r"\right)$ [" + name_and_units["rho"][1] + "]"
         print(value)
 
     print(value)
@@ -59,7 +68,7 @@ def plot_single_value(loaded_snap, snap_num, value='rho', snapshotDir= "output",
         # quiver(loaded_snap.pos[:,0],loaded_snap.pos[:,1],loaded_snap.vel[:,0], loaded_snap.vel[:,1],
         # scale=50)#*loaded_snap.parameters['BoxSize']/box[0])
 
-    xlabel('x [' + units_length + ']')
+    xlabel('x [' + units_length + ']',loc="left")
     ylabel('y [' + units_length + ']')
 
 def get_single_value(value,index=0):
@@ -77,9 +86,11 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
                plot_velocities=False):
     snapshots = glob.glob(snapshotDir + '/./snapshot_*')
     print("found snapshots: ", snapshots)
-    maxSnap=len(snapshots)
+    snapshots.sort()
+    sorted(snapshots)
+    maxSnap = int((snapshots[-1].split('snapshot_')[-1]).split('.hdf5')[0])
     if lastSnap == -1:
-        lastSnap = maxSnap - 1
+        lastSnap = maxSnap
     else:
         lastSnap = min(lastSnap, maxSnap)
     print("doing from snapshot ", firstSnap, " to snapshot ", lastSnap)
@@ -116,6 +127,7 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
             fig = figure(figsize=(36,20))
             fig.subplots_adjust(hspace=0.4,wspace=0.4)
             rcParams.update({'font.size': 40, 'font.family': 'Serif'})
+            rcParams['text.usetex'] = True
             num_figures = int(ceil(len(value)/2))
             for index,val in enumerate(value):
                 curr_subplot = int(num_figures*100 + 21 + index)
@@ -132,9 +144,12 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
                                   additional_points_color=additional_points_color, units_length=units_length,
                                   plot_velocities=plot_velocities, newfig=False)
                 rcParams.update({'font.size': 40, 'font.family': 'Serif'})
+                rcParams['text.usetex'] = True
+
             #title('time : {:.2f} [s]'.format(loaded_snap.time))
             suptitle('time : {:.2f} [s]'.format(loaded_snap.time), fontsize='x-large')
             rcParams.update({'font.size': 40, 'font.family': 'Serif'})
+            rcParams['text.usetex'] = True
             filename = plottingDir + "/Aslice_" + "_".join(value) + "_{0}.png".format(snap)
             print("saving to: ", filename)
             savefig(filename)
