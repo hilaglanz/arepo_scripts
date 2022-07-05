@@ -46,10 +46,10 @@ print("R2:", r2)
 q = m2 / m1
 
 if r1 > r2:
-    b = r1 * (1-overlap_factor) + r2
+    b = r1 * (1-overlap_factor)
     a0 = r1 * (0.6 * q ** (2. / 3.) + log(1 + q ** (1. / 3.))) / (0.49 * q ** (2. / 3.))
 else:
-    b = r2 * (1 - overlap_factor) + r1
+    b = r2 * (1 - overlap_factor)
     a0 = r2 * (0.6 * q ** (2. / 3.) + log(1 + q ** (1. / 3.))) / (0.49 * q ** (2. / 3.))
 
 x1 = m2 / m * a0
