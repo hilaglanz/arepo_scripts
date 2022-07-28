@@ -165,7 +165,7 @@ def InitParser():
     parser.add_argument('--saving_dir', type=str,  help='path to output directory', default= "plots")
     parser.add_argument('--value', nargs='+', type=str,  help='value to be plotted', default= ["rho"])
     parser.add_argument('--axes0', nargs='+', type=int,  help='horizonal axes to plot in', default= None)
-    parser.add_argument('--axes0', nargs='+', type=int,  help='horizonal axes to plot in', default= None)
+    parser.add_argument('--axes1', nargs='+', type=int,  help='vertical axes to plot in', default= None)
     parser.add_argument('--vmin', type=float,  nargs='+', help='minimal range plotting', default=None)
     parser.add_argument('--vmax', type=float,  nargs='+', help='maximum range plotting', default=None)
     parser.add_argument('--boxsize', type=float,  nargs='+', help='boxsize', default=None)
