@@ -72,7 +72,7 @@ def plot_single_value(loaded_snap, snap_num, value='rho', snapshotDir= "output",
         # scale=50)#*loaded_snap.parameters['BoxSize']/box[0])
 
     xlabel(xlab + ' [' + units_length + ']',loc="left")
-    ylabel(ylab + 'y [' + units_length + ']')
+    ylabel(ylab + ' [' + units_length + ']')
 
 def get_single_value(value,index=0):
     if value is None:
