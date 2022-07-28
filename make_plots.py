@@ -35,6 +35,9 @@ def plot_single_value(loaded_snap, snap_num, value='rho', snapshotDir= "output",
         print(value)
 
     print(value)
+    xlab = chr(ord('x') + axes[0])
+    ylab = chr(ord('x') + axes[1])
+
     loaded_snap.plot_Aslice(value, logplot=logplot, colorbar=True, cblabel=label, center=center, vrange=vrange,
                                   box=box, res=res, numthreads=numthreads, newfig=newfig, axes=axes)
     if box == False:
@@ -68,8 +71,8 @@ def plot_single_value(loaded_snap, snap_num, value='rho', snapshotDir= "output",
         # quiver(loaded_snap.pos[:,0],loaded_snap.pos[:,1],loaded_snap.vel[:,0], loaded_snap.vel[:,1],
         # scale=50)#*loaded_snap.parameters['BoxSize']/box[0])
 
-    xlabel('x [' + units_length + ']',loc="left")
-    ylabel('y [' + units_length + ']')
+    xlabel(xlab + ' [' + units_length + ']',loc="left")
+    ylabel(ylab + 'y [' + units_length + ']')
 
 def get_single_value(value,index=0):
     if value is None:
@@ -130,7 +133,8 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
             rcParams['text.usetex'] = True
             num_figures = int(ceil(len(value)/2))
             for index,val in enumerate(value):
-                curr_subplot = int(num_figures*100 + 21 + index)
+                if num_figures > 1:
+                    curr_subplot = int(num_figures*100 + 21 + index)
                 print("curr subplot: ", curr_subplot)
                 subplot(curr_subplot)
                 plot_single_value(loaded_snap, snap_num=snap, value=val, snapshotDir=snapshotDir, plottingDir=plottingDir,
