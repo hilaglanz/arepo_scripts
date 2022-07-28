@@ -142,7 +142,7 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
                                   additional_points_size=additional_points_size,
                                   additional_points_shape=additional_points_shape,
                                   additional_points_color=additional_points_color, units_length=units_length,
-                                  plot_velocities=plot_velocities, newfig=False, axes=get_single_value(axes_array))
+                                  plot_velocities=plot_velocities, newfig=False, axes=get_single_value(axes_array, index))
                 rcParams.update({'font.size': 40, 'font.family': 'Serif'})
                 rcParams['text.usetex'] = True
 
@@ -164,7 +164,8 @@ def InitParser():
     parser.add_argument('--source_dir', type=str,  help='path to snapshot files directory', default= sys.argv[0])
     parser.add_argument('--saving_dir', type=str,  help='path to output directory', default= "plots")
     parser.add_argument('--value', nargs='+', type=str,  help='value to be plotted', default= ["rho"])
-    parser.add_argument('--axes', nargs='+', type=list,  help='axes to plot in', default= [[0,1]])
+    parser.add_argument('--axes0', nargs='+', type=int,  help='horizonal axes to plot in', default= None)
+    parser.add_argument('--axes0', nargs='+', type=int,  help='horizonal axes to plot in', default= None)
     parser.add_argument('--vmin', type=float,  nargs='+', help='minimal range plotting', default=None)
     parser.add_argument('--vmax', type=float,  nargs='+', help='maximum range plotting', default=None)
     parser.add_argument('--boxsize', type=float,  nargs='+', help='boxsize', default=None)
@@ -205,8 +206,12 @@ if __name__ == "__main__":
     if args.center_x is not None and args.center_y is not None:
         center = [args.center_x, args.center_y,args.center_z]
 
+    axes_array = [[0,1]]
+    if args.axes0 is not None and args.axes1 is not None:
+        axes_array = [[args.axes0[i],args.axes1[i]] for i in range(len(args.axes0))]
+
     plot_range(args.value, args.source_dir, args.saving_dir, args.beginStep, args.lastStep, args.skipStep, box=box,
                vrange=vrange, logplot=args.logplot, res=args.res, numthreads= args.numthreads, center=center, plot_points=args.plot_points,
                additional_points_size=args.additional_points_size, additional_points_shape=args.additional_points_shape,
                additional_points_color=args.additional_points_color, units_length=args.units_length,
-               plot_velocities=args.plot_velocities,axes_array=args.axes)
+               plot_velocities=args.plot_velocities, axes_array=axes_array)
