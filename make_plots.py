@@ -18,7 +18,7 @@ species = ['n', 'p', '^{4}He', '^{11}B', '^{12}C', '^{13}C', '^{13}N', '^{14}N',
 def plot_single_value(loaded_snap, snap_num, value='rho', snapshotDir= "output", plottingDir="plots", firstSnap=0,lastSnap=-1,skipSteps=1,box=False,
                vrange=False,logplot=True, res=1024, numthreads=1, center=True,plot_points=True,
                additional_points_size=30,additional_points_shape='X', additional_points_color='w', units_length = 'cm',
-               plot_velocities=False, newfig=True):
+               plot_velocities=False, newfig=True,axes=[0,1]):
     label = value
     if value in name_and_units.keys():
         label = name_and_units[value][0]
@@ -36,7 +36,7 @@ def plot_single_value(loaded_snap, snap_num, value='rho', snapshotDir= "output",
 
     print(value)
     loaded_snap.plot_Aslice(value, logplot=logplot, colorbar=True, cblabel=label, center=center, vrange=vrange,
-                                  box=box, res=res, numthreads=numthreads, newfig=newfig)
+                                  box=box, res=res, numthreads=numthreads, newfig=newfig, axes=axes)
     if box == False:
         box = [loaded_snap.boxsize, loaded_snap.boxsize]
     if plot_points:
@@ -83,7 +83,7 @@ def get_single_value(value,index=0):
 def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSnap=0,lastSnap=-1,skipSteps=1,box=False,
                vrange=False,logplot=True, res=1024, numthreads=1, center=True,plot_points=True,
                additional_points_size=30,additional_points_shape='X', additional_points_color='w', units_length = 'cm',
-               plot_velocities=False):
+               plot_velocities=False,axes_array=[[0,1]]):
     snapshots = glob.glob(snapshotDir + '/./snapshot_*')
     print("found snapshots: ", snapshots)
     snapshots.sort()
@@ -117,7 +117,7 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
                               additional_points_size=additional_points_size,
                               additional_points_shape=additional_points_shape,
                               additional_points_color=additional_points_color, units_length=units_length,
-                              plot_velocities=plot_velocities)
+                              plot_velocities=plot_velocities,axes=get_single_value(axes_array))
             title('time : {:.2f} [s]'.format(loaded_snap.time))
             filename = plottingDir + "/Aslice_" + val + "_{0}.png".format(snap)
             print("saving to: ", filename)
@@ -142,7 +142,7 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
                                   additional_points_size=additional_points_size,
                                   additional_points_shape=additional_points_shape,
                                   additional_points_color=additional_points_color, units_length=units_length,
-                                  plot_velocities=plot_velocities, newfig=False)
+                                  plot_velocities=plot_velocities, newfig=False, axes=get_single_value(axes_array))
                 rcParams.update({'font.size': 40, 'font.family': 'Serif'})
                 rcParams['text.usetex'] = True
 
@@ -164,6 +164,7 @@ def InitParser():
     parser.add_argument('--source_dir', type=str,  help='path to snapshot files directory', default= sys.argv[0])
     parser.add_argument('--saving_dir', type=str,  help='path to output directory', default= "plots")
     parser.add_argument('--value', nargs='+', type=str,  help='value to be plotted', default= ["rho"])
+    parser.add_argument('--axes', nargs='+', type=list,  help='axes to plot in', default= [[0,1]])
     parser.add_argument('--vmin', type=float,  nargs='+', help='minimal range plotting', default=None)
     parser.add_argument('--vmax', type=float,  nargs='+', help='maximum range plotting', default=None)
     parser.add_argument('--boxsize', type=float,  nargs='+', help='boxsize', default=None)
@@ -208,4 +209,4 @@ if __name__ == "__main__":
                vrange=vrange, logplot=args.logplot, res=args.res, numthreads= args.numthreads, center=center, plot_points=args.plot_points,
                additional_points_size=args.additional_points_size, additional_points_shape=args.additional_points_shape,
                additional_points_color=args.additional_points_color, units_length=args.units_length,
-               plot_velocities=args.plot_velocities)
+               plot_velocities=args.plot_velocities,axes_array=args.axes)
