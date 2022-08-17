@@ -88,9 +88,9 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
                additional_points_size=30,additional_points_shape='X', additional_points_color='w', units_length = 'cm',
                plot_velocities=False,axes_array=[[0,1]]):
     snapshots = glob.glob(snapshotDir + '/./snapshot_*')
-    print("found snapshots: ", snapshots)
-    snapshots.sort()
+    snapshots.sort(key=lambda st: int(st.split("_")[1].split(".")[0]))
     sorted(snapshots)
+    print("found snapshots: ", snapshots[0], " to ", snapshots[-1])
     maxSnap = int((snapshots[-1].split('snapshot_')[-1]).split('.hdf5')[0])
     if lastSnap == -1:
         lastSnap = maxSnap
