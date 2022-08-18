@@ -33,7 +33,10 @@ def plot_single_value(loaded_snap, snap_num, value='rho', snapshotDir= "output",
         value = "rho" + value
         label = r'$\rho \left(' + species[int(value.split("xnuc")[-1])] + r"\right)$ [" + name_and_units["rho"][1] + "]"
         print(value)
-
+    if value == "mean_a":
+        loaded_snap.calculate_mean_a()
+        label = "Mean Atomic Weight"
+        
     print(value)
     xlab = chr(ord('x') + axes[0])
     ylab = chr(ord('x') + axes[1])
@@ -200,7 +203,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     box = False
     if args.boxsize is not None:
-        box = [[args.boxsize[i], args.boxsize[i]] for i in range(len(args.boxsize))]
+        box = [[args.boxsize[i], args.boxsize[i], args.boxsize[i]] for i in range(len(args.boxsize))]
 
     vrange = False
     if args.vmin is not None and args.vmax is not None:
