@@ -33,7 +33,7 @@ def InitParser():
     parser.add_argument('--snapshot_name', type=str, help='snapshots initilas', default="snapshot_")
     parser.add_argument('--plotting_dir', type=str, help='diretory to plot to', default="plots")
     parser.add_argument('--value', type=str, help='value to plot and compare profile', default="rho")
-    parser.add_argument('--snapshot_nums', type=int, nargs=+, help='array of snapshot numbers to compare',
+    parser.add_argument('--snapshot_nums', type=int, nargs='+', help='array of snapshot numbers to compare',
                         default=[0 ,8, 10])
     parser.add_argument('--logplot', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),  help='logplot',
                         default=True)
