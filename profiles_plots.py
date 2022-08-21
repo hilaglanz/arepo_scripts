@@ -1,8 +1,8 @@
-from load_modules import *
 import os
 import glob
 import argparse
 import numpy as np
+from loadmodules import *
 
 def set_new_fig_properties():
     fig = figure(figsize=(36, 20))
