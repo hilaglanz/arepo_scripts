@@ -38,6 +38,8 @@ def InitParser():
     parser.add_argument('--logplot', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),  help='logplot',
                         default=True)
 
+    return parser
+
 if __name__ == "__main__":
     for arg in sys.argv:
         print(arg)
