@@ -16,9 +16,9 @@ def plot_profile_test(output_dir,snapshot_name,plotting_dir,testing_value="rho",
     evenly_spaced_interval = np.linspace(0, 1, len(snapshot_number_array))
     line_colors = [cm.rainbow(x) for x in evenly_spaced_interval]
     labels=[]
-    for snapshot_number in snapshot_number_array:
+    for index, snapshot_number in enumerate(snapshot_number_array):
         s = gadget_readsnap(snapshot_number,output_dir,snapshot_name)
-        s.plot_radprof(testing_value, log=log,color=line_colors[snapshot_number])
+        s.plot_radprof(testing_value, log=log,color=line_colors[index])
         labels.append("snap " + str(snapshot_number) + "," + str(s.time)+ " [s]")
     if len(snapshot_number_array) > 1:
         legend(labels)
