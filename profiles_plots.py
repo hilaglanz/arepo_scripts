@@ -11,6 +11,9 @@ def set_new_fig_properties():
     rcParams['lines.linewidth'] = 3.0
 
 def plot_profile_test(output_dir,snapshot_name,plotting_dir,testing_value="rho",snapshot_number_array=[0,8,10],log=True,new_fig=True):
+    if not os.path.exists(plotting_dir):
+        os.mkdir(plotting_dir)
+        
     if new_fig:
         set_new_fig_properties()
     evenly_spaced_interval = np.linspace(0, 1, len(snapshot_number_array))
@@ -22,7 +25,7 @@ def plot_profile_test(output_dir,snapshot_name,plotting_dir,testing_value="rho",
         labels.append("snap " + str(snapshot_number) + "," + str(s.time)+ " [s]")
     if len(snapshot_number_array) > 1:
         legend(labels)
-    filename = plotting_dir + "/" + value + "_profile_" + "_".join([str(snap_num) for snap_num in snapshot_number_array]) + ".png"
+    filename = plotting_dir + "/" + testing_value + "_profile_" + "_".join([str(snap_num) for snap_num in snapshot_number_array]) + ".png"
     print("saving to: ", filename)
     savefig(filename)
     print("saved fig")
