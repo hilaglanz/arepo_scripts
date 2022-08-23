@@ -25,13 +25,13 @@ def plot_profile_test(output_dir,snapshot_name,plotting_dir,testing_value="rho",
     suffix = ""
     for index, snapshot_number in enumerate(snapshot_number_array):
         if around_objects:
-            snapshot_file = "%s/%s%03d" % (output_dir, snapshot_name, snapshot_number)
             if object_num != 0:
+                snapshot_file = "%s/%s%03d" % (output_dir, snapshot_name, snapshot_number)
                 binary = BinariesLoader(snapshot_file, conditional_axis=motion_axis)
                 s = binary.binary_snapshot
                 if object_num == 1:
                     i = binary.i1
-                    center= binary.pos1
+                    center = binary.pos1
                     print("doing object 1")
                 else:
                     i = binary.i2
@@ -101,14 +101,13 @@ if __name__ == "__main__":
     print(len(sys.argv))
     parser = InitParser()
     args = parser.parse_args()
-    if args.around_objects:
-        if not args.take_single_object:
-            plot_profile_test(output_dir=args.output_dir, snapshot_name=args.snapshot_name, plotting_dir=args.plotting_dir,
-                              testing_value=args.value, snapshot_number_array=args.snapshot_nums, log=args.logplot,
-                              around_objects=args.around_objects, motion_axis=args.motion_axis, object_num=1)
-            plot_profile_test(output_dir=args.output_dir, snapshot_name=args.snapshot_name, plotting_dir=args.plotting_dir,
-                              testing_value=args.value, snapshot_number_array=args.snapshot_nums, log=args.logplot,
-                              around_objects=args.around_objects, motion_axis=args.motion_axis,object_num=2,new_fig=True)
+    if args.around_objects and not args.take_single_object:
+        plot_profile_test(output_dir=args.output_dir, snapshot_name=args.snapshot_name, plotting_dir=args.plotting_dir,
+                          testing_value=args.value, snapshot_number_array=args.snapshot_nums, log=args.logplot,
+                          around_objects=args.around_objects, motion_axis=args.motion_axis, object_num=1)
+        plot_profile_test(output_dir=args.output_dir, snapshot_name=args.snapshot_name, plotting_dir=args.plotting_dir,
+                          testing_value=args.value, snapshot_number_array=args.snapshot_nums, log=args.logplot,
+                          around_objects=args.around_objects, motion_axis=args.motion_axis,object_num=2,new_fig=True)
     else:
         plot_profile_test(output_dir= args.output_dir, snapshot_name=args.snapshot_name, plotting_dir=args.plotting_dir,
                           testing_value=args.value, snapshot_number_array=args.snapshot_nums, log=args.logplot,
