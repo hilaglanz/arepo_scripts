@@ -32,10 +32,12 @@ def plot_profile_test(output_dir,snapshot_name,plotting_dir,testing_value="rho",
                 if object_num == 1:
                     i = binary.i1
                     center = binary.pos1
+                    suffix = "1"
                     print("doing object 1")
                 else:
                     i = binary.i2
                     center = binary.pos2
+                    suffix = "2"
                     print("doing object 2")
             else:
                 print("doing single object")
