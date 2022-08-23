@@ -31,15 +31,18 @@ def plot_profile_test(output_dir,snapshot_name,plotting_dir,testing_value="rho",
                 s = binary.binary_snapshot
                 if object_num == 1:
                     i = binary.i1
+                    center= binary.pos1
                     print("doing object 1")
                 else:
                     i = binary.i2
+                    center = binary.pos2
                     print("doing object 2")
             else:
+                print("doing single object")
                 s = gadget_readsnap(snapshot_number, output_dir, snapshot_name)
                 center = s.centerofmass()
+                print("around center: ", center)
                 i = np.where(s.rho > 10)
-                print("doing single object")
             if testing_value == "bfld" or testing_value == "B":
                 print("adding magnetic field size")
                 s.data["B"] = np.sqrt((s.data['bfld'] * s.data['bfld']).sum(axis=1))
