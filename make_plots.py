@@ -37,7 +37,7 @@ def plot_single_value(loaded_snap, snap_num, value='rho', snapshotDir= "output",
         loaded_snap.calculate_mean_a()
         label = "Mean Atomic Weight"
     if value == "bfld" or value == "B":
-        loaded_snap.data["B"] = np.sqrt((loaded_snap.data['bfld']*loaded_snap.data['bfld']).sum(axis=0))
+        loaded_snap.data["B"] = np.sqrt((loaded_snap.data['bfld']*loaded_snap.data['bfld']).sum(axis=1))
         value = "B"
 
         

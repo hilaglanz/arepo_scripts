@@ -29,7 +29,7 @@ def plot_profile_test(output_dir,snapshot_name,plotting_dir,testing_value="rho",
             binary = BinaryLoader(snapshot_file, conditional_axis=motion_axis)
             s = binary.snapshot
             if testing_value == "bfld" or value == "B":
-                binary.data["B"] = np.sqrt((binary.data['bfld'] * binary.data['bfld']).sum(axis=0))
+                binary.data["B"] = np.sqrt((binary.data['bfld'] * binary.data['bfld']).sum(axis=1))
                 testing_value = "B"
             nshells = 200
             dr = 0
@@ -52,7 +52,7 @@ def plot_profile_test(output_dir,snapshot_name,plotting_dir,testing_value="rho",
         else:
             s = gadget_readsnap(snapshot_number, output_dir, snapshot_name)
             if testing_value == "bfld" or value == "B":
-                s.data["B"] = np.sqrt((s.data['bfld'] * s.data['bfld']).sum(axis=0))
+                s.data["B"] = np.sqrt((s.data['bfld'] * s.data['bfld']).sum(axis=1))
                 testing_value = "B"
             s.plot_radprof(testing_value, log=log,color=line_colors[index], center=center)
         labels.append("snap " + str(snapshot_number) + "," + str(s.time)+ " [s]")
