@@ -20,7 +20,6 @@ def plot_profile_test(output_dir,snapshot_name,plotting_dir,testing_value="rho",
     if new_fig:
         set_new_fig_properties()
 
-    evenly_spaced_interval = np.linspace(0, 1, len(snapshot_number_array))
     line_colors = pylab.rcParams['axes.prop_cycle'].by_key()['color']
     labels = []
     suffix = ""
@@ -40,14 +39,14 @@ def plot_profile_test(output_dir,snapshot_name,plotting_dir,testing_value="rho",
                 suffix = "1"
                 print("calculating for object 1")
                 p = calcGrid.calcRadialProfile(s.data['pos'].astype('float64')[binary.i1],
-                                               s.data[testing_value].astype('float64'), 2, nshells, dr, center[0],
+                                               s.data[testing_value].astype('float64')[binary.i1], 2, nshells, dr, center[0],
                                                center[1], center[2])
             else:
                 center = binary.pos2
                 suffix = "2"
                 print("calculating for object 1")
                 p = calcGrid.calcRadialProfile(s.data['pos'].astype('float64')[binary.i2],
-                                               s.data[testing_value].astype('float64'), 2, nshells, dr, center[0],
+                                               s.data[testing_value].astype('float64')[binary.i1], 2, nshells, dr, center[0],
                                                center[1], center[2])
             print("plotting")
             print("color= ", line_colors[index])
