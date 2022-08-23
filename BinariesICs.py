@@ -30,9 +30,11 @@ class BinariesICs:
         print("objects properties set")
 
     def init_orbital_parameters(self):
+        print("setting orbital parameters")
         self.pos1 = (self.snapshot1.mass[self.i1] * self.snapshot1.pos[self.i1]).sum(axis=0) / self.m1
         self.pos2 = (self.snapshot2.mass[self.i2] * self.snapshot2.pos[self.i2]).sum(axis=0) / self.m2
         self.loaded_separation = self.pos2 - self.pos1
+        print("loaded separation: ", self.loaded_separation)
         self.center_of_mass = (self.m1 * self.pos1 + self.m2 * self.pos2) / self.total_mass
         print("binary center of mass: ", self.center_of_mass)
         self.v1 = (self.snapshot1.mass[self.i1] * self.snapshot1.v[self.i1]).sum(axis=0) / self.m1
