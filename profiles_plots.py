@@ -18,6 +18,11 @@ def plot_profile_test(output_dir,snapshot_name,plotting_dir,testing_value="rho",
 
     if new_fig:
         set_new_fig_properties()
+
+    if testing_value == "bfld" or value == "B":
+        loaded_snap.data["B"] = np.sqrt((loaded_snap.data['bfld'] * loaded_snap.data['bfld']).sum(axis=0))
+        testing_value = "B"
+        
     evenly_spaced_interval = np.linspace(0, 1, len(snapshot_number_array))
     line_colors = [cm.rainbow(x) for x in evenly_spaced_interval]
     labels = []
