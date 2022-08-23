@@ -47,7 +47,7 @@ class BinariesICs:
         print("G= ",G)
         self.eccentricity_vector = np.cross(self.velocity_difference, self.angular_momentum) / (G * (self.m1 + self.m2)) - \
                             self.loaded_separation / np.sqrt((self.loaded_separation**2).sum())
-        print("eccentricity vector: ", self.eccentricity)
+        print("eccentricity vector: ", self.eccentricity_vector)
         self.eccentricity = np.sqrt((self.eccentricity_vector**2).sum())
         print("eccentricity: ", self.eccentricity)
         self.semimajor = ((self.angular_momentum ** 2).sum()) / (G * (self.m1 + self.m2) * (1 - self.eccentricity ** 2))
