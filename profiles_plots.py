@@ -2,6 +2,7 @@ import os
 import glob
 import argparse
 import numpy as np
+import pylab
 from loadmodules import *
 from BinariesICs import *
 
@@ -20,7 +21,7 @@ def plot_profile_test(output_dir,snapshot_name,plotting_dir,testing_value="rho",
         set_new_fig_properties()
 
     evenly_spaced_interval = np.linspace(0, 1, len(snapshot_number_array))
-    line_colors = [cm.rainbow(x) for x in evenly_spaced_interval]
+    line_colors = pylab.rcParams['axes.prop_cycle'].by_key()['color']
     labels = []
     suffix = ""
     for index, snapshot_number in enumerate(snapshot_number_array):
@@ -54,8 +55,8 @@ def plot_profile_test(output_dir,snapshot_name,plotting_dir,testing_value="rho",
             if testing_value == "bfld" or testing_value == "B":
                 s.data["B"] = np.sqrt((s.data['bfld'] * s.data['bfld']).sum(axis=1))
                 testing_value = "B"
-            s.plot_radprof(testing_value, log=log,color=line_colors[index], center=center)
-        labels.append("snap " + str(snapshot_number) + "," + str(round(s.time,2))+ " [s]")
+            s.plot_radprof(testing_value, log=log, color=line_colors[index], center=center)
+        labels.append("snap " + str(snapshot_number) + "," + str(round(s.time, 2)) + " [s]")
     if len(snapshot_number_array) > 1:
         legend(labels)
     filename = plotting_dir + "/" + testing_value + "_profile_" + suffix + "_".join([str(snap_num) for snap_num in snapshot_number_array]) + ".png"
