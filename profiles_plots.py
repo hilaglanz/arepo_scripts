@@ -26,28 +26,30 @@ def plot_profile_test(output_dir,snapshot_name,plotting_dir,testing_value="rho",
     for index, snapshot_number in enumerate(snapshot_number_array):
         if around_objects:
             snapshot_file = "%s/%s%03d" % (output_dir, snapshot_name, snapshot_number)
-            binary = BinariesLoader(snapshot_file, conditional_axis=motion_axis)
-            s = binary.binary_snapshot
+            if object_num != 0:
+                binary = BinariesLoader(snapshot_file, conditional_axis=motion_axis)
+                s = binary.binary_snapshot
+                if object_num == 1:
+                    i = binary.i1
+                    print("doing object 1")
+                else:
+                    i = binary.i2
+                    print("doing object 2")
+            else:
+                s = gadget_readsnap(snapshot_number, output_dir, snapshot_name)
+                center = s.centerofmass()
+                i = np.where(s.rho > 10)
+                print("doing single object")
             if testing_value == "bfld" or testing_value == "B":
                 print("adding magnetic field size")
                 s.data["B"] = np.sqrt((s.data['bfld'] * s.data['bfld']).sum(axis=1))
                 testing_value = "B"
             nshells = 200
             dr = 0
-            if object_num == 1:
-                center = binary.pos1
-                suffix = "1"
-                print("calculating for object 1")
-                p = calcGrid.calcRadialProfile(s.data['pos'].astype('float64')[binary.i1],
-                                               s.data[testing_value].astype('float64')[binary.i1], 2, nshells, dr, center[0],
-                                               center[1], center[2])
-            else:
-                center = binary.pos2
-                suffix = "2"
-                print("calculating for object 1")
-                p = calcGrid.calcRadialProfile(s.data['pos'].astype('float64')[binary.i2],
-                                               s.data[testing_value].astype('float64')[binary.i1], 2, nshells, dr, center[0],
-                                               center[1], center[2])
+            p = calcGrid.calcRadialProfile(s.data['pos'].astype('float64')[i],
+                                           s.data[testing_value].astype('float64')[i], 2, nshells, dr,
+                                           center[0],
+                                           center[1], center[2])
             print("plotting")
             print("color= ", line_colors[index])
             if log:
@@ -60,11 +62,12 @@ def plot_profile_test(output_dir,snapshot_name,plotting_dir,testing_value="rho",
                 s.data["B"] = np.sqrt((s.data['bfld'] * s.data['bfld']).sum(axis=1))
                 testing_value = "B"
             s.plot_radprof(testing_value, log=log, color=line_colors[index], center=center)
-        print("used color: ", line_colors[index])
+        print("used color: ", line_colors[index], s.time)
         labels.append("snap " + str(snapshot_number) + "," + str(round(s.time, 2)) + " [s]")
     if len(snapshot_number_array) > 1:
         legend(labels)
-    filename = plotting_dir + "/" + testing_value + "_profile_" + suffix + "_".join([str(snap_num) for snap_num in snapshot_number_array]) + ".png"
+    filename = plotting_dir + "/" + testing_value + "_profile_" + suffix + "_".join([str(snap_num) for snap_num
+                                                                                     in snapshot_number_array]) + ".png"
     print("saving to: ", filename)
     savefig(filename)
     print("saved fig")
@@ -83,6 +86,9 @@ def InitParser():
                         help='should plot around each of the object in the binary system',
                         default=False)
     parser.add_argument('--motion_axis', type=int, help='axis of motion when plotting around objects', default=None)
+    parser.add_argument('--take_single_object', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
+                        help='should plot around one  of the object',
+                        default=False)
 
     return parser
 
@@ -93,12 +99,13 @@ if __name__ == "__main__":
     parser = InitParser()
     args = parser.parse_args()
     if args.around_objects:
-        plot_profile_test(output_dir=args.output_dir, snapshot_name=args.snapshot_name, plotting_dir=args.plotting_dir,
-                          testing_value=args.value, snapshot_number_array=args.snapshot_nums, log=args.logplot,
-                          around_objects=args.around_objects, motion_axis=args.motion_axis, object_num=1)
-        plot_profile_test(output_dir=args.output_dir, snapshot_name=args.snapshot_name, plotting_dir=args.plotting_dir,
-                          testing_value=args.value, snapshot_number_array=args.snapshot_nums, log=args.logplot,
-                          around_objects=args.around_objects, motion_axis=args.motion_axis,object_num=2,new_fig=True)
+        if not args.take_single_object:
+            plot_profile_test(output_dir=args.output_dir, snapshot_name=args.snapshot_name, plotting_dir=args.plotting_dir,
+                              testing_value=args.value, snapshot_number_array=args.snapshot_nums, log=args.logplot,
+                              around_objects=args.around_objects, motion_axis=args.motion_axis, object_num=1)
+            plot_profile_test(output_dir=args.output_dir, snapshot_name=args.snapshot_name, plotting_dir=args.plotting_dir,
+                              testing_value=args.value, snapshot_number_array=args.snapshot_nums, log=args.logplot,
+                              around_objects=args.around_objects, motion_axis=args.motion_axis,object_num=2,new_fig=True)
     else:
         plot_profile_test(output_dir= args.output_dir, snapshot_name=args.snapshot_name, plotting_dir=args.plotting_dir,
                           testing_value=args.value, snapshot_number_array=args.snapshot_nums, log=args.logplot,
