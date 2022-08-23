@@ -22,6 +22,7 @@ class BinariesICs:
         self.m1 = self.snapshot1.mass[self.i1].sum()
         self.m2 = self.snapshot2.mass[self.i2].sum()
         self.total_mass = self.m1 + self.m2
+        print("masses: ",self.m1," , ",self.m2)
         self.r1 = self.snapshot1.r()[self.i1].max()
         self.r2 = self.snapshot2.r()[self.i2].max()
         self.npart1 = size(self.i1)
