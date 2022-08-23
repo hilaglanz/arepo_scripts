@@ -56,6 +56,7 @@ def plot_profile_test(output_dir,snapshot_name,plotting_dir,testing_value="rho",
                 s.data["B"] = np.sqrt((s.data['bfld'] * s.data['bfld']).sum(axis=1))
                 testing_value = "B"
             s.plot_radprof(testing_value, log=log, color=line_colors[index], center=center)
+        print("used colot: ", line_colors[index])
         labels.append("snap " + str(snapshot_number) + "," + str(round(s.time, 2)) + " [s]")
     if len(snapshot_number_array) > 1:
         legend(labels)
