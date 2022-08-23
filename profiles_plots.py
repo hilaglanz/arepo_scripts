@@ -22,7 +22,7 @@ def plot_profile_test(output_dir,snapshot_name,plotting_dir,testing_value="rho",
     if testing_value == "bfld" or value == "B":
         loaded_snap.data["B"] = np.sqrt((loaded_snap.data['bfld'] * loaded_snap.data['bfld']).sum(axis=0))
         testing_value = "B"
-        
+
     evenly_spaced_interval = np.linspace(0, 1, len(snapshot_number_array))
     line_colors = [cm.rainbow(x) for x in evenly_spaced_interval]
     labels = []
@@ -31,6 +31,7 @@ def plot_profile_test(output_dir,snapshot_name,plotting_dir,testing_value="rho",
         if around_objects:
             snapshot_file = "%s/%s%03d" % (output_dir, snapshot_name, snapshot_number)
             binary = BinaryLoader(snapshot_file, conditional_axis=motion_axis)
+            s = binary.snapshot
             nshells = 200
             dr = 0
             if object_num == 1:
