@@ -34,20 +34,19 @@ class BinariesICs:
         self.pos2 = (self.snapshot2.mass[self.i2] * self.snapshot2.pos[self.i2]).sum(axis=0) / self.m2
         self.loaded_separation = self.pos2 - self.pos1
         self.center_of_mass = (self.m1 * self.pos1 + self.m2 * self.pos2) / self.total_mass
-
+        print("binary center of mass: ", self.center_of_mass)
         self.v1 = (self.snapshot1.mass[self.i1] * self.snapshot1.v[self.i1]).sum(axis=0) / self.m1
         self.v2 = (self.snapshot2.mass[self.i2] * self.snapshot2.v[self.i2]).sum(axis=0) / self.m2
         self.velocity_difference = self.v2 - self.v1
-
+        print("relative velocity: ", self.velocity_difference)
         self.angular_momentum = np.cross(self.loaded_separation, self.velocity_difference)
-
+        print("angular momentum: ", self.angular_momentum)
         self.eccentricity = np.cross(self.velocity_difference, self.angular_momentum) / G * (self.m1 + self.m2) - \
                             self.loaded_separation / np.dot(self.loaded_separation, self.loaded_separation) ** 0.5
-
+        print("eccentricity: ", self.eccentricity)
         self.semimajor = (self.angular_momentum ** 2) / (G * (self.m1 + self.m2) * (1 - self.eccentricity ** 2))
 
-        print("current orbital parameters: a=", self.semimajor, " e=", self.eccentricity, " r=", self.loaded_separation,
-              " l=", self.angular_momentum, " v=", self.velocity_difference)
+        print("current orbital parameters: a=", self.semimajor, " r=", self.loaded_separation)
 
     def initialized_new_data(self):
         self.data = {}
