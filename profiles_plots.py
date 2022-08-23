@@ -20,28 +20,32 @@ def plot_profile_test(output_dir,snapshot_name,plotting_dir,testing_value="rho",
         set_new_fig_properties()
     evenly_spaced_interval = np.linspace(0, 1, len(snapshot_number_array))
     line_colors = [cm.rainbow(x) for x in evenly_spaced_interval]
-    labels=[]
-    suffix=""
+    labels = []
+    suffix = ""
     for index, snapshot_number in enumerate(snapshot_number_array):
-        s = gadget_readsnap(snapshot_number,output_dir,snapshot_name)
         if around_objects:
-            binary = BinaryLoader(s.name, conditional_axis=motion_axis)
+            snapshot_file = "%s/%s%03d" % (output_dir, snapshot_name, snapshot_number)
+            binary = BinaryLoader(snapshot_file, conditional_axis=motion_axis)
+            nshells = 200
+            dr = 0
             if object_num == 1:
                 center = binary.pos1
-                suffix="1"
-                p = calcGrid.calcRadialProfile(binary.data['pos'].astype('float64')[binary.i1], binary.data[value].astype('float64'), 2,
-                                           nshells, dr, center[0], center[1], center[2])
+                suffix = "1"
+                p = calcGrid.calcRadialProfile(binary.data['pos'].astype('float64')[binary.i1],
+                                               binary.data[testing_value].astype('float64'), 2, nshells, dr, center[0],
+                                               center[1], center[2])
             else:
                 center = binary.pos2
-                suffix="2"
+                suffix = "2"
                 p = calcGrid.calcRadialProfile(binary.data['pos'].astype('float64')[binary.i2],
-                                           binary.data[value].astype('float64'), 2,
-                                           nshells, dr, center[0], center[1], center[2])
+                                               binary.data[testing_value].astype('float64'), 2, nshells, dr, center[0],
+                                               center[1], center[2])
             if log:
                 pylab.semilogy(p[1, :], p[0, :], color=line_colors[index])
             else:
                 pylab.plot(p[1, :], p[0, :], color=line_colors[index])
         else:
+            s = gadget_readsnap(snapshot_number, output_dir, snapshot_name)
             s.plot_radprof(testing_value, log=log,color=line_colors[index], center=center)
         labels.append("snap " + str(snapshot_number) + "," + str(s.time)+ " [s]")
     if len(snapshot_number_array) > 1:
