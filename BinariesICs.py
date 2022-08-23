@@ -44,10 +44,13 @@ class BinariesICs:
         print("relative velocity: ", self.velocity_difference)
         self.angular_momentum = np.cross(self.loaded_separation, self.velocity_difference)
         print("angular momentum: ", self.angular_momentum)
-        self.eccentricity = np.cross(self.velocity_difference, self.angular_momentum) / G * (self.m1 + self.m2) - \
-                            self.loaded_separation / np.sqrt((self.loaded_separation * self.loaded_separation).sum(axis=1))
+        print("G= ",G)
+        self.eccentricity_vector = np.cross(self.velocity_difference, self.angular_momentum) / (G * (self.m1 + self.m2)) - \
+                            self.loaded_separation / np.sqrt((self.loaded_separation**2).sum())
+        print("eccentricity vector: ", self.eccentricity)
+        self.eccentricity = np.sqrt((self.eccentricity_vector**2).sum())
         print("eccentricity: ", self.eccentricity)
-        self.semimajor = (self.angular_momentum ** 2) / (G * (self.m1 + self.m2) * (1 - self.eccentricity ** 2))
+        self.semimajor = ((self.angular_momentum ** 2).sum()) / (G * (self.m1 + self.m2) * (1 - self.eccentricity ** 2))
 
         print("current orbital parameters: a=", self.semimajor, " r=", self.loaded_separation)
 
