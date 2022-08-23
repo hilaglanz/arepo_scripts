@@ -19,10 +19,6 @@ def plot_profile_test(output_dir,snapshot_name,plotting_dir,testing_value="rho",
     if new_fig:
         set_new_fig_properties()
 
-    if testing_value == "bfld" or value == "B":
-        loaded_snap.data["B"] = np.sqrt((loaded_snap.data['bfld'] * loaded_snap.data['bfld']).sum(axis=0))
-        testing_value = "B"
-
     evenly_spaced_interval = np.linspace(0, 1, len(snapshot_number_array))
     line_colors = [cm.rainbow(x) for x in evenly_spaced_interval]
     labels = []
@@ -32,6 +28,9 @@ def plot_profile_test(output_dir,snapshot_name,plotting_dir,testing_value="rho",
             snapshot_file = "%s/%s%03d" % (output_dir, snapshot_name, snapshot_number)
             binary = BinaryLoader(snapshot_file, conditional_axis=motion_axis)
             s = binary.snapshot
+            if testing_value == "bfld" or value == "B":
+                binary.data["B"] = np.sqrt((binary.data['bfld'] * binary.data['bfld']).sum(axis=0))
+                testing_value = "B"
             nshells = 200
             dr = 0
             if object_num == 1:
@@ -52,6 +51,9 @@ def plot_profile_test(output_dir,snapshot_name,plotting_dir,testing_value="rho",
                 pylab.plot(p[1, :], p[0, :], color=line_colors[index])
         else:
             s = gadget_readsnap(snapshot_number, output_dir, snapshot_name)
+            if testing_value == "bfld" or value == "B":
+                s.data["B"] = np.sqrt((s.data['bfld'] * s.data['bfld']).sum(axis=0))
+                testing_value = "B"
             s.plot_radprof(testing_value, log=log,color=line_colors[index], center=center)
         labels.append("snap " + str(snapshot_number) + "," + str(s.time)+ " [s]")
     if len(snapshot_number_array) > 1:
