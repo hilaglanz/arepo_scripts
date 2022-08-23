@@ -27,8 +27,8 @@ class BinariesICs:
         self.npart = self.npart1 + self.npart2
 
     def init_orbital_parameters(self):
-        self.pos1 = (self.snapshot1.mass[i1] * self.self.snapshot1.pos[self.i1]).sum(axis=0) / self.m1
-        self.pos2 = (self.self.snapshot2.mass[i2] * self.self.snapshot2.pos[self.i2]).sum(axis=0) / self.m2
+        self.pos1 = (self.snapshot1.mass[self.i1] * self.self.snapshot1.pos[self.i1]).sum(axis=0) / self.m1
+        self.pos2 = (self.self.snapshot2.mass[self.i2] * self.self.snapshot2.pos[self.i2]).sum(axis=0) / self.m2
         self.loaded_separation = self.pos2 - self.pos1
         self.center_of_mass = (self.m1 * self.pos1 + self.m2 * self.pos2) / self.total_mass
 
