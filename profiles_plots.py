@@ -30,6 +30,7 @@ def plot_profile_test(output_dir,snapshot_name,plotting_dir,testing_value="rho",
             binary = BinariesLoader(snapshot_file, conditional_axis=motion_axis)
             s = binary.binary_snapshot
             if testing_value == "bfld" or testing_value == "B":
+                print("adding magnetic field size")
                 s.data["B"] = np.sqrt((s.data['bfld'] * s.data['bfld']).sum(axis=1))
                 testing_value = "B"
             nshells = 200
@@ -37,15 +38,19 @@ def plot_profile_test(output_dir,snapshot_name,plotting_dir,testing_value="rho",
             if object_num == 1:
                 center = binary.pos1
                 suffix = "1"
+                print("calculating for object 1")
                 p = calcGrid.calcRadialProfile(s.data['pos'].astype('float64')[binary.i1],
                                                s.data[testing_value].astype('float64'), 2, nshells, dr, center[0],
                                                center[1], center[2])
             else:
                 center = binary.pos2
                 suffix = "2"
+                print("calculating for object 1")
                 p = calcGrid.calcRadialProfile(s.data['pos'].astype('float64')[binary.i2],
                                                s.data[testing_value].astype('float64'), 2, nshells, dr, center[0],
                                                center[1], center[2])
+            print("plotting")
+            print("color= ", line_colors[index])
             if log:
                 pylab.semilogy(p[1, :], p[0, :], color=line_colors[index])
             else:
@@ -56,7 +61,7 @@ def plot_profile_test(output_dir,snapshot_name,plotting_dir,testing_value="rho",
                 s.data["B"] = np.sqrt((s.data['bfld'] * s.data['bfld']).sum(axis=1))
                 testing_value = "B"
             s.plot_radprof(testing_value, log=log, color=line_colors[index], center=center)
-        print("used colot: ", line_colors[index])
+        print("used color: ", line_colors[index])
         labels.append("snap " + str(snapshot_number) + "," + str(round(s.time, 2)) + " [s]")
     if len(snapshot_number_array) > 1:
         legend(labels)
