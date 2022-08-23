@@ -7,6 +7,7 @@ from loadmodules import *
 
 class BinariesICs:
     def __init__(self, species_file="species55.txt"):
+        print("initializing general binary info")
         self.init_species(species_file)
         self.init_object_properties()
         self.init_orbital_parameters()
@@ -15,6 +16,7 @@ class BinariesICs:
         self.sp = loaders.load_species(species_file)
         self.iC12 = self.sp['names'].index('c12')
         self.iO16 = self.sp['names'].index('o16')
+        print("species file set")
 
     def init_object_properties(self):
         self.m1 = self.snapshot1.mass[self.i1].sum()
@@ -25,6 +27,7 @@ class BinariesICs:
         self.npart1 = size(self.i1)
         self.npart2 = size(self.i2)
         self.npart = self.npart1 + self.npart2
+        print("objects properties set")
 
     def init_orbital_parameters(self):
         self.pos1 = (self.snapshot1.mass[self.i1] * self.self.snapshot1.pos[self.i1]).sum(axis=0) / self.m1
@@ -235,6 +238,7 @@ class BinariesICs:
 
 class BinariesLoader(BinariesICs):
     def __init__(self, snapshot_file, conditional_axis=0, rhocut=1, species_file="species55.txt"):
+        print("initializeing binaries from a single snapshot")
         self.binary_snapshot = gadget_readsnapname(snapshot_file, hdf5=True, loadonlytype=[0])
         if conditional_axis is not None:
             if rhocut is not None:
