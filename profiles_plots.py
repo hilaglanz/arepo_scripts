@@ -29,21 +29,21 @@ def plot_profile_test(output_dir,snapshot_name,plotting_dir,testing_value="rho",
             binary = BinariesLoader(snapshot_file, conditional_axis=motion_axis)
             s = binary.snapshot
             if testing_value == "bfld" or testing_value == "B":
-                binary.data["B"] = np.sqrt((binary.data['bfld'] * binary.data['bfld']).sum(axis=1))
+                s.data["B"] = np.sqrt((s.data['bfld'] * s.data['bfld']).sum(axis=1))
                 testing_value = "B"
             nshells = 200
             dr = 0
             if object_num == 1:
                 center = binary.pos1
                 suffix = "1"
-                p = calcGrid.calcRadialProfile(binary.data['pos'].astype('float64')[binary.i1],
-                                               binary.data[testing_value].astype('float64'), 2, nshells, dr, center[0],
+                p = calcGrid.calcRadialProfile(s.data['pos'].astype('float64')[binary.i1],
+                                               s.data[testing_value].astype('float64'), 2, nshells, dr, center[0],
                                                center[1], center[2])
             else:
                 center = binary.pos2
                 suffix = "2"
-                p = calcGrid.calcRadialProfile(binary.data['pos'].astype('float64')[binary.i2],
-                                               binary.data[testing_value].astype('float64'), 2, nshells, dr, center[0],
+                p = calcGrid.calcRadialProfile(s.data['pos'].astype('float64')[binary.i2],
+                                               s.data[testing_value].astype('float64'), 2, nshells, dr, center[0],
                                                center[1], center[2])
             if log:
                 pylab.semilogy(p[1, :], p[0, :], color=line_colors[index])
