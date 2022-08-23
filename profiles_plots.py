@@ -3,6 +3,7 @@ import glob
 import argparse
 import numpy as np
 from loadmodules import *
+from BinariesICs import *
 
 def set_new_fig_properties():
     fig = figure(figsize=(36, 20))
@@ -10,22 +11,42 @@ def set_new_fig_properties():
     rcParams['text.usetex'] = True
     rcParams['lines.linewidth'] = 3.0
 
-def plot_profile_test(output_dir,snapshot_name,plotting_dir,testing_value="rho",snapshot_number_array=[0,8,10],log=True,new_fig=True):
+def plot_profile_test(output_dir,snapshot_name,plotting_dir,testing_value="rho",snapshot_number_array=[0,8,10],
+                      center=False, log=True,new_fig=True, around_objects=False, motion_axis= 0, object_num=0):
     if not os.path.exists(plotting_dir):
         os.mkdir(plotting_dir)
-        
+
     if new_fig:
         set_new_fig_properties()
     evenly_spaced_interval = np.linspace(0, 1, len(snapshot_number_array))
     line_colors = [cm.rainbow(x) for x in evenly_spaced_interval]
     labels=[]
+    suffix=""
     for index, snapshot_number in enumerate(snapshot_number_array):
         s = gadget_readsnap(snapshot_number,output_dir,snapshot_name)
-        s.plot_radprof(testing_value, log=log,color=line_colors[index])
+        if around_objects:
+            binary = BinaryLoader(s.name, conditional_axis=motion_axis)
+            if object_num == 1:
+                center = binary.pos1
+                suffix="1"
+                p = calcGrid.calcRadialProfile(binary.data['pos'].astype('float64')[binary.i1], binary.data[value].astype('float64'), 2,
+                                           nshells, dr, center[0], center[1], center[2])
+            else:
+                center = binary.pos2
+                suffix="2"
+                p = calcGrid.calcRadialProfile(binary.data['pos'].astype('float64')[binary.i2],
+                                           binary.data[value].astype('float64'), 2,
+                                           nshells, dr, center[0], center[1], center[2])
+            if log:
+                pylab.semilogy(p[1, :], p[0, :], color=line_colors[index])
+            else:
+                pylab.plot(p[1, :], p[0, :], color=line_colors[index])
+        else:
+            s.plot_radprof(testing_value, log=log,color=line_colors[index], center=center)
         labels.append("snap " + str(snapshot_number) + "," + str(s.time)+ " [s]")
     if len(snapshot_number_array) > 1:
         legend(labels)
-    filename = plotting_dir + "/" + testing_value + "_profile_" + "_".join([str(snap_num) for snap_num in snapshot_number_array]) + ".png"
+    filename = plotting_dir + "/" + testing_value + "_profile_" + suffix + "_".join([str(snap_num) for snap_num in snapshot_number_array]) + ".png"
     print("saving to: ", filename)
     savefig(filename)
     print("saved fig")
@@ -40,6 +61,10 @@ def InitParser():
                         default=[0 ,8, 10])
     parser.add_argument('--logplot', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),  help='logplot',
                         default=True)
+    parser.add_argument('--around_objects', type=lambda x: (str(x).lower() in ['true', '1', 'yes']), 
+                        help='should plot around each of the object in the binary system',
+                        default=False)
+    parser.add_argument('--motion_axis', type=int, help='axis of motion when plotting around objects', default=0)    
 
     return parser
 
@@ -49,5 +74,14 @@ if __name__ == "__main__":
     print(len(sys.argv))
     parser = InitParser()
     args = parser.parse_args()
-    plot_profile_test(output_dir= args.output_dir, snapshot_name=args.snapshot_name, plotting_dir=args.plotting_dir,
-                      testing_value=args.value, snapshot_number_array=args.snapshot_nums, log=args.logplot)
+    if args.around_objects:
+        plot_profile_test(output_dir=args.output_dir, snapshot_name=args.snapshot_name, plotting_dir=args.plotting_dir,
+                          testing_value=args.value, snapshot_number_array=args.snapshot_nums, log=args.logplot,
+                          around_objects=args.around_objects, motion_axis=args.motion_axis, object_num=1)
+        plot_profile_test(output_dir=args.output_dir, snapshot_name=args.snapshot_name, plotting_dir=args.plotting_dir,
+                          testing_value=args.value, snapshot_number_array=args.snapshot_nums, log=args.logplot,
+                          around_objects=args.around_objects, motion_axis=args.motion_axis,object_num=2,new_fig=True)
+    else:
+        plot_profile_test(output_dir= args.output_dir, snapshot_name=args.snapshot_name, plotting_dir=args.plotting_dir,
+                          testing_value=args.value, snapshot_number_array=args.snapshot_nums, log=args.logplot,
+                          around_objects=args.around_objects, motion_axis= args.motion_axis)
