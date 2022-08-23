@@ -26,7 +26,7 @@ def plot_profile_test(output_dir,snapshot_name,plotting_dir,testing_value="rho",
     for index, snapshot_number in enumerate(snapshot_number_array):
         if around_objects:
             snapshot_file = "%s/%s%03d" % (output_dir, snapshot_name, snapshot_number)
-            binary = BinaryLoader(snapshot_file, conditional_axis=motion_axis)
+            binary = BinariesLoader(snapshot_file, conditional_axis=motion_axis)
             s = binary.snapshot
             if testing_value == "bfld" or testing_value == "B":
                 binary.data["B"] = np.sqrt((binary.data['bfld'] * binary.data['bfld']).sum(axis=1))
