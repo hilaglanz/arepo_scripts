@@ -32,20 +32,20 @@ class BinariesICs:
 
     def init_orbital_parameters(self):
         print("setting orbital parameters")
-        self.pos1 = (self.snapshot1.pos[self.i1, :] * self.snapshot1.mass[self.i1][:, None]).sum(axis=0) / self.m1
-        self.pos2 = (self.snapshot2.pos[self.i2, :] * self.snapshot2.mass[self.i2][:, None]).sum(axis=0) / self.m2
+        self.pos1 = (self.snapshot1.pos[self.i1] * self.snapshot1.mass[self.i1][:, None]).sum(axis=0) / self.m1
+        self.pos2 = (self.snapshot2.pos[self.i2] * self.snapshot2.mass[self.i2][:, None]).sum(axis=0) / self.m2
         self.loaded_separation = self.pos2 - self.pos1
         print("loaded separation: ", self.loaded_separation)
         self.center_of_mass = (self.m1 * self.pos1 + self.m2 * self.pos2) / self.total_mass
         print("binary center of mass: ", self.center_of_mass)
-        self.v1 = (self.snapshot1.v[self.i1,:] * self.snapshot1.mass[self.i1][:, None]).sum(axis=0) / self.m1
-        self.v2 = (self.snapshot2.v[self.i2,:] * self.snapshot1.mass[self.i2][:, None]).sum(axis=0) / self.m2
+        self.v1 = (self.snapshot1.vel[self.i1] * self.snapshot1.mass[self.i1][:, None]).sum(axis=0) / self.m1
+        self.v2 = (self.snapshot2.vel[self.i2] * self.snapshot2.mass[self.i2][:, None]).sum(axis=0) / self.m2
         self.velocity_difference = self.v2 - self.v1
         print("relative velocity: ", self.velocity_difference)
         self.angular_momentum = np.cross(self.loaded_separation, self.velocity_difference)
         print("angular momentum: ", self.angular_momentum)
         self.eccentricity = np.cross(self.velocity_difference, self.angular_momentum) / G * (self.m1 + self.m2) - \
-                            self.loaded_separation / np.dot(self.loaded_separation, self.loaded_separation) ** 0.5
+                            self.loaded_separation / np.sqrt((self.loaded_separation * self.loaded_separation).sum(axis=1))
         print("eccentricity: ", self.eccentricity)
         self.semimajor = (self.angular_momentum ** 2) / (G * (self.m1 + self.m2) * (1 - self.eccentricity ** 2))
 
