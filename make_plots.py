@@ -68,10 +68,10 @@ def plot_single_value(loaded_snap, snap_num, value='rho', snapshotDir= "output",
     if plot_velocities:
         loaded_snap.data['velx'] = loaded_snap.vel[:, 0]
         loaded_snap.data['vely'] = loaded_snap.vel[:, 1]
-        slice_velx = loaded_snap.get_Aslice('velx', box=box, res=res, numthreads=numthreads)
-        slice_vely = loaded_snap.get_Aslice('vely', box=box, res=res, numthreads=numthreads)
-        posx = slice_velx['x'][:-1]
-        posy = slice_velx['y'][:-1]
+        slice_velx = loaded_snap.get_Aslice('velx', box=box, res=res, center=center, numthreads=numthreads)
+        slice_vely = loaded_snap.get_Aslice('vely', box=box, res=res, center=center, numthreads=numthreads)
+        posx = slice_velx['x']
+        posy = slice_velx['y']
         velx = slice_velx['grid']
         vely = slice_vely['grid']
         streamplot(posx, posy, velx, vely, density=2, color='black')
