@@ -12,8 +12,8 @@ def set_new_fig_properties():
     rcParams['text.usetex'] = True
     rcParams['lines.linewidth'] = 3.0
 
-def compute_cumulative_mass(snapshot):
-    rsort = snapshot.r().argsort()
+def compute_cumulative_mass(snapshot, center):
+    rsort = snapshot.r(center=center).argsort()
 
     mcum = np.zeros(snapshot.npart)
     mcum[0] = snapshot.mass[rsort[0]]
@@ -22,14 +22,14 @@ def compute_cumulative_mass(snapshot):
     snapshot.data['cum_mass'] = mcum / msol
     return
 
-def compute_value(s, testing_value):
+def compute_value(s, testing_value, center):
     if testing_value == "bfld" or testing_value == "B":
         print("adding magnetic field size")
         s.data["B"] = np.sqrt((s.data['bfld'] * s.data['bfld']).sum(axis=1))
         testing_value = "B"
     if testing_value == "cum_mass":
         print("adding cummulative nass")
-        compute_cumulative_mass(s)
+        compute_cumulative_mass(s, center)
 
     return testing_value
 
@@ -66,7 +66,7 @@ def plot_profile_test(output_dir,snapshot_name,plotting_dir,testing_value="rho",
                 center = s.centerofmass()
                 print("around center: ", center)
                 i = np.where(s.rho > 10)
-            testing_value = compute_value(s,testing_value)
+            testing_value = compute_value(s,testing_value, center)
             nshells = 200
             dr = 0
             p = calcGrid.calcRadialProfile(s.data['pos'].astype('float64')[i],
@@ -81,7 +81,7 @@ def plot_profile_test(output_dir,snapshot_name,plotting_dir,testing_value="rho",
                 pylab.plot(p[1, :], p[0, :], color=line_colors[index])
         else:
             s = gadget_readsnap(snapshot_number, output_dir, snapshot_name)
-            testing_value = compute_value(s, testing_value)
+            testing_value = compute_value(s, testing_value, center)
             s.plot_radprof(testing_value, log=log, color=line_colors[index], center=center)
         print("used color: ", line_colors[index], s.time)
         labels.append("snap " + str(snapshot_number) + "," + str(round(s.time, 2)) + " [s]")
