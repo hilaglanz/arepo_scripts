@@ -19,7 +19,7 @@ def compute_cumulative_mass(snapshot):
     mcum[0] = snapshot.mass[rsort[0]]
     for i in range(1, snapshot.npart):
         mcum[rsort[i]] = mcum[rsort[i - 1]] + snapshot.mass[rsort[i]]
-    snapshot.data['cum_mass'] = mcum / msun
+    snapshot.data['cum_mass'] = mcum / msol
     return
 
 def compute_value(s, testing_value):
