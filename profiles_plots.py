@@ -12,6 +12,27 @@ def set_new_fig_properties():
     rcParams['text.usetex'] = True
     rcParams['lines.linewidth'] = 3.0
 
+def compute_cumulative_mass(snapshot):
+    rsort = snapshot.r().argsort()
+
+    mcum = np.zeros(snapshot.npart)
+    mcum[0] = snapshot.mass[rsort[0]]
+    for i in range(1, snapshot.npart):
+        mcum[rsort[i]] = mcum[rsort[i - 1]] + snapshot.mass[rsort[i]]
+    snapshot.data['mcum'] = mcum
+    return
+
+def compute_value(s, testing_value):
+    if testing_value == "bfld" or testing_value == "B":
+        print("adding magnetic field size")
+        s.data["B"] = np.sqrt((s.data['bfld'] * s.data['bfld']).sum(axis=1))
+        testing_value = "B"
+    if testing_value == "cum_mass":
+        print("adding cummulative nass")
+        compute_cumulative_mass(s)
+
+    return testing_value
+
 def plot_profile_test(output_dir,snapshot_name,plotting_dir,testing_value="rho",snapshot_number_array=[0,8,10],
                       center=False, log=True,new_fig=True, around_objects=False, motion_axis= 0, object_num=0):
     if not os.path.exists(plotting_dir):
@@ -45,10 +66,7 @@ def plot_profile_test(output_dir,snapshot_name,plotting_dir,testing_value="rho",
                 center = s.centerofmass()
                 print("around center: ", center)
                 i = np.where(s.rho > 10)
-            if testing_value == "bfld" or testing_value == "B":
-                print("adding magnetic field size")
-                s.data["B"] = np.sqrt((s.data['bfld'] * s.data['bfld']).sum(axis=1))
-                testing_value = "B"
+            testing_value = compute_value(s,testing_value)
             nshells = 200
             dr = 0
             p = calcGrid.calcRadialProfile(s.data['pos'].astype('float64')[i],
@@ -63,9 +81,7 @@ def plot_profile_test(output_dir,snapshot_name,plotting_dir,testing_value="rho",
                 pylab.plot(p[1, :], p[0, :], color=line_colors[index])
         else:
             s = gadget_readsnap(snapshot_number, output_dir, snapshot_name)
-            if testing_value == "bfld" or testing_value == "B":
-                s.data["B"] = np.sqrt((s.data['bfld'] * s.data['bfld']).sum(axis=1))
-                testing_value = "B"
+            testing_value = compute_value(s, testing_value)
             s.plot_radprof(testing_value, log=log, color=line_colors[index], center=center)
         print("used color: ", line_colors[index], s.time)
         labels.append("snap " + str(snapshot_number) + "," + str(round(s.time, 2)) + " [s]")
