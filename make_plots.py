@@ -70,10 +70,10 @@ def plot_single_value(loaded_snap, snap_num, value='rho', snapshotDir= "output",
         loaded_snap.data['vely'] = loaded_snap.vel[:, 1]
         slice_velx = loaded_snap.get_Aslice('velx', box=box, res=res, center=center, numthreads=numthreads)
         slice_vely = loaded_snap.get_Aslice('vely', box=box, res=res, center=center, numthreads=numthreads)
-        posx = pylab.arange( res+1, dtype="float64" ) / res * box[0] - .5 * box[0] + center[0]
-        posy = pylab.arange( res+1, dtype="float64" ) / res * box[1] - .5 * box[1] + center[1]
-        velx = slice_velx['grid']
-        vely = slice_vely['grid']
+        posx = slice_velx['x']
+        posy = slice_velx['y']
+        velx = pylab.transpose(slice_velx['grid'])
+        vely = pylab.transpose(slice_vely['grid'])
         streamplot(posx, posy, velx, vely, density=2, color='black')
         # quiver(loaded_snap.pos[:,0],loaded_snap.pos[:,1],loaded_snap.vel[:,0], loaded_snap.vel[:,1],
         # scale=50)#*loaded_snap.parameters['BoxSize']/box[0])
