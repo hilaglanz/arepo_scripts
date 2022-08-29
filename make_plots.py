@@ -23,11 +23,7 @@ def plot_single_value(loaded_snap, snap_num, value='rho', snapshotDir= "output",
     if value in name_and_units.keys():
         label = name_and_units[value][0]
         label += " [" + name_and_units[value][1] + "]"
-    else:
-        '''for val in name_and_units.keys():
-            if value in val:
-                label += "[" + name_and_units[value][1] + "]"
-                break'''
+
     if "xnuc" in value:
         loaded_snap.data["rho"+value] = loaded_snap.rho * loaded_snap.data[value]
         value = "rho" + value
@@ -39,6 +35,15 @@ def plot_single_value(loaded_snap, snap_num, value='rho', snapshotDir= "output",
     if value == "bfld" or value == "B":
         loaded_snap.data["B"] = np.sqrt((loaded_snap.data['bfld']*loaded_snap.data['bfld']).sum(axis=1))
         value = "B"
+    if "vel" in value:
+        loaded_snap.data['velx'] = loaded_snap.vel[:, 0]
+        loaded_snap.data['vely'] = loaded_snap.vel[:, 1]
+        loaded_snap.data['velz'] = loaded_snap.vel[:, 2]
+
+    if value == "vel":
+        loaded_snap.data['vel_size'] = np.sqrt((loaded_snap.vel ** 2).sum(axis=1))
+        value = "vel_size"
+
 
         
     print(value)
