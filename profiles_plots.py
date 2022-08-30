@@ -34,7 +34,7 @@ def compute_value(s, testing_value, center):
     return testing_value
 
 def plot_profile_test(output_dir,snapshot_name,plotting_dir,testing_value="rho",snapshot_number_array=[0,8,10],
-                      center=False, log=True,new_fig=True, around_objects=False, motion_axis= 0, object_num=0):
+                      center=False, log=True,new_fig=True, around_objects=False, around_density_peak=False, motion_axis= 0, object_num=0):
     if not os.path.exists(plotting_dir):
         os.mkdir(plotting_dir)
 
@@ -63,9 +63,13 @@ def plot_profile_test(output_dir,snapshot_name,plotting_dir,testing_value="rho",
             else:
                 print("doing single object")
                 s = gadget_readsnap(snapshot_number, output_dir, snapshot_name)
-                center = s.centerofmass()
+                if around_density_peak:
+                    print("calculating around density peak")
+                    center = s.pos[np.where(s.rho == s.rho.max())][-1, :]
+                else:
+                    center = s.centerofmass()
                 print("around center: ", center)
-                i = np.where(s.rho > 10)
+                i = np.where(s.rho > 100)
             testing_value = compute_value(s,testing_value, center)
             nshells = 200
             dr = 0
@@ -110,6 +114,9 @@ def InitParser():
     parser.add_argument('--take_single_object', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
                         help='should plot around one  of the object',
                         default=False)
+    parser.add_argument('--around_density_peak', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
+                        help='should calculate the center according to the density peak?',
+                        default=False)
 
     return parser
 
@@ -122,11 +129,14 @@ if __name__ == "__main__":
     if args.around_objects and not args.take_single_object:
         plot_profile_test(output_dir=args.output_dir, snapshot_name=args.snapshot_name, plotting_dir=args.plotting_dir,
                           testing_value=args.value, snapshot_number_array=args.snapshot_nums, log=args.logplot,
-                          around_objects=args.around_objects, motion_axis=args.motion_axis, object_num=1)
+                          around_objects=args.around_objects, motion_axis=args.motion_axis,
+                          around_density_peak=args.around_density_peak, object_num=1)
         plot_profile_test(output_dir=args.output_dir, snapshot_name=args.snapshot_name, plotting_dir=args.plotting_dir,
                           testing_value=args.value, snapshot_number_array=args.snapshot_nums, log=args.logplot,
-                          around_objects=args.around_objects, motion_axis=args.motion_axis,object_num=2,new_fig=True)
+                          around_objects=args.around_objects, motion_axis=args.motion_axis,
+                          around_density_peak=args.around_density_peak, object_num=2,new_fig=True)
     else:
         plot_profile_test(output_dir= args.output_dir, snapshot_name=args.snapshot_name, plotting_dir=args.plotting_dir,
                           testing_value=args.value, snapshot_number_array=args.snapshot_nums, log=args.logplot,
-                          around_objects=args.around_objects, motion_axis= args.motion_axis)
+                          around_objects=args.around_objects, motion_axis=args.motion_axis,
+                          around_density_peak=args.around_density_peak)
