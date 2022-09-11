@@ -159,7 +159,7 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
             rcParams['text.usetex'] = True
             num_figures = int(ceil(len(value)/2))
             for index,val in enumerate(value):
-                if num_figures > 1:
+                if num_figures >= 1:
                     curr_subplot = int(num_figures*100 + 21 + index)
                 print("curr subplot: ", curr_subplot)
                 subplot(curr_subplot)
