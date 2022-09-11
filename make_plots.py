@@ -14,12 +14,31 @@ species = ['n', 'p', '^{4}He', '^{11}B', '^{12}C', '^{13}C', '^{13}N', '^{14}N',
            '^{39}Ar', '^{39}K', '^{40}Ca', '^{43}Sc', '^{44}Ti', '^{47}V', '^{48}Cr', '^{51}Mn',
            '^{52}Fe', '^{56}Fe', '^{55}Co', '^{56}Ni', '^{58}Ni', '^{59}Ni']
 
+def plot_stream(loaded_snap, value='vel', xlab='x', ylab='y', axes=[0,1], box=False, res=1024, numthreads=1):
+    loaded_snap.data[value + xlab] = loaded_snap.data[value][:, axes[0]]
+    loaded_snap.data[value + ylab] = loaded_snap.data[value][:, axes[1]]
+    slice_velx = loaded_snap.get_Aslice(value + xlab, box=box, res=res, center=center, numthreads=numthreads)
+    slice_vely = loaded_snap.get_Aslice(value + ylab, box=box, res=res, center=center, numthreads=numthreads)
+    posx = slice_velx['x'][:-1]
+    posy = slice_velx['y'][:-1]
+    velx = pylab.transpose(slice_velx['grid'])
+    vely = pylab.transpose(slice_vely['grid'])
+    streamplot(posx, posy, velx, vely, density=2, color='black')
+    # quiver(loaded_snap.pos[:,0],loaded_snap.pos[:,1],loaded_snap.vel[:,0], loaded_snap.vel[:,1],
+    # scale=50)#*loaded_snap.parameters['BoxSize']/box[0])
 
-def plot_single_value(loaded_snap, snap_num, value='rho', snapshotDir= "output", plottingDir="plots", firstSnap=0,lastSnap=-1,skipSteps=1,box=False,
-               vrange=False,logplot=True, res=1024, numthreads=1, center=True,plot_points=True,
-               additional_points_size=30,additional_points_shape='X', additional_points_color='w', units_length = 'cm',
-               plot_velocities=False, newfig=True,axes=[0,1]):
+def plot_single_value(loaded_snap, value='rho',box=False, vrange=False,logplot=True, res=1024, numthreads=1,
+                      center=True,plot_points=True, additional_points_size=30,additional_points_shape='X',
+                      additional_points_color='w', units_length='cm', unit_velocity="$cm/s$",
+                      unit_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
+                      newfig=True, axes=[0,1]):
     label = value
+    if unit_velocity is not None:
+        name_and_units["vel"][1] = unit_velocity
+
+    if unit_density is not None:
+        name_and_units["rho"][1] = unit_density
+
     if value in name_and_units.keys():
         label = name_and_units[value][0]
         label += " [" + name_and_units[value][1] + "]"
@@ -32,9 +51,11 @@ def plot_single_value(loaded_snap, snap_num, value='rho', snapshotDir= "output",
     if value == "mean_a":
         loaded_snap.calculate_mean_a()
         label = "Mean Atomic Weight"
+
     if value == "bfld" or value == "B":
         loaded_snap.data["B"] = np.sqrt((loaded_snap.data['bfld']*loaded_snap.data['bfld']).sum(axis=1))
         value = "B"
+
     if "vel" in value:
         loaded_snap.data['velx'] = loaded_snap.vel[:, 0]
         loaded_snap.data['vely'] = loaded_snap.vel[:, 1]
@@ -43,6 +64,7 @@ def plot_single_value(loaded_snap, snap_num, value='rho', snapshotDir= "output",
     if value == "vel":
         loaded_snap.data['vel_size'] = np.sqrt((loaded_snap.vel ** 2).sum(axis=1))
         value = "vel_size"
+
 
 
         
@@ -71,19 +93,11 @@ def plot_single_value(loaded_snap, snap_num, value='rho', snapshotDir= "output",
                     print(circ)
                     gca().add_patch(circ)
     if plot_velocities:
-        loaded_snap.data['velx'] = loaded_snap.vel[:, 0]
-        loaded_snap.data['vely'] = loaded_snap.vel[:, 1]
-        slice_velx = loaded_snap.get_Aslice('velx', box=box, res=res, center=center, numthreads=numthreads)
-        slice_vely = loaded_snap.get_Aslice('vely', box=box, res=res, center=center, numthreads=numthreads)
-        posx = slice_velx['x'][:-1]
-        posy = slice_velx['y'][:-1]
-        velx = pylab.transpose(slice_velx['grid'])
-        vely = pylab.transpose(slice_vely['grid'])
-        streamplot(posx, posy, velx, vely, density=2, color='black')
-        # quiver(loaded_snap.pos[:,0],loaded_snap.pos[:,1],loaded_snap.vel[:,0], loaded_snap.vel[:,1],
-        # scale=50)#*loaded_snap.parameters['BoxSize']/box[0])
+        plot_stream(loaded_snap, value='vel', xlab=xlab, ylab=ylab, axes=axes, box=box, res=res, numthreads=numthreads)
+    elif plot_bfld:
+        plot_stream(loaded_snap, value='bfld', xlab=xlab, ylab=ylab, axes=axes, box=box, res=res, numthreads=numthreads)
 
-    xlabel(xlab + ' [' + units_length + ']',loc="left")
+    xlabel(xlab + ' [' + units_length + ']', loc="left")
     ylabel(ylab + ' [' + units_length + ']')
 
 def get_single_value(value,index=0):
@@ -98,7 +112,8 @@ def get_single_value(value,index=0):
 def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSnap=0,lastSnap=-1,skipSteps=1,box=False,
                vrange=False,logplot=True, res=1024, numthreads=1, center=True,plot_points=True,
                additional_points_size=30,additional_points_shape='X', additional_points_color='w', units_length = 'cm',
-               plot_velocities=False,axes_array=[[0,1]]):
+               units_velocity="$cm/s$", units_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
+               axes_array=[[0,1]]):
     snapshots = glob.glob(snapshotDir + '/./snapshot_*')
     snapshots.sort(key=lambda st: int(st.split("_")[1].split(".")[0]))
     sorted(snapshots)
@@ -124,15 +139,14 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
         if len(value) == 1:
             val = value[0]
             print(val)
-            plot_single_value(loaded_snap, snap_num=snap, value=val, snapshotDir=snapshotDir, plottingDir=plottingDir,
-                              firstSnap=firstSnap,
-                              lastSnap=lastSnap, skipSteps=skipSteps, box=get_single_value(box),
+            plot_single_value(loaded_snap, value=val, box=get_single_value(box),
                               vrange=get_single_value(vrange), logplot=get_single_value(logplot), res=res,
                               numthreads=numthreads, center=center, plot_points=plot_points,
                               additional_points_size=additional_points_size,
                               additional_points_shape=additional_points_shape,
                               additional_points_color=additional_points_color, units_length=units_length,
-                              plot_velocities=plot_velocities,axes=get_single_value(axes_array))
+                              unit_velocity= units_velocity, unit_density= units_density,
+                              plot_velocities=plot_velocities, plot_bfld= plot_bfld, axes=get_single_value(axes_array))
             title('time : {:.2f} [s]'.format(loaded_snap.time))
             filename = plottingDir + "/Aslice_" + val + "_{0}.png".format(snap)
             print("saving to: ", filename)
@@ -149,16 +163,15 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
                     curr_subplot = int(num_figures*100 + 21 + index)
                 print("curr subplot: ", curr_subplot)
                 subplot(curr_subplot)
-                plot_single_value(loaded_snap, snap_num=snap, value=val, snapshotDir=snapshotDir, plottingDir=plottingDir,
-                                  firstSnap=firstSnap,
-                                  lastSnap=lastSnap, skipSteps=skipSteps, box=get_single_value(box,index),
+                plot_single_value(loaded_snap,  value=val, box=get_single_value(box,index),
                                   vrange=get_single_value(vrange,index), logplot=get_single_value(logplot,index),
                                   res=res,
                                   numthreads=numthreads, center=center, plot_points=plot_points,
                                   additional_points_size=additional_points_size,
                                   additional_points_shape=additional_points_shape,
                                   additional_points_color=additional_points_color, units_length=units_length,
-                                  plot_velocities=plot_velocities, newfig=False, axes=get_single_value(axes_array, index))
+                                  unit_velocity= units_velocity, unit_density= units_density,
+                                  plot_velocities=plot_velocities, plot_bfld= plot_bfld, newfig=False, axes=get_single_value(axes_array, index))
                 rcParams.update({'font.size': 40, 'font.family': 'Serif'})
                 rcParams['text.usetex'] = True
 
@@ -196,10 +209,14 @@ def InitParser():
                         default=True)
     parser.add_argument('--plot_velocities', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),  help='plot velocity field',
                         default=False)
+    parser.add_argument('--plot_bfld', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),  help='plot magnetic field stream',
+                        default=False)
     parser.add_argument('--additional_points_size', type=float,  help='point sizes in plot', default = 30)
     parser.add_argument('--additional_points_shape', type=str,  help='point shapes in plot', default= "X")
     parser.add_argument('--additional_points_color', type=str,  help='point colors in plot', default= "w")
     parser.add_argument('--units_length', type=str,  help='name of the length units', default= "cm")
+    parser.add_argument('--units_velocity', type=str,  help='name of the velocity units default is cgs', default= None)
+    parser.add_argument('--units_density', type=str,  help='name of the density units default is cgs', default= None)
 
     return parser
 
@@ -227,7 +244,9 @@ if __name__ == "__main__":
         axes_array = [[args.axes0[i],args.axes1[i]] for i in range(len(args.axes0))]
 
     plot_range(args.value, args.source_dir, args.saving_dir, args.beginStep, args.lastStep, args.skipStep, box=box,
-               vrange=vrange, logplot=args.logplot, res=args.res, numthreads= args.numthreads, center=center, plot_points=args.plot_points,
-               additional_points_size=args.additional_points_size, additional_points_shape=args.additional_points_shape,
-               additional_points_color=args.additional_points_color, units_length=args.units_length,
-               plot_velocities=args.plot_velocities, axes_array=axes_array)
+               vrange=vrange, logplot=args.logplot, res=args.res, numthreads= args.numthreads, center=center,
+               plot_points=args.plot_points, additional_points_size=args.additional_points_size,
+               additional_points_shape=args.additional_points_shape,
+               additional_points_color=args.additional_points_color,
+               units_length=args.units_length, units_velocity=args.units_velocity, units_density= args.units_density,
+               plot_velocities=args.plot_velocities, plot_bfld= args.plot_bfld, axes_array=axes_array)
