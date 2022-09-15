@@ -34,6 +34,7 @@ class BinariesICs:
         print("setting orbital parameters")
         self.pos1 = (self.snapshot1.pos[self.i1] * self.snapshot1.mass[self.i1][:, None]).sum(axis=0) / self.m1
         self.pos2 = (self.snapshot2.pos[self.i2] * self.snapshot2.mass[self.i2][:, None]).sum(axis=0) / self.m2
+        print("pos1: ", pos1, "pos2: ", pos2)
         self.loaded_separation = self.pos2 - self.pos1
         print("loaded separation: ", self.loaded_separation)
         self.center_of_mass = (self.m1 * self.pos1 + self.m2 * self.pos2) / self.total_mass
