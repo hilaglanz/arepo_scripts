@@ -26,7 +26,7 @@ def compute_gas_to_magnetic_pressure(snapshot):
     if "B" not in snapshot.data.keys():
         compute_value(snapshot, "B")
     snapshot.data["betta"] = 8.0 * pi * snapshot.pres/snapshot.data["B"]**2
-    print("average betta = ", snapshot.data["betta"].mean())
+    print("average betta = ", 8.0 * pi * snapshot.pres.mean()/(snapshot.data["B"]**2).mean())
 
     return "betta"
 
@@ -40,8 +40,8 @@ def compute_magnetic_stress_parameter(snapshot, center): #Shakura Sunyaev parame
         snapshot.data["B_phi"] = B_phi
         snapshot.data["B_z"] = snapshot.bfld[:,2]
     snapshot.data["alpha_m"] = -snapshot.data["B_R"] * snapshot.data["B_phi"]/(4 * pi * snapshot.pres)
-    print("average alpha_m = ", snapshot.data["alpha_m"].mean())
-    
+    print("average alpha_m = ", -snapshot.data["B_R"].mean() * snapshot.data["B_phi"].mean()/ (4 * pi * snapshot.pres.mean()))
+
     return "alpha_m"
 
 def compute_value(s, testing_value, center=None):
