@@ -26,20 +26,22 @@ def compute_gas_to_magnetic_pressure(snapshot):
     if "B" not in snapshot.data.keys():
         compute_value(snapshot, "B")
     snapshot.data["betta"] = 8.0 * pi * snapshot.pres/snapshot.data["B"]**2
+    print("average betta = ", snapshot.data["betta"].mean())
 
     return "betta"
 
 def compute_magnetic_stress_parameter(snapshot, center): #Shakura Sunyaev parameter
     if "B_R" not in snapshot.data.keys():
-        phi = atan(snapshot.pos[:,1]/snapshot.pos[:,0])
-        r = sqrt((snapshot.pos[:,0] - center[0]) ** 2 + (snapshot.pos[:,1] - center[1]) ** 2)
-        B_R = snapshot.bfld[:,0] * cos(phi) + snapshot.bfld[:,1] * sin(phi)
-        B_phi = -snapshot.bfld[:,0] * sin(phi) + snapshot.bfld[:,1] * cos(phi)
+        phi = np.arctan(snapshot.pos[:,1]/snapshot.pos[:,0])
+        r = np.sqrt((snapshot.pos[:,0] - center[0]) ** 2 + (snapshot.pos[:,1] - center[1]) ** 2)
+        B_R = snapshot.bfld[:,0] * np.cos(phi) + snapshot.bfld[:,1] * np.sin(phi)
+        B_phi = -snapshot.bfld[:,0] * np.sin(phi) + snapshot.bfld[:,1] * np.cos(phi)
         snapshot.data["B_R"] = B_R
         snapshot.data["B_phi"] = B_phi
         snapshot.data["B_z"] = snapshot.bfld[:,2]
-    snapshot["alpha_m"] = -snapshot.data["B_R"] * snapshot.data["B_phi"]/(4 * pi * snapshot.pres)
-
+    snapshot.data["alpha_m"] = -snapshot.data["B_R"] * snapshot.data["B_phi"]/(4 * pi * snapshot.pres)
+    print("average alpha_m = ", snapshot.data["alpha_m"].mean())
+    
     return "alpha_m"
 
 def compute_value(s, testing_value, center=None):
@@ -50,6 +52,7 @@ def compute_value(s, testing_value, center=None):
 
     if testing_value == "betta":
         return compute_gas_to_magnetic_pressure(s)
+
     if center is None:
         center = s.center
 
