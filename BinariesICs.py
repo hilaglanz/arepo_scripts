@@ -34,7 +34,7 @@ class BinariesICs:
         print("setting orbital parameters")
         self.pos1 = (self.snapshot1.pos[self.i1] * self.snapshot1.mass[self.i1][:, None]).sum(axis=0) / self.m1
         self.pos2 = (self.snapshot2.pos[self.i2] * self.snapshot2.mass[self.i2][:, None]).sum(axis=0) / self.m2
-        print("pos1: ", pos1, "pos2: ", pos2)
+        print("pos1: ", self.pos1, "pos2: ", self.pos2)
         self.loaded_separation = self.pos2 - self.pos1
         print("loaded separation: ", self.loaded_separation)
         self.center_of_mass = (self.m1 * self.pos1 + self.m2 * self.pos2) / self.total_mass
@@ -77,11 +77,11 @@ class BinariesICs:
         self.data['xnuc'][self.npart1:, :] = self.snapshot2.data['xnuc'][self.i2, :]
         self.data['pass'][self.npart1:, 1] = 1.0
 
-        self.data['pos'][:npart1, :] = self.snapshot1.pos[i1, :]
-        self.data['vel'][:npart1, :] = self.snapshot1.vel[i1, :]
+        self.data['pos'][:self.npart1, :] = self.snapshot1.pos[i1, :]
+        self.data['vel'][:self.npart1, :] = self.snapshot1.vel[i1, :]
 
-        self.data['pos'][npart1:, :] = self.snapshot2.pos[i2, :]
-        self.data['vel'][npart1:, :] = self.snapshot2.vel[i2, :]
+        self.data['pos'][self.npart1:, :] = self.snapshot2.pos[i2, :]
+        self.data['vel'][self.npart1:, :] = self.snapshot2.vel[i2, :]
 
         if 'bfld' in self.snapshot1.data.keys():
             self.data['bfld'][:self.npart1, :] = self.snapshot1.data['bfld'][self.i1, :]
