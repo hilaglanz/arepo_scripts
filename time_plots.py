@@ -53,16 +53,17 @@ def calculate_value_over_time(snapshots_number_list, snapshot_dir="output", valu
             print("plotting difference of value")
             value_to_calc = value.split("diff")[0]
         if mean:
-            value_over_time.append(calculate_mean_value(snapshot, value))
+            value_over_time.append(calculate_mean_value(snapshot, value_to_calc))
         else:
             value_over_time.append(calculate_value(snapshot, value_to_calc, sink_value, sink_id))
     print("added ", value_to_calc, " to the time evolution")
+    print(value_over_time)
     if value_to_calc != value:
         value_diff_over_time = []
         prev_value = value_over_time[0]
         prev_time = times[0]
         for i in range(len(value_over_time)):
-            if "dot" in value:
+            if "diff" in value:
                 value_diff_over_time.append(value_over_time[i] - prev_value)
             else:
                 if times[i] == prev_time:
