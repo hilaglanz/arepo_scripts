@@ -34,12 +34,11 @@ def calculate_value(snapshot, value, sink_value=False, sink_id=0):
         sink_idk = sink_idks[0][sink_id]
         print("doing for sink particle")
         if len(snapshot.data[value].shape) > 1:
-            curr_mass = np.sqrt((snapshot.data[value][sink_idk]**2).sum(axis=1))
+            curr_val = np.sqrt((snapshot.data[value][sink_idk,:]**2).sum())
         else:
-            curr_mass =  abs(snapshot.data[value][sink_idk])
-        print("mass= ", curr_mass)
+            curr_val = abs(snapshot.data[value][sink_idk])
 
-        return curr_mass
+        return curr_val
 
     values = (snapshot.data[value] * snapshot.mass[:, None]).sum(axis=0) / snapshot.mass.sum()
     return np.sqrt((values ** 2).sum(axis=1))
