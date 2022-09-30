@@ -47,14 +47,16 @@ def calculate_value_over_time(snapshots_number_list, snapshot_dir="output", valu
         snapshot = gadget_readsnap(snapshot_num, snapshot_dir)
         times.append(snapshot.time)
         if "dot" in value:
+            print("plotting time different")
             value_to_calc = value.split("dot")[0]
         if "diff" in value:
+            print("plotting difference of value")
             value_to_calc = value.split("diff")[0]
         if mean:
             value_over_time.append(calculate_mean_value(snapshot, value))
         else:
             value_over_time.append(calculate_value(snapshot, value_to_calc, sink_value, sink_id))
-
+    print("added ", value_to_calc, " to the time evolution")
     if value_to_calc != value:
         value_diff_over_time = []
         prev_value = value_over_time[0]
