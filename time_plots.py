@@ -112,7 +112,7 @@ def InitParser():
     parser.add_argument('--logplot', type=lambda x: (str(x).lower() in ['true', '1', 'yes']), help='logplot',
                         default=True)
     parser.add_argument('--mean', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
-                        help='calculate mean value', default=True)
+                        help='calculate mean value', default=False)
     parser.add_argument('--sink_value', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
                         help='calculate value for sink', default=False)
     parser.add_argument('--sink_id', type=int, help='sink particle to plot for', default=0)
