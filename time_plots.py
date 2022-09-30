@@ -91,7 +91,8 @@ def make_time_plots(snapshots_number_list, snapshot_dir="output", plotting_dir="
     suptitle(value + "time evolution", fontsize='x-large')
     rcParams.update({'font.size': 40, 'font.family': 'Serif'})
     rcParams['text.usetex'] = True
-    filename = plotting_dir + "/" + value + "_over_time_" + "_" .join(snapshots_number_list) + ".png"
+    filename = plotting_dir + "/" + value + "_over_time_" + \
+               "_" .join([str(snap_num) for snap_num in snapshots_number_list]) + ".png"
     print("saving to: ", filename)
     savefig(filename)
     print("saved fig")
