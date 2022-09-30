@@ -77,8 +77,9 @@ def calculate_value_over_time(snapshots_number_list, snapshot_dir="output", valu
     else:
         return value_over_time, times
 
-def make_time_plots(snapshots_number_list, snapshot_dir="output", value="mass", log=False,
+def make_time_plots(snapshots_number_list, snapshot_dir="output", plotting_dir="times_plots", value="mass", log=False,
                     mean=False, sink_value=False, sink_id=0):
+
     value_over_time, times = calculate_value_over_time(snapshots_number_list,
                                                        snapshot_dir, value, mean,
                                                        sink_value, sink_id)
@@ -87,6 +88,13 @@ def make_time_plots(snapshots_number_list, snapshot_dir="output", value="mass", 
         pylab.semilogy(times, value_over_time)
     else:
         pylab.plot(times, value_over_time)
+    suptitle(value + "time evolution", fontsize='x-large')
+    rcParams.update({'font.size': 40, 'font.family': 'Serif'})
+    rcParams['text.usetex'] = True
+    filename = plotting_dir + "/" + value + "_over_time_" + "_" .join(snapshots_number_list) + ".png"
+    print("saving to: ", filename)
+    savefig(filename)
+    print("saved fig")
 
 
 def InitParser():
@@ -117,5 +125,8 @@ if __name__ == "__main__":
     snapshot_number_list = get_snapshot_number_list(args.output_dir, snapshotName=args.snapshot_name,
                                                     firstSnap=args.beginStep, lastSnap=args.lastStep,
                                                     skipSteps= args.skipStep)
-    make_time_plots(snapshot_number_list, snapshot_dir=args.output_dir, value=args.value,
+    if not os.path.exists(args.plotting_dir):
+        os.mkdir(args.plotting_dir)
+
+    make_time_plots(snapshot_number_list, snapshot_dir=args.output_dir, plotting_dir=args.plotting_dir, value=args.value,
                     log=args.logplot, mean=args.mean, sink_value=args.sink_value, sink_id=args.sink_id )
