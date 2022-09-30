@@ -32,6 +32,8 @@ def calculate_value(snapshot, value, sink_value=False, sink_id=0):
     if sink_value:
         sink_idks = np.where(snapshot.type == 5)
         sink_idk = sink_idks[0][sink_id]
+        print("doing for sink particle")
+        print("mass= ", np.sqrt((snapshot.data[value][sink_idk]**2).sum(axis=1)))
 
         return np.sqrt((snapshot.data[value][sink_idk]**2).sum(axis=1))
 
