@@ -93,7 +93,7 @@ def make_time_plots(snapshots_number_list, snapshot_dir="output", plotting_dir="
         pylab.semilogy(times, value_over_time)
     else:
         pylab.plot(times, value_over_time)
-    suptitle(value + "time evolution", fontsize='x-large')
+    suptitle(value + " time evolution", fontsize='x-large')
     rcParams.update({'font.size': 40, 'font.family': 'Serif'})
     rcParams['text.usetex'] = True
     filename = plotting_dir + "/" + value + "_over_time_" + \
