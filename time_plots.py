@@ -57,7 +57,6 @@ def calculate_value_over_time(snapshots_number_list, snapshot_dir="output", valu
         else:
             value_over_time.append(calculate_value(snapshot, value_to_calc, sink_value, sink_id))
     print("added ", value_to_calc, " to the time evolution")
-    print(value_over_time)
     if value_to_calc != value:
         value_diff_over_time = []
         prev_value = value_over_time[0]
@@ -93,7 +92,7 @@ def make_time_plots(snapshots_number_list, snapshot_dir="output", plotting_dir="
     rcParams.update({'font.size': 40, 'font.family': 'Serif'})
     rcParams['text.usetex'] = True
     filename = plotting_dir + "/" + value + "_over_time_" + \
-               "_" .join([str(snap_num) for snap_num in snapshots_number_list]) + ".png"
+               str(snapshots_number_list[0]) + "_to_" + str(snapshots_number_list[-1]) + ".png"
     print("saving to: ", filename)
     savefig(filename)
     print("saved fig")
