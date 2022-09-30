@@ -135,7 +135,7 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
     if not os.path.exists(plottingDir):
         os.mkdir(plottingDir)
 
-    for snap in get_snapshot_number_list(snapshotDir, firstSnap, lastSnap, skipSteps):
+    for snap in get_snapshot_number_list(snapshotDir, "snapshot_", firstSnap, lastSnap, skipSteps):
         print("doing snapshot ",snap)
         loaded_snap = gadget_readsnap(snap, snapshotDir)
         print(type(value), value)
