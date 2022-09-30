@@ -19,7 +19,7 @@ def calculate_particle_value(snapshot, particle_index, value):
 
 def calculate_mean_value(snapshot, value):
     if value in snapshot.data.keys():
-        if snapshot.data[value].shape[1] > 1:
+        if len(snapshot.data[value].shape) > 1:
             return np.sqrt((snapshot.data[value] * snapshot.data[value]).sum(axis=1)).mean()
 
         return snapshot.data[value].mean()
