@@ -103,7 +103,7 @@ def make_time_plots(snapshots_number_list, snapshot_dir="output", plotting_dir="
     print("saved fig")
     txt_file_name = filename.replace("png", "txt")
     print("saving txt file to: ", txt_file_name)
-    with open(txt_file_name, "wb") as opened_file:
+    with open(txt_file_name, "w") as opened_file:
         times_and_values = [str(times[i]) + "," + str(value_over_time) for i in range(len(value_over_time))]
         for i in range(len(value_over_time)):
             opened_file.writelines(times_and_values)
