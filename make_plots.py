@@ -111,7 +111,7 @@ def get_single_value(value,index=0):
 
 def get_snapshot_number_list(snapshotDir="outupt", snapshotName="snapshot_", firstSnap=0, lastSnap=-1, skipSteps=1):
     snapshots = glob.glob(snapshotDir + '/./' + snapshotName + '*')
-    snapshots.sort(key=lambda st: int(st.split("_")[1].split(".")[0]))
+    snapshots.sort(key=lambda st: int(st.split(snapshotName)[1].split(".")[0]))
     sorted(snapshots)
     print("found snapshots: ", snapshots[0], " to ", snapshots[-1])
     maxSnap = int((snapshots[-1].split('snapshot_')[-1]).split('.hdf5')[0])
