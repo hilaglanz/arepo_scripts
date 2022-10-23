@@ -13,7 +13,6 @@ species = ['n', 'p', '^{4}He', '^{11}B', '^{12}C', '^{13}C', '^{13}N', '^{14}N',
            '^{32}S', '^{33}S', '^{33}Cl', '^{34}Cl', '^{35}Cl', '^{36}Ar', '^{37}Ar', '^{38}Ar',
            '^{39}Ar', '^{39}K', '^{40}Ca', '^{43}Sc', '^{44}Ti', '^{47}V', '^{48}Cr', '^{51}Mn',
            '^{52}Fe', '^{56}Fe', '^{55}Co', '^{56}Ni', '^{58}Ni', '^{59}Ni']
-modified_units = False
 
 def plot_stream(loaded_snap, value='vel', xlab='x', ylab='y', axes=[0,1], box=False, res=1024, numthreads=1):
     loaded_snap.data[value + xlab] = loaded_snap.data[value][:, axes[0]]
@@ -32,7 +31,7 @@ def plot_single_value(loaded_snap, value='rho',box=False, vrange=False,logplot=T
                       center=True,plot_points=True, additional_points_size=30,additional_points_shape='X',
                       additional_points_color='w', units_length='cm', unit_velocity="$cm/s$",
                       unit_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
-                      newfig=True, axes=[0,1]):
+                      newfig=True, axes=[0,1], modified_units = False):
     label = value
     convert_to_cgs = True
     if unit_velocity is not None:
@@ -174,6 +173,7 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
     convert_to_cgs = False
     if units_velocity is None and units_density is None:
         convert_to_cgs = True
+    modified_units = False
     for snap in get_snapshot_number_list(snapshotDir, "snapshot_", firstSnap, lastSnap, skipSteps):
         print("doing snapshot ",snap)
         loaded_snap = gadget_readsnap(snap, snapshotDir)
@@ -188,7 +188,8 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
                               additional_points_shape=additional_points_shape,
                               additional_points_color=additional_points_color, units_length=units_length,
                               unit_velocity= units_velocity, unit_density= units_density,
-                              plot_velocities=plot_velocities, plot_bfld= plot_bfld, axes=get_single_value(axes_array))
+                              plot_velocities=plot_velocities, plot_bfld= plot_bfld, axes=get_single_value(axes_array),
+                              modified_units=modified_units)
             title('time : {:.2f}'.format(loaded_snap.time) + " [" + name_and_units["time"][1] + "]")
             filename = plottingDir + "/Aslice_" + val + "_{0}.png".format(snap)
             print("saving to: ", filename)
@@ -225,6 +226,8 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
             print("saving to: ", filename)
             savefig(filename)
             print("saved fig")
+
+        modified_units = True
 
 
 def InitParser():
