@@ -5,7 +5,7 @@ import numpy as np
 from loadmodules import *
 
 name_and_units = {"rho":(r'$\rho$',r'$g/cm^3$', 1.0), "temp":("Temperature","K", 1.0), "vel":("Velocity","$cm/s$", 1.0),
-                  "mass":("Mass","g", 1.0), "time":("time", "s", 1.0)}
+                  "mass":("Mass","g", 1.0), "time":("time", "s", 1.0). "legnth": ("length", "cm",1.0)}
 species = ['n', 'p', '^{4}He', '^{11}B', '^{12}C', '^{13}C', '^{13}N', '^{14}N', '^{15}N', '^{15}O',
            '^{16}O', '^{17}O', '^{18}F', '^{19}Ne', '^{20}Ne', '^{21}Ne', '^{22}Ne', '^{22}Na',
            '^{23}Na', '^{23}Mg', '^{24}Mg', '^{25}Mg', '^{26}Mg', '^{25}Al', '^{26}Al',
@@ -45,16 +45,30 @@ def plot_single_value(loaded_snap, value='rho',box=False, vrange=False,logplot=T
 
     if convert_to_cgs:
         name_and_units["vel"][2] *= float(loaded_snap.parameters["UnitVelocity_in_cm_per_s"])
+        name_and_units["length"][2] *= float(loaded_snap.parameters["UnitLength_in_cm"])
         name_and_units["time"][2] *= float(loaded_snap.parameters["UnitLength_in_cm"]) / float(loaded_snap.parameters["UnitVelocity_in_cm_per_s"])
         name_and_units["mass"][2] *= float(loaded_snap.parameters["UnitMass_in_g"])
         name_and_units["rho"][2] *= float(loaded_snap.parameters["UnitMass_in_g"]) / float(loaded_snap.parameters["UnitLength_in_cm"])**3
-        loaded_snap.time *= name_and_units["time"][2]
-        #TODO: convert also temperature
+        print("converting to cgs units")
 
+    loaded_snap.time *= name_and_units["time"][2]
+    loaded_snap.pos[:,0] *= name_and_units["length"][2]
+    loaded_snap.pos[:,1] *= name_and_units["length"][2]
+    loaded_snap.pos[:,2] *= name_and_units["length"][2]
+    loaded_snap.vel[:,0] *= name_and_units["vel"][2]
+    loaded_snap.vel[:,1] *= name_and_units["vel"][2]
+    loaded_snap.vel[:,2] *= fname_and_units["vel"][2]
+    loaded_snap.mass *= name_and_units["mass"][2]
+    loaded_snap.rho *= name_and_units["rho"][2]
+    #TODO: convert also temperature
+
+    print("units: ")
+    for val in name_and_units.values():
+        print(val[0], val[2])
+        
     if value in name_and_units.keys():
         label = name_and_units[value][0]
         label += " [" + name_and_units[value][1] + "]"
-        loaded_snap.data[value] *= name_and_units[value][2]
 
     if "xnuc" in value:
         loaded_snap.data["rho"+value] = loaded_snap.rho * loaded_snap.data[value]
@@ -264,6 +278,7 @@ if __name__ == "__main__":
         axes_array = [[args.axes0[i],args.axes1[i]] for i in range(len(args.axes0))]
 
     name_and_units["rho"][2] *= (args.factor_mass/arge.factor_legnth**3)
+    name_and_units["length"][2] *= args.factor_length
     name_and_units["vel"][2] *= (args.factor_velocity)
     name_and_units["mass"][2] *= (args.factor_mass)
     name_and_units["time"][2] *= (args.factor_length/arge.factor_velocity)
