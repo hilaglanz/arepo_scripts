@@ -13,6 +13,7 @@ species = ['n', 'p', '^{4}He', '^{11}B', '^{12}C', '^{13}C', '^{13}N', '^{14}N',
            '^{32}S', '^{33}S', '^{33}Cl', '^{34}Cl', '^{35}Cl', '^{36}Ar', '^{37}Ar', '^{38}Ar',
            '^{39}Ar', '^{39}K', '^{40}Ca', '^{43}Sc', '^{44}Ti', '^{47}V', '^{48}Cr', '^{51}Mn',
            '^{52}Fe', '^{56}Fe', '^{55}Co', '^{56}Ni', '^{58}Ni', '^{59}Ni']
+modified_units = False
 
 def plot_stream(loaded_snap, value='vel', xlab='x', ylab='y', axes=[0,1], box=False, res=1024, numthreads=1):
     loaded_snap.data[value + xlab] = loaded_snap.data[value][:, axes[0]]
@@ -43,33 +44,34 @@ def plot_single_value(loaded_snap, value='rho',box=False, vrange=False,logplot=T
         name_and_units["rho"][1] = unit_density
         convert_to_cgs = False
 
-    if convert_to_cgs:
-        name_and_units["vel"][2] *= float(loaded_snap.parameters["UnitVelocity_in_cm_per_s"])
-        name_and_units["length"][2] *= float(loaded_snap.parameters["UnitLength_in_cm"])
-        name_and_units["time"][2] *= float(loaded_snap.parameters["UnitLength_in_cm"]) / float(loaded_snap.parameters["UnitVelocity_in_cm_per_s"])
-        name_and_units["mass"][2] *= float(loaded_snap.parameters["UnitMass_in_g"])
-        name_and_units["rho"][2] *= float(loaded_snap.parameters["UnitMass_in_g"]) / float(loaded_snap.parameters["UnitLength_in_cm"])**3
-        print("converting to cgs units")
+    if not modified_units:
+        if convert_to_cgs:
+            name_and_units["vel"][2] *= float(loaded_snap.parameters["UnitVelocity_in_cm_per_s"])
+            name_and_units["length"][2] *= float(loaded_snap.parameters["UnitLength_in_cm"])
+            name_and_units["time"][2] *= float(loaded_snap.parameters["UnitLength_in_cm"]) / float(loaded_snap.parameters["UnitVelocity_in_cm_per_s"])
+            name_and_units["mass"][2] *= float(loaded_snap.parameters["UnitMass_in_g"])
+            name_and_units["rho"][2] *= float(loaded_snap.parameters["UnitMass_in_g"]) / float(loaded_snap.parameters["UnitLength_in_cm"])**3
+            print("converting to cgs units")
 
-    loaded_snap.time *= name_and_units["time"][2]
-    loaded_snap.pos[:,0] *= name_and_units["length"][2]
-    loaded_snap.pos[:,1] *= name_and_units["length"][2]
-    loaded_snap.pos[:,2] *= name_and_units["length"][2]
-    loaded_snap.data["pos"][:,0] *= name_and_units["length"][2]
-    loaded_snap.data["pos"][:,1] *= name_and_units["length"][2]
-    loaded_snap.data["pos"][:,2] *= name_and_units["length"][2]
-    loaded_snap.center *= name_and_units["length"][2]
-    loaded_snap.vel[:,0] *= name_and_units["vel"][2]
-    loaded_snap.vel[:,1] *= name_and_units["vel"][2]
-    loaded_snap.vel[:,2] *= name_and_units["vel"][2]
-    loaded_snap.data["vel"][:,0] *= name_and_units["vel"][2]
-    loaded_snap.data["vel"][:,1] *= name_and_units["vel"][2]
-    loaded_snap.data["vel"][:,2] *= name_and_units["vel"][2]
-    loaded_snap.mass *= name_and_units["mass"][2]
-    loaded_snap.data["mass"] *= name_and_units["mass"][2]
-    loaded_snap.rho *= name_and_units["rho"][2]
-    loaded_snap.data["rho"] *= name_and_units["rho"][2]
-    #TODO: convert also temperature
+        loaded_snap.time *= name_and_units["time"][2]
+        '''loaded_snap.pos[:,0] *= name_and_units["length"][2]
+        loaded_snap.pos[:,1] *= name_and_units["length"][2]
+        loaded_snap.pos[:,2] *= name_and_units["length"][2]'''
+        loaded_snap.data["pos"][:,0] *= name_and_units["length"][2]
+        loaded_snap.data["pos"][:,1] *= name_and_units["length"][2]
+        loaded_snap.data["pos"][:,2] *= name_and_units["length"][2]
+        '''loaded_snap.vel[:,0] *= name_and_units["vel"][2]
+        loaded_snap.vel[:,1] *= name_and_units["vel"][2]
+        loaded_snap.vel[:,2] *= name_and_units["vel"][2]'''
+        loaded_snap.data["vel"][:,0] *= name_and_units["vel"][2]
+        loaded_snap.data["vel"][:,1] *= name_and_units["vel"][2]
+        loaded_snap.data["vel"][:,2] *= name_and_units["vel"][2]
+        #loaded_snap.mass *= name_and_units["mass"][2]
+        loaded_snap.data["mass"] *= name_and_units["mass"][2]
+        #loaded_snap.rho *= name_and_units["rho"][2]
+        loaded_snap.data["rho"] *= name_and_units["rho"][2]
+        #TODO: convert also temperature
+        modified_units = True
 
     print("units: ")
     for val in name_and_units.values():
