@@ -59,7 +59,6 @@ def plot_single_value(loaded_snap, value='rho',box=False, vrange=False,logplot=T
     loaded_snap.data["pos"][:,1] *= name_and_units["length"][2]
     loaded_snap.data["pos"][:,2] *= name_and_units["length"][2]
     loaded_snap.center *= name_and_units["length"][2]
-    loaded_snap.data["center"] *= name_and_units["length"][2]
     loaded_snap.vel[:,0] *= name_and_units["vel"][2]
     loaded_snap.vel[:,1] *= name_and_units["vel"][2]
     loaded_snap.vel[:,2] *= name_and_units["vel"][2]
