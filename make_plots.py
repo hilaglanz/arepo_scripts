@@ -277,8 +277,8 @@ if __name__ == "__main__":
     if args.axes0 is not None and args.axes1 is not None:
         axes_array = [[args.axes0[i],args.axes1[i]] for i in range(len(args.axes0))]
 
-    print(name_and_units["rho"][2])
-    name_and_units["rho"][2] = name_and_units["rho"][2] * (args.factor_mass/args.factor_length**3)
+    print(name_and_units["rho"])
+    name_and_units["rho"][2] = (args.factor_mass/args.factor_length**3)
     name_and_units["length"][2] *= args.factor_length
     name_and_units["vel"][2] *= (args.factor_velocity)
     name_and_units["mass"][2] *= (args.factor_mass)
