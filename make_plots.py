@@ -118,14 +118,14 @@ def plot_single_value(loaded_snap, value='rho',box=False, vrange=False,logplot=T
         if len(points) > 0:
             print("plotting points")
             for point in points:
-                point_pos = loaded_snap.pos[point]
+                point_pos = loaded_snap.data["pos"][point]
 
                 scatter(point_pos[0], point_pos[1], additional_points_size, additional_points_color,
                         additional_points_shape)
 
                 if loaded_snap.type[point] == 5:
-                    print("plotting accretion radius of: ", loaded_snap.parameters['SinkFormationRadius'])
-                    circ = Circle((point_pos[0], point_pos[1]), loaded_snap.parameters['SinkFormationRadius']
+                    print("plotting accretion radius of: ", loaded_snap.parameters['SinkFormationRadius']*name_and_units["length"][2])
+                    circ = Circle((point_pos[0], point_pos[1]), loaded_snap.parameters['SinkFormationRadius']*name_and_units["length"][2]
                                   , fill=False, color='white', linestyle='dashed', linewidth=3.0)
                     print(circ)
                     gca().add_patch(circ)
