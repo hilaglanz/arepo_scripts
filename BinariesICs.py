@@ -34,7 +34,7 @@ class BinariesICs:
         print("setting orbital parameters")
         self.pos1 = (self.snapshot1.pos[self.i1] * self.snapshot1.mass[self.i1][:, None]).sum(axis=0) / self.m1
         self.pos2 = (self.snapshot2.pos[self.i2] * self.snapshot2.mass[self.i2][:, None]).sum(axis=0) / self.m2
-        print("pos1: ", pos1, "pos2: ", pos2)
+        print("pos1: ", self.pos1, "pos2: ", self.pos2)
         self.loaded_separation = self.pos2 - self.pos1
         print("loaded separation: ", self.loaded_separation)
         self.center_of_mass = (self.m1 * self.pos1 + self.m2 * self.pos2) / self.total_mass
@@ -77,11 +77,11 @@ class BinariesICs:
         self.data['xnuc'][self.npart1:, :] = self.snapshot2.data['xnuc'][self.i2, :]
         self.data['pass'][self.npart1:, 1] = 1.0
 
-        self.data['pos'][:npart1, :] = self.snapshot1.pos[i1, :]
-        self.data['vel'][:npart1, :] = self.snapshot1.vel[i1, :]
+        self.data['pos'][:self.npart1, :] = self.snapshot1.pos[i1, :]
+        self.data['vel'][:self.npart1, :] = self.snapshot1.vel[i1, :]
 
-        self.data['pos'][npart1:, :] = self.snapshot2.pos[i2, :]
-        self.data['vel'][npart1:, :] = self.snapshot2.vel[i2, :]
+        self.data['pos'][self.npart1:, :] = self.snapshot2.pos[i2, :]
+        self.data['vel'][self.npart1:, :] = self.snapshot2.vel[i2, :]
 
         if 'bfld' in self.snapshot1.data.keys():
             self.data['bfld'][:self.npart1, :] = self.snapshot1.data['bfld'][self.i1, :]
@@ -176,7 +176,7 @@ class BinariesICs:
         print("using orbital phase=", orbitalPhaseGoal)
         self.relative_x = dist * math.sin((pi - orbitalPhaseGoal) % (2 * pi))
         self.relative_y = -dist * np.cos(orbitalPhaseGoal)
-        print("relative_x= ", self.relative_x, " relative_y= ",self.relative_y)
+        print("relative_x= ", self.relative_x, " relative_y= ", self.relative_y)
 
         [self.relative_vy, self.relative_vx] = self.GetRelativeVelocityAtAngel(orbitalPhaseGoal)
 
@@ -187,35 +187,35 @@ class BinariesICs:
         self.create_new_velocity_array()
 
     def create_new_position_array(self):
-        self.new_x1 = - self.m2 * relative_x / self.total_mass
-        self.new_x2 = self.m1 * relative_x / self.total_mass
+        self.new_x1 = - self.m2 * self.relative_x / self.total_mass
+        self.new_x2 = self.m1 * self.relative_x / self.total_mass
 
-        self.new_y1 = - self.m2 * relative_y / self.total_mass
-        self.new_y2 = self.m1 * relative_y / self.total_mass
+        self.new_y1 = - self.m2 * self.relative_y / self.total_mass
+        self.new_y2 = self.m1 * self.relative_y / self.total_mass
 
         self.new_pos1 = np.array([self.new_x1, self.new_y1, self.pos1[2]])
         self.new_pos2 = np.array([self.new_x2, self.new_y2, self.pos2[2]])
 
     def create_new_velocity_array(self):
-        self.new_vx1 = - self.m2 * relative_vx / self.total_mass
-        self.new_vx2 = self.m1 * relative_vx / self.total_mass
+        self.new_vx1 = - self.m2 * self.relative_vx / self.total_mass
+        self.new_vx2 = self.m1 * self.relative_vx / self.total_mass
 
-        self.new_vy1 = - self.m2 * relative_vy / self.total_mass
-        self.new_vy2 = self.m1 * relative_vy / self.total_mass
+        self.new_vy1 = - self.m2 * self.relative_vy / self.total_mass
+        self.new_vy2 = self.m1 * self.relative_vy / self.total_mass
 
         self.new_v1 = np.array([self.new_vx1, self.new_vy1, self.v1[2]])
         self.new_v2 = np.array([self.new_vx2, self.new_vy2, self.v2[2]])
 
     def place_objects_at_new_pos(self):
-        self.data['pos'][:npart1, :] = self.data['pos'][:self.npart1, :] + self.new_pos1 - self.pos1
-        self.data['pos'][npart1:, :] = self.data['pos'][self.npart1:, :] + self.new_pos2 - self.pos2
+        self.data['pos'][:self.npart1, :] = self.data['pos'][:self.npart1, :] + self.new_pos1 - self.pos1
+        self.data['pos'][self.npart1:, :] = self.data['pos'][self.npart1:, :] + self.new_pos2 - self.pos2
 
         self.data['boxsize'] = max(self.find_new_borders(), 1e10)
         self.data['pos'] += 0.5 * self.data['boxsize']
 
     def change_objects_velocity(self):
-        self.data['vel'][:npart1, :] = self.data['vel'][:self.npart1, :] + self.new_v1 - self.v1
-        self.data['vel'][npart1:, :] = self.data['vel'][self.npart1:, :] + self.new_v1 - self.v2
+        self.data['vel'][:self.npart1, :] = self.data['vel'][:self.npart1, :] + self.new_v1 - self.v1
+        self.data['vel'][self.npart1:, :] = self.data['vel'][self.npart1:, :] + self.new_v1 - self.v2
 
     def add_magnetic_field(self):
         mm = np.array([0., 0., 1e3 * 1e9 ** 3 / 2.])  # 1e3 G at 1e9 cm
@@ -227,9 +227,9 @@ class BinariesICs:
                                   mm[None,:] / (r1[i] ** 3)[:, None]
 
         c2 = (self.data['pos'] * self.data['mass'][:, None] * self.data['pass'][:, 1][:, None]).sum(axis=0) / self.m2
-        r2 = np.maximum(np.sqrt(((data['pos'] - c2[None, :]) ** 2).sum(axis=1)), 3e7).astype('float64')
+        r2 = np.maximum(np.sqrt(((self.data['pos'] - c2[None, :]) ** 2).sum(axis=1)), 3e7).astype('float64')
         i, = np.where(r2 < 1e10)
-        rad2 = data['pos'][i, :] - c2[None, :]
+        rad2 = self.data['pos'][i, :] - c2[None, :]
         self.data['bfld'][i, :] += 3. * rad2 * (mm[None, :] * rad2).sum(axis=1)[:, None] / (r2[i] ** 5)[:, None] - \
                               mm[None, :] / (r2[i] ** 3)[:, None]
 

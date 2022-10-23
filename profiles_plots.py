@@ -22,11 +22,45 @@ def compute_cumulative_mass(snapshot, center):
     snapshot.data['cum_mass'] = mcum / msol
     return
 
-def compute_value(s, testing_value, center):
+def compute_gas_to_magnetic_pressure(snapshot):
+    if "B" not in snapshot.data.keys():
+        compute_value(snapshot, "B")
+    snapshot.data["betta"] = 8.0 * pi * snapshot.pres/snapshot.data["B"]**2
+    print("average betta = ", 8.0 * pi * snapshot.pres.mean()/(snapshot.data["B"]**2).mean())
+
+    return "betta"
+
+def compute_magnetic_stress_parameter(snapshot, center): #Shakura Sunyaev parameter
+    if "B_R" not in snapshot.data.keys():
+        phi = np.arctan(snapshot.pos[:, 1]/snapshot.pos[:, 0])
+        r = np.sqrt((snapshot.pos[:, 0] - center[None, 0]) ** 2 + (snapshot.pos[:, 1] - center[None, 1]) ** 2)
+        print(len(r))
+        print("max distance = ", r.max())
+        B_R = snapshot.bfld[:, 0] * np.cos(phi) + snapshot.bfld[:, 1] * np.sin(phi)
+        B_phi = -snapshot.bfld[:, 0] * np.sin(phi) + snapshot.bfld[:, 1] * np.cos(phi)
+        snapshot.data["B_R"] = B_R
+        snapshot.data["B_phi"] = B_phi
+        snapshot.data["B_z"] = snapshot.bfld[:, 2]
+    snapshot.data["alpha_m"] = -snapshot.data["B_R"] * snapshot.data["B_phi"]/(4 * pi * snapshot.pres)
+    print("average alpha_m = ", -snapshot.data["B_R"].mean() * snapshot.data["B_phi"].mean()/ (4 * pi * snapshot.pres.mean()))
+
+    return "alpha_m"
+
+def compute_value(s, testing_value, center=None):
     if testing_value == "bfld" or testing_value == "B":
         print("adding magnetic field size")
         s.data["B"] = np.sqrt((s.data['bfld'] * s.data['bfld']).sum(axis=1))
         testing_value = "B"
+
+    if testing_value == "betta":
+        return compute_gas_to_magnetic_pressure(s)
+
+    if center is None:
+        center = s.center
+
+    if testing_value == "alpha_m":
+        return compute_magnetic_stress_parameter(s, center)
+
     if testing_value == "cum_mass":
         print("adding cummulative nass")
         compute_cumulative_mass(s, center)

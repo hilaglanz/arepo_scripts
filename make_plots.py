@@ -109,13 +109,9 @@ def get_single_value(value,index=0):
 
     return value[0]
 
-def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSnap=0,lastSnap=-1,skipSteps=1,box=False,
-               vrange=False,logplot=True, res=1024, numthreads=1, center=True,plot_points=True,
-               additional_points_size=30,additional_points_shape='X', additional_points_color='w', units_length = 'cm',
-               units_velocity="$cm/s$", units_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
-               axes_array=[[0,1]]):
-    snapshots = glob.glob(snapshotDir + '/./snapshot_*')
-    snapshots.sort(key=lambda st: int(st.split("_")[1].split(".")[0]))
+def get_snapshot_number_list(snapshotDir="outupt", snapshotName="snapshot_", firstSnap=0, lastSnap=-1, skipSteps=1):
+    snapshots = glob.glob(snapshotDir + '/./' + snapshotName + '*')
+    snapshots.sort(key=lambda st: int(st.split(snapshotName)[1].split(".")[0]))
     sorted(snapshots)
     print("found snapshots: ", snapshots[0], " to ", snapshots[-1])
     maxSnap = int((snapshots[-1].split('snapshot_')[-1]).split('.hdf5')[0])
@@ -127,12 +123,19 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
 
     if firstSnap > lastSnap:
         print("cannot do firstSnap > lastSnap")
-        return
+        return []
+
+    return range(firstSnap, lastSnap+1, skipSteps)
+def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSnap=0,lastSnap=-1,skipSteps=1,box=False,
+               vrange=False,logplot=True, res=1024, numthreads=1, center=True,plot_points=True,
+               additional_points_size=30,additional_points_shape='X', additional_points_color='w', units_length = 'cm',
+               units_velocity="$cm/s$", units_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
+               axes_array=[[0,1]]):
 
     if not os.path.exists(plottingDir):
         os.mkdir(plottingDir)
 
-    for snap in range(firstSnap,lastSnap+1,skipSteps):
+    for snap in get_snapshot_number_list(snapshotDir, "snapshot_", firstSnap, lastSnap, skipSteps):
         print("doing snapshot ",snap)
         loaded_snap = gadget_readsnap(snap, snapshotDir)
         print(type(value), value)
