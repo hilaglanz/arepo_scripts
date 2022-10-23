@@ -4,8 +4,8 @@ import argparse
 import numpy as np
 from loadmodules import *
 
-name_and_units = {"rho":(r'$\rho$',r'$g/cm^3$'), "temp":("Temperature","K"), "vel":("Velocity","$cm/s$"),
-                  "mass":("Mass","g")}
+name_and_units = {"rho":(r'$\rho$',r'$g/cm^3$', 1.0), "temp":("Temperature","K", 1.0), "vel":("Velocity","$cm/s$", 1.0),
+                  "mass":("Mass","g", 1.0), "time":("time", "s", 1.0)}
 species = ['n', 'p', '^{4}He', '^{11}B', '^{12}C', '^{13}C', '^{13}N', '^{14}N', '^{15}N', '^{15}O',
            '^{16}O', '^{17}O', '^{18}F', '^{19}Ne', '^{20}Ne', '^{21}Ne', '^{22}Ne', '^{22}Na',
            '^{23}Na', '^{23}Mg', '^{24}Mg', '^{25}Mg', '^{26}Mg', '^{25}Al', '^{26}Al',
@@ -33,21 +33,35 @@ def plot_single_value(loaded_snap, value='rho',box=False, vrange=False,logplot=T
                       unit_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
                       newfig=True, axes=[0,1]):
     label = value
+    convert_to_cgs = True
     if unit_velocity is not None:
         name_and_units["vel"][1] = unit_velocity
+        name_and_units["time"][1] = r'$' + unit_length + "/" + unit_velocity + '$'
+        convert_to_cgs = False
 
     if unit_density is not None:
         name_and_units["rho"][1] = unit_density
+        convert_to_cgs = False
+
+    if convert_to_cgs:
+        name_and_units["vel"][2] *= float(loaded_snap.parameters["UnitVelocity_in_cm_per_s"])
+        name_and_units["time"][2] *= float(loaded_snap.parameters["UnitLength_in_cm"]) / float(loaded_snap.parameters["UnitVelocity_in_cm_per_s"])
+        name_and_units["mass"][2] *= float(loaded_snap.parameters["UnitMass_in_g"])
+        name_and_units["rho"][2] *= float(loaded_snap.parameters["UnitMass_in_g"]) / float(loaded_snap.parameters["UnitLength_in_cm"])**3
+        loaded_snap.time *= name_and_units["time"][2]
+        #TODO: convert also temperature
 
     if value in name_and_units.keys():
         label = name_and_units[value][0]
         label += " [" + name_and_units[value][1] + "]"
+        loaded_snap.data[value] *= name_and_units[value][2]
 
     if "xnuc" in value:
         loaded_snap.data["rho"+value] = loaded_snap.rho * loaded_snap.data[value]
         value = "rho" + value
         label = r'$\rho \left(' + species[int(value.split("xnuc")[-1])] + r"\right)$ [" + name_and_units["rho"][1] + "]"
         print(value)
+
     if value == "mean_a":
         loaded_snap.calculate_mean_a()
         label = "Mean Atomic Weight"
@@ -57,16 +71,13 @@ def plot_single_value(loaded_snap, value='rho',box=False, vrange=False,logplot=T
         value = "B"
 
     if "vel" in value:
-        loaded_snap.data['velx'] = loaded_snap.vel[:, 0]
-        loaded_snap.data['vely'] = loaded_snap.vel[:, 1]
-        loaded_snap.data['velz'] = loaded_snap.vel[:, 2]
+        loaded_snap.data['velx'] = loaded_snap.data["vel"][:, 0]
+        loaded_snap.data['vely'] = loaded_snap.data["vel"][:, 1]
+        loaded_snap.data['velz'] = loaded_snap.data["vel"][:, 2]
 
     if value == "vel":
         loaded_snap.data['vel_size'] = np.sqrt((loaded_snap.vel ** 2).sum(axis=1))
         value = "vel_size"
-
-
-
         
     print(value)
     xlab = chr(ord('x') + axes[0])
@@ -126,15 +137,18 @@ def get_snapshot_number_list(snapshotDir="outupt", snapshotName="snapshot_", fir
         return []
 
     return range(firstSnap, lastSnap+1, skipSteps)
+
 def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSnap=0,lastSnap=-1,skipSteps=1,box=False,
-               vrange=False,logplot=True, res=1024, numthreads=1, center=True,plot_points=True,
+               vrange=False,logplot=True, res=1024, numthreads=1, center=True, plot_points=True,
                additional_points_size=30,additional_points_shape='X', additional_points_color='w', units_length = 'cm',
                units_velocity="$cm/s$", units_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
                axes_array=[[0,1]]):
 
     if not os.path.exists(plottingDir):
         os.mkdir(plottingDir)
-
+    convert_to_cgs = False
+    if units_velocity is None and units_density is None:
+        convert_to_cgs = True
     for snap in get_snapshot_number_list(snapshotDir, "snapshot_", firstSnap, lastSnap, skipSteps):
         print("doing snapshot ",snap)
         loaded_snap = gadget_readsnap(snap, snapshotDir)
@@ -150,7 +164,7 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
                               additional_points_color=additional_points_color, units_length=units_length,
                               unit_velocity= units_velocity, unit_density= units_density,
                               plot_velocities=plot_velocities, plot_bfld= plot_bfld, axes=get_single_value(axes_array))
-            title('time : {:.2f} [s]'.format(loaded_snap.time))
+            title('time : {:.2f}'.format(loaded_snap.time) + " [" + name_and_units["time"][1] + "]")
             filename = plottingDir + "/Aslice_" + val + "_{0}.png".format(snap)
             print("saving to: ", filename)
             savefig(filename)
@@ -179,7 +193,7 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
                 rcParams['text.usetex'] = True
 
             #title('time : {:.2f} [s]'.format(loaded_snap.time))
-            suptitle('time : {:.2f} [s]'.format(loaded_snap.time), fontsize='x-large')
+            suptitle('time : {:.2f}'.format(loaded_snap.time) + " [" + name_and_units["time"][1] + "]", fontsize='x-large')
             rcParams.update({'font.size': 40, 'font.family': 'Serif'})
             rcParams['text.usetex'] = True
             filename = plottingDir + "/Aslice_" + "_".join(value) + "_{0}.png".format(snap)
@@ -220,6 +234,9 @@ def InitParser():
     parser.add_argument('--units_length', type=str,  help='name of the length units', default= "cm")
     parser.add_argument('--units_velocity', type=str,  help='name of the velocity units default is cgs', default= None)
     parser.add_argument('--units_density', type=str,  help='name of the density units default is cgs', default= None)
+    parser.add_argument('--factor_mass', type=float,  help='multiply mass unit by this factor', default=1.0)
+    parser.add_argument('--factor_length', type=float,  help='multiply length unit by this factor', default=1.0)
+    parser.add_argument('--factor_velocity', type=float,  help='multiply velocity unit by this factor', default=1.0)
 
     return parser
 
@@ -245,6 +262,12 @@ if __name__ == "__main__":
     axes_array = [[0,1]]
     if args.axes0 is not None and args.axes1 is not None:
         axes_array = [[args.axes0[i],args.axes1[i]] for i in range(len(args.axes0))]
+
+    name_and_units["rho"][2] *= (args.factor_mass/arge.factor_legnth**3)
+    name_and_units["vel"][2] *= (args.factor_velocity)
+    name_and_units["mass"][2] *= (args.factor_mass)
+    name_and_units["time"][2] *= (args.factor_length/arge.factor_velocity)
+    #TODO: add conversion to temperature
 
     plot_range(args.value, args.source_dir, args.saving_dir, args.beginStep, args.lastStep, args.skipStep, box=box,
                vrange=vrange, logplot=args.logplot, res=args.res, numthreads= args.numthreads, center=center,
