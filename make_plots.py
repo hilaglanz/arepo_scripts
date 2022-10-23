@@ -277,11 +277,11 @@ if __name__ == "__main__":
     if args.axes0 is not None and args.axes1 is not None:
         axes_array = [[args.axes0[i],args.axes1[i]] for i in range(len(args.axes0))]
 
-    name_and_units["rho"][2] *= (args.factor_mass/arge.factor_legnth**3)
+    name_and_units["rho"][2] *= (args.factor_mass/args.factor_legnth**3)
     name_and_units["length"][2] *= args.factor_length
     name_and_units["vel"][2] *= (args.factor_velocity)
     name_and_units["mass"][2] *= (args.factor_mass)
-    name_and_units["time"][2] *= (args.factor_length/arge.factor_velocity)
+    name_and_units["time"][2] *= (args.factor_length/args.factor_velocity)
     #TODO: add conversion to temperature
 
     plot_range(args.value, args.source_dir, args.saving_dir, args.beginStep, args.lastStep, args.skipStep, box=box,
