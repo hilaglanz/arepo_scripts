@@ -4,8 +4,8 @@ import argparse
 import numpy as np
 from loadmodules import *
 
-name_and_units = {"rho":(r'$\rho$',r'$g/cm^3$', 1.0), "temp":("Temperature","K", 1.0), "vel":("Velocity","$cm/s$", 1.0),
-                  "mass":("Mass","g", 1.0), "time":("time", "s", 1.0), "legnth": ("length", "cm",1.0)}
+name_and_units = {"rho":[r'$\rho$',r'$g/cm^3$', 1.0], "temp":["Temperature","K", 1.0], "vel":["Velocity","$cm/s$", 1.0],
+                  "mass":["Mass","g", 1.0], "time":["time", "s", 1.0], "legnth": ["length", "cm",1.0]}
 species = ['n', 'p', '^{4}He', '^{11}B', '^{12}C', '^{13}C', '^{13}N', '^{14}N', '^{15}N', '^{15}O',
            '^{16}O', '^{17}O', '^{18}F', '^{19}Ne', '^{20}Ne', '^{21}Ne', '^{22}Ne', '^{22}Na',
            '^{23}Na', '^{23}Mg', '^{24}Mg', '^{25}Mg', '^{26}Mg', '^{25}Al', '^{26}Al',
@@ -277,8 +277,7 @@ if __name__ == "__main__":
     if args.axes0 is not None and args.axes1 is not None:
         axes_array = [[args.axes0[i],args.axes1[i]] for i in range(len(args.axes0))]
 
-    print(name_and_units["rho"])
-    name_and_units["rho"][2] = (args.factor_mass/args.factor_length**3)
+    name_and_units["rho"][2] *= (args.factor_mass/args.factor_length**3)
     name_and_units["length"][2] *= args.factor_length
     name_and_units["vel"][2] *= (args.factor_velocity)
     name_and_units["mass"][2] *= (args.factor_mass)
