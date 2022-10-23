@@ -57,7 +57,7 @@ def plot_single_value(loaded_snap, value='rho',box=False, vrange=False,logplot=T
     loaded_snap.pos[:,2] *= name_and_units["length"][2]
     loaded_snap.vel[:,0] *= name_and_units["vel"][2]
     loaded_snap.vel[:,1] *= name_and_units["vel"][2]
-    loaded_snap.vel[:,2] *= fname_and_units["vel"][2]
+    loaded_snap.vel[:,2] *= name_and_units["vel"][2]
     loaded_snap.mass *= name_and_units["mass"][2]
     loaded_snap.rho *= name_and_units["rho"][2]
     #TODO: convert also temperature
