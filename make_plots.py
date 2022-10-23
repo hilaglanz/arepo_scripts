@@ -281,7 +281,7 @@ if __name__ == "__main__":
     name_and_units["length"][2] *= args.factor_length
     name_and_units["vel"][2] *= (args.factor_velocity)
     name_and_units["mass"][2] *= (args.factor_mass)
-    name_and_units["time"][2] *= (args.factor_length/arg.factor_velocity)
+    name_and_units["time"][2] *= (args.factor_length/args.factor_velocity)
     #TODO: add conversion to temperature
 
     plot_range(args.value, args.source_dir, args.saving_dir, args.beginStep, args.lastStep, args.skipStep, box=box,
