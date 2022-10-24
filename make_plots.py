@@ -14,6 +14,28 @@ species = ['n', 'p', '^{4}He', '^{11}B', '^{12}C', '^{13}C', '^{13}N', '^{14}N',
            '^{39}Ar', '^{39}K', '^{40}Ca', '^{43}Sc', '^{44}Ti', '^{47}V', '^{48}Cr', '^{51}Mn',
            '^{52}Fe', '^{56}Fe', '^{55}Co', '^{56}Ni', '^{58}Ni', '^{59}Ni']
 
+def change_snap_units(loaded_snap):
+    loaded_snap.time *= name_and_units["time"][2]
+    '''loaded_snap.pos[:,0] *= name_and_units["length"][2]
+    loaded_snap.pos[:,1] *= name_and_units["length"][2]
+    loaded_snap.pos[:,2] *= name_and_units["length"][2]'''
+    loaded_snap.data["pos"][:, 0] *= name_and_units["length"][2]
+    loaded_snap.data["pos"][:, 1] *= name_and_units["length"][2]
+    loaded_snap.data["pos"][:, 2] *= name_and_units["length"][2]
+    loaded_snap.center *= name_and_units["length"][2]
+    '''loaded_snap.vel[:,0] *= name_and_units["vel"][2]
+    loaded_snap.vel[:,1] *= name_and_units["vel"][2]
+    loaded_snap.vel[:,2] *= name_and_units["vel"][2]'''
+    loaded_snap.data["vel"][:, 0] *= name_and_units["vel"][2]
+    loaded_snap.data["vel"][:, 1] *= name_and_units["vel"][2]
+    loaded_snap.data["vel"][:, 2] *= name_and_units["vel"][2]
+    # loaded_snap.mass *= name_and_units["mass"][2]
+    loaded_snap.data["mass"] *= name_and_units["mass"][2]
+    # loaded_snap.rho *= name_and_units["rho"][2]
+    loaded_snap.data["rho"] *= name_and_units["rho"][2]
+    loaded_snap.data["vol"] *= (name_and_units["length"][2] ** 3)
+    # TODO: convert also temperature
+
 def plot_stream(loaded_snap, value='vel', xlab='x', ylab='y', axes=[0,1], box=False, res=1024, numthreads=1):
     loaded_snap.data[value + xlab] = loaded_snap.data[value][:, axes[0]]
     loaded_snap.data[value + ylab] = loaded_snap.data[value][:, axes[1]]
@@ -52,26 +74,7 @@ def plot_single_value(loaded_snap, value='rho',box=False, vrange=False,logplot=T
             name_and_units["rho"][2] *= float(loaded_snap.parameters["UnitMass_in_g"]) / float(loaded_snap.parameters["UnitLength_in_cm"])**3
             print("converting to cgs units")
 
-    loaded_snap.time *= name_and_units["time"][2]
-    '''loaded_snap.pos[:,0] *= name_and_units["length"][2]
-    loaded_snap.pos[:,1] *= name_and_units["length"][2]
-    loaded_snap.pos[:,2] *= name_and_units["length"][2]'''
-    loaded_snap.data["pos"][:,0] *= name_and_units["length"][2]
-    loaded_snap.data["pos"][:,1] *= name_and_units["length"][2]
-    loaded_snap.data["pos"][:,2] *= name_and_units["length"][2]
-    loaded_snap.center *= name_and_units["length"][2]
-    '''loaded_snap.vel[:,0] *= name_and_units["vel"][2]
-    loaded_snap.vel[:,1] *= name_and_units["vel"][2]
-    loaded_snap.vel[:,2] *= name_and_units["vel"][2]'''
-    loaded_snap.data["vel"][:,0] *= name_and_units["vel"][2]
-    loaded_snap.data["vel"][:,1] *= name_and_units["vel"][2]
-    loaded_snap.data["vel"][:,2] *= name_and_units["vel"][2]
-    #loaded_snap.mass *= name_and_units["mass"][2]
-    loaded_snap.data["mass"] *= name_and_units["mass"][2]
-    #loaded_snap.rho *= name_and_units["rho"][2]
-    loaded_snap.data["rho"] *= name_and_units["rho"][2]
-    loaded_snap.data["vol"] *= (name_and_units["length"][2]**3)
-    #TODO: convert also temperature
+    change_snap_units(loaded_snap)
     modified_units = True
 
     print("units: ")
@@ -110,7 +113,8 @@ def plot_single_value(loaded_snap, value='rho',box=False, vrange=False,logplot=T
     ylab = chr(ord('x') + axes[1])
 
     loaded_snap.plot_Aslice(value, logplot=logplot, colorbar=True, cblabel=label, center=center, vrange=vrange,
-                                  box=box, res=res, numthreads=numthreads, newfig=newfig, axes=axes)
+                                  box=box, res=res, numthreads=numthreads, newfig=newfig, axes=axes,
+                            minimum=min(1e-8, 0.1*vrange[0]))
     if box == False:
         box = [loaded_snap.boxsize, loaded_snap.boxsize]
     if plot_points:
