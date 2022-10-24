@@ -12,7 +12,7 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
     sink_mass = 1.0*(vel**2)/(2*G)
     if binary:
         last_sink_i = 1
-        orbital_vel = (G * sink_mass / semimajor) ** 0.5
+        orbital_vel = 0.5 * (2 * G * sink_mass / semimajor) ** 0.5
     num_sinks = last_sink_i + 1
     print("using cs= ", cs, "v_inf= ", vel, "mach= ", mach, "rho_inf= ", rho, "Ra= ", accretion_radius, "G= ", G)
 
