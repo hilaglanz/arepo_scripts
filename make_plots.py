@@ -124,7 +124,7 @@ def plot_single_value(loaded_snap, value='rho',box=False, vrange=False,logplot=T
             for point in points:
                 point_pos = loaded_snap.data["pos"][point]
 
-                scatter(point_pos[0], point_pos[1], additional_points_size, additional_points_color,
+                scatter(point_pos[axes[0]], point_pos[axes[1]], additional_points_size, additional_points_color,
                         additional_points_shape)
 
                 if loaded_snap.type[point] == 5:
