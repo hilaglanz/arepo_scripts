@@ -129,7 +129,7 @@ def plot_single_value(loaded_snap, value='rho',box=False, vrange=False,logplot=T
 
                 if loaded_snap.type[point] == 5:
                     print("plotting accretion radius of: ", loaded_snap.parameters['SinkFormationRadius']*name_and_units["length"][2])
-                    circ = Circle((point_pos[0], point_pos[1]), loaded_snap.parameters['SinkFormationRadius']*name_and_units["length"][2]
+                    circ = Circle((point_pos[axes[0]], point_pos[axes[1]]), loaded_snap.parameters['SinkFormationRadius']*name_and_units["length"][2]
                                   , fill=False, color='white', linestyle='dashed', linewidth=3.0)
                     print(circ)
                     gca().add_patch(circ)
