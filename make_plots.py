@@ -138,8 +138,8 @@ def plot_single_value(loaded_snap, value='rho',box=False, vrange=False,logplot=T
     elif plot_bfld:
         plot_stream(loaded_snap, value='bfld', xlab=xlab, ylab=ylab, axes=axes, box=box, res=res, numthreads=numthreads)
 
-    xlabel(xlab + ' [' + units_length + ']', loc="left")
-    ylabel(ylab + ' [' + units_length + ']')
+    xlabel(xlab + ' [' + unit_length + ']', loc="left")
+    ylabel(ylab + ' [' + unit_length + ']')
 
 def get_single_value(value,index=0):
     if value is None:
