@@ -51,7 +51,7 @@ def plot_stream(loaded_snap, value='vel', xlab='x', ylab='y', axes=[0,1], box=Fa
 
 def plot_single_value(loaded_snap, value='rho',box=False, vrange=False,logplot=True, res=1024, numthreads=1,
                       center=True,plot_points=True, additional_points_size=30,additional_points_shape='X',
-                      additional_points_color='w', units_length='cm', unit_velocity="$cm/s$",
+                      additional_points_color='w', unit_length='cm', unit_velocity="$cm/s$",
                       unit_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
                       newfig=True, axes=[0,1], modified_units = False):
     label = value
@@ -192,7 +192,7 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
                               numthreads=numthreads, center=center, plot_points=plot_points,
                               additional_points_size=additional_points_size,
                               additional_points_shape=additional_points_shape,
-                              additional_points_color=additional_points_color, units_length=units_length,
+                              additional_points_color=additional_points_color, unit_length=units_length,
                               unit_velocity= units_velocity, unit_density= units_density,
                               plot_velocities=plot_velocities, plot_bfld= plot_bfld, axes=get_single_value(axes_array),
                               modified_units=modified_units)
@@ -218,7 +218,7 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
                                   numthreads=numthreads, center=center, plot_points=plot_points,
                                   additional_points_size=additional_points_size,
                                   additional_points_shape=additional_points_shape,
-                                  additional_points_color=additional_points_color, units_length=units_length,
+                                  additional_points_color=additional_points_color, unit_length=units_length,
                                   unit_velocity= units_velocity, unit_density= units_density,
                                   plot_velocities=plot_velocities, plot_bfld= plot_bfld, newfig=False, axes=get_single_value(axes_array, index))
                 rcParams.update({'font.size': 40, 'font.family': 'Serif'})
