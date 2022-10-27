@@ -25,8 +25,8 @@ class BinariesICs:
         self.m2 = self.snapshot2.mass[self.i2].sum()
         self.total_mass = self.m1 + self.m2
         print("masses: ",self.m1," , ",self.m2)
-        self.r1 = self.snapshot1.r()[self.i1].max()
-        self.r2 = self.snapshot2.r()[self.i2].max()
+        self.d1 = self.snapshot1.r()[self.i1].max() #maximum distance from the center of the box
+        self.d2 = self.snapshot2.r()[self.i2].max() #maximum distance from the center of the box
         self.npart1 = size(self.i1)
         self.npart2 = size(self.i2)
         self.npart = self.npart1 + self.npart2
@@ -37,6 +37,8 @@ class BinariesICs:
         self.pos1 = (self.snapshot1.pos[self.i1] * self.snapshot1.mass[self.i1][:, None]).sum(axis=0) / self.m1
         self.pos2 = (self.snapshot2.pos[self.i2] * self.snapshot2.mass[self.i2][:, None]).sum(axis=0) / self.m2
         print("pos1: ", self.pos1, "pos2: ", self.pos2)
+        self.r1 = self.snapshot1.r(center=self.pos1)[self.i1].max() #radius of particles1
+        self.r2 = self.snapshot2.r(center=self.pos2)[self.i2].max() #radius of particles2
         self.loaded_separation = self.pos2 - self.pos1
         print("loaded separation: ", self.loaded_separation)
         self.center_of_mass = (self.m1 * self.pos1 + self.m2 * self.pos2) / self.total_mass
@@ -245,9 +247,9 @@ class BinariesICs:
         return max(RL1, RL2)
 
 class BinariesLoader(BinariesICs):
-    def __init__(self, snapshot_file, conditional_axis=0, rhocut=1, species_file="species55.txt"):
+    def __init__(self, snapshot_file, conditional_axis=0, rhocut=1, species_file="species55.txt", load_types=[0]):
         print("initializeing binaries from a single snapshot")
-        self.binary_snapshot = gadget_readsnapname(snapshot_file, hdf5=True, loadonlytype=[0])
+        self.binary_snapshot = gadget_readsnapname(snapshot_file, hdf5=True, loadonlytype=load_types)
         if conditional_axis is not None:
             if rhocut is not None:
                 self.get_objects_position_density(conditional_axis,rhocut)
@@ -284,9 +286,9 @@ class BinariesLoader(BinariesICs):
 
 
 class SeparateBinariesLoader(BinariesICs):
-    def __init__(self, snapshot_file1, snapshot_file2, rhocut=1, species_file="species55.txt"):
-        self.snapshot1 = gadget_readsnapname(snapshot_file1, hdf5=True, loadonlytype=[0])
-        self.snapshot2 = gadget_readsnapname(snapshot_file2, hdf5=True, loadonlytype=[0])
+    def __init__(self, snapshot_file1, snapshot_file2, rhocut=1, species_file="species55.txt", load_types=[0]):
+        self.snapshot1 = gadget_readsnapname(snapshot_file1, hdf5=True, loadonlytype=load_types)
+        self.snapshot2 = gadget_readsnapname(snapshot_file2, hdf5=True, loadonlytype=load_types)
         self.get_objects_density(rhocut)
         super().__init__(species_file)
 
@@ -302,6 +304,7 @@ def InitParser():
     parser.add_argument('--species_file', type=str,  help='path to species file', default="species55.txt")
     parser.add_argument('--conditional_axis', type=int,  help='axis of motion', default=0)
     parser.add_argument('--rhocut', type=float,  help='lower cutoff of density', default=1)
+    parser.add_argument('--load_types', type=int, nargs='+',  help='load only these types', default=[0])
     parser.add_argument('--period', type=float,  help='orbital period in seconds for mergers', default=0)
     parser.add_argument('--impact_parameter_rhocut', type=float,
                         help='calculate impact parameter according to this density cutoff', default=0)
@@ -325,9 +328,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
     if args.snapshot_file2 is None:
         binary = BinariesLoader(args.snapshot_file,conditional_axis=args.conditional_axis,
-                                rhocut=args.rhocut, species_file=args.species_file)
+                                rhocut=args.rhocut, species_file=args.species_file, load_types=args.load_types)
     else:
-        binary = SeparateBinariesLoader(args.snapshot_file, args.snapshot_file2, args.rhocut, args.species_file)
+        binary = SeparateBinariesLoader(args.snapshot_file, args.snapshot_file2, args.rhocut, args.species_file,
+                                        load_types=args.load_types)
 
     if args.period > 0:
         binary.create_ic_merger_keplerian(ic_file_name=args.ic_file_name, T= args.period, rhocut= args.rhocut,
