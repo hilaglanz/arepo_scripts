@@ -8,7 +8,8 @@ from loadmodules import *
 class BinariesICs:
     def __init__(self, species_file="species55.txt"):
         print("initializing general binary info")
-        self.init_species(species_file)
+        if species_file is not None:
+            self.init_species(species_file)
         self.init_object_properties()
         self.init_orbital_parameters()
 
@@ -17,6 +18,7 @@ class BinariesICs:
         self.iC12 = self.sp['names'].index('c12')
         self.iO16 = self.sp['names'].index('o16')
         print("species file set")
+            
 
     def init_object_properties(self):
         self.m1 = self.snapshot1.mass[self.i1].sum()
