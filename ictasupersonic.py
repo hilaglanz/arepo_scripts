@@ -1,5 +1,6 @@
 import os, sys
 import argparse
+import numpy as np
 from loadmodules import *
 
 
@@ -27,12 +28,17 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
     gadget_add_grid(pointStar, accretion_radius, res=round(accretion_radius/Rs))
     print("added inner grid with size of Ra= ", accretion_radius)
     print("minimum vol =", (accretion_radius**3)/round(accretion_radius/Rs)**3)
-    gadget_add_grids(pointStar, [2*accretion_radius, 4*accretion_radius, 8*accretion_radius, 16*accretion_radius,
-                                 boxsize], res=res)
-    print("added 5 sub-grids around")
-    print("max vol =", (boxsize**3.0 - (16.0*accretion_radius)**3)/res**3)
-    print("mid vol =", (16**3.0 - (8.0*accretion_radius)**3)/res**3)
-
+    zones=np.log(boxsize/accretion_radius)/np.log(2)
+    grids=2.**np.array(range(1,int(zones)+1))*accretion_radius
+    if boxsize>1.4*grids[-1]:
+        grids=np.append(grids, boxsize)
+    else:
+        grids[-1]=boxsize
+    gadget_add_grids(pointStar, grids, res=res)
+    print(grids)
+    print("added {0} sub-grids around".format(len(grids)))
+    print("max vol =", (boxsize**3.0 - (grids[-2])**3)/res**3)
+    
     pointStar['type']=np.zeros(pointStar['count'])
     pointStar['type'][:num_sinks] = [5] * num_sinks
 
