@@ -5,12 +5,15 @@ from loadmodules import *
 
 
 def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho=1, gamma=5.0/3, Ra=1, Rs=0.02, res=100,
-                        binary=False, semimajor = 2.5):
+                        binary=False, semimajor = 2.5, supersonic_perscription=True):
     vel = mach*cs
     accretion_radius = Ra
     last_sink_i = 0
     orbital_vel = 0
-    sink_mass = 1.0*(vel**2)/(2*G)
+    if supersonic_perscription:
+        sink_mass = accretion_radius*(vel**2)/(2*G)
+    else:
+        sink_mass = accretion_radius*(vel**2 + cs**2)/(2*G)
     if binary:
         last_sink_i = 1
         orbital_vel = 0.5 * (2 * G * sink_mass / semimajor) ** 0.5
@@ -24,12 +27,18 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
     pointStar['mass'] = np.array([sink_mass] * num_sinks)
     pointStar['vel'] = np.zeros( (num_sinks,3) )
     pointStar['boxsize'] = boxsize
-    gadget_add_grid(pointStar, accretion_radius, res=round(10.0*accretion_radius/Rs))
-    print("added inner grid with size of Ra= ", accretion_radius)
-    print("minimum vol =", (accretion_radius**3)/round(10.0*accretion_radius/Rs)**3)
-    num_sub_grids = np.log2(boxsize/accretion_radius)
+    finest_grid_size = accretion_radius
+    highest_resolution = round(10.0*finest_grid_size/Rs)
+    while highest_resolution > 200:
+        finest_grid_size /= 2.0
+        print("decreasing finest grid size to ", finest_grid_size)
+        highest_resolution = round(10.0 * finest_grid_size / Rs)
+    gadget_add_grid(pointStar, finest_grid_size, res=highest_resolution)
+    print("added inner grid with size of ", finest_grid_size/accretion_radius, "Ra")
+    print("minimum vol =", (finest_grid_size**3)/highest_resolution**3)
+    num_sub_grids = np.log2(boxsize/finest_grid_size)
     sub_grid_indices = np.array(range(1,int(num_sub_grids)+1))
-    sub_grid_sizes = accretion_radius * 2.**sub_grid_indices
+    sub_grid_sizes = finest_grid_size * 2.**sub_grid_indices
     if boxsize > 1.4 * sub_grid_sizes[-1]:
         sub_grid_sizes = np.append(sub_grid_sizes, boxsize)
     else:
