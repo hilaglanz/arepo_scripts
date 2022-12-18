@@ -3,7 +3,36 @@ import argparse
 import numpy as np
 from loadmodules import *
 
+def initialize_dictionary_with_point_masses(point_mass, npart, boxsize):
+    pointStar = {}
+    pointStar['count'] = npart
+    pointStar['pos'] = np.zeros( (npart,3) )
+    pointStar['pos'] += 0.5 * boxsize
+    pointStar['mass'] = np.array([point_mass] * npart)
+    pointStar['vel'] = np.zeros( (npart,3) )
+    pointStar['boxsize'] = boxsize
 
+    return pointStar
+
+def get_finest_grid_size_and_resolution(accretion_radius, sink_radius):
+    finest_grid_size = accretion_radius
+    highest_resolution = round(10.0 * finest_grid_size / sink_radius)
+    while highest_resolution > 200:
+        finest_grid_size /= 2.0
+        print("decreasing finest grid size to ", finest_grid_size)
+        highest_resolution = round(10.0 * finest_grid_size / sink_radius)
+
+    return finest_grid_size, highest_resolution
+def get_smoothed_sub_grid_sizes(boxsize, finest_grid_size):
+    num_sub_grids = np.log2(boxsize / finest_grid_size)
+    sub_grid_indices = np.array(range(1, int(num_sub_grids) + 1))
+    sub_grid_sizes = finest_grid_size * 2. ** sub_grid_indices
+    if boxsize > 1.4 * sub_grid_sizes[-1]:
+        sub_grid_sizes = np.append(sub_grid_sizes, boxsize)
+    else:
+        sub_grid_sizes[-1] = boxsize
+
+    return sub_grid_sizes
 def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho=1, gamma=5.0/3, Ra=1, Rs=0.02, res=100,
                         binary=False, semimajor = 2.5, supersonic_perscription=True):
     vel = mach*cs
@@ -20,29 +49,14 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
     num_sinks = last_sink_i + 1
     print("using cs= ", cs, "v_inf= ", vel, "mach= ", mach, "rho_inf= ", rho, "Ra= ", accretion_radius, "G= ", G)
 
-    pointStar = {}
-    pointStar['count'] = num_sinks
-    pointStar['pos'] = np.zeros( (num_sinks,3) )
-    pointStar['pos'] += 0.5 * boxsize
-    pointStar['mass'] = np.array([sink_mass] * num_sinks)
-    pointStar['vel'] = np.zeros( (num_sinks,3) )
-    pointStar['boxsize'] = boxsize
-    finest_grid_size = accretion_radius
-    highest_resolution = round(10.0*finest_grid_size/Rs)
-    while highest_resolution > 200:
-        finest_grid_size /= 2.0
-        print("decreasing finest grid size to ", finest_grid_size)
-        highest_resolution = round(10.0 * finest_grid_size / Rs)
+    pointStar = initialize_dictionary_with_point_masses(sink_mass, num_sinks, boxsize)
+
+    finest_grid_size, highest_resolution = get_finest_grid_size_and_resolution(accretion_radius, Rs)
     gadget_add_grid(pointStar, finest_grid_size, res=highest_resolution)
     print("added inner grid with size of ", finest_grid_size/accretion_radius, "Ra")
     print("minimum vol =", (finest_grid_size**3)/highest_resolution**3)
-    num_sub_grids = np.log2(boxsize/finest_grid_size)
-    sub_grid_indices = np.array(range(1,int(num_sub_grids)+1))
-    sub_grid_sizes = finest_grid_size * 2.**sub_grid_indices
-    if boxsize > 1.4 * sub_grid_sizes[-1]:
-        sub_grid_sizes = np.append(sub_grid_sizes, boxsize)
-    else:
-        sub_grid_sizes[-1] = boxsize
+
+    sub_grid_sizes = get_smoothed_sub_grid_sizes(boxsize, finest_grid_size)
     gadget_add_grids(pointStar, sub_grid_sizes, res=res)
     print(sub_grid_sizes)
     print("added {0} sub-grids around".format(len(sub_grid_sizes)))
