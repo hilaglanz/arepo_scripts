@@ -24,20 +24,20 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
     pointStar['mass'] = np.array([sink_mass] * num_sinks)
     pointStar['vel'] = np.zeros( (num_sinks,3) )
     pointStar['boxsize'] = boxsize
-
-    gadget_add_grid(pointStar, accretion_radius, res=round(accretion_radius/Rs))
+    gadget_add_grid(pointStar, accretion_radius, res=round(10.0*accretion_radius/Rs))
     print("added inner grid with size of Ra= ", accretion_radius)
-    print("minimum vol =", (accretion_radius**3)/round(accretion_radius/Rs)**3)
-    zones=np.log(boxsize/accretion_radius)/np.log(2)
-    grids=2.**np.array(range(1,int(zones)+1))*accretion_radius
-    if boxsize>1.4*grids[-1]:
-        grids=np.append(grids, boxsize)
+    print("minimum vol =", (accretion_radius**3)/round(10.0*accretion_radius/Rs)**3)
+    num_sub_grids = np.log2(boxsize/accretion_radius)
+    sub_grid_indices = np.array(range(1,int(num_sub_grids)+1))
+    sub_grid_sizes = accretion_radius * 2.**sub_grid_indices
+    if boxsize > 1.4 * sub_grid_sizes[-1]:
+        sub_grid_sizes = np.append(sub_grid_sizes, boxsize)
     else:
-        grids[-1]=boxsize
-    gadget_add_grids(pointStar, grids, res=res)
-    print(grids)
-    print("added {0} sub-grids around".format(len(grids)))
-    print("max vol =", (boxsize**3.0 - (grids[-2])**3)/res**3)
+        sub_grid_sizes[-1] = boxsize
+    gadget_add_grids(pointStar, sub_grid_sizes, res=res)
+    print(sub_grid_sizes)
+    print("added {0} sub-grids around".format(len(sub_grid_sizes)))
+    print("max vol =", (boxsize**3.0 - (sub_grid_sizes[-2])**3)/res**3)
     
     pointStar['type']=np.zeros(pointStar['count'])
     pointStar['type'][:num_sinks] = [5] * num_sinks
