@@ -19,5 +19,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
     y = yag.yag(arepodir=args.output, arepobase=args.snapshot_base, outdir=args.output_grid)
     y.map3D(explosiontime=args.explosion_time, centering=True, map1DSNU=True, map2DSNU=False, maxVel=3e9,
-            normaliseAbundances=True, map1D=False, removeHeShell=False,boxsize=y.get_boxsize())
+            normaliseAbundances=True, map1D=False, removeHeShell=False)
     print("new model save in ", args.output_grid, "/model_SNU_1D.txt")
