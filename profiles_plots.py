@@ -92,7 +92,7 @@ def plot_profiles(output_dir, snapshot_name, plotting_dir, testing_value="rho", 
                                                                       snapshot_name, snapshot_number, testing_value)
 
         if output_txt_files:
-            write_txt_file(p, plotting_dir, snapshot_number, suffix, testing_value)
+            write_txt_file(p, plotting_dir, snapshot_number, s.time, suffix, testing_value)
 
         plot_to_figure(index, line_colors, log, p, s)
         labels.append("snap " + str(snapshot_number) + "," + str(round(s.time, 2)) + " [s]")
@@ -184,9 +184,9 @@ def get_relevant_plotting_parameters_for_binary(motion_axis, object_num, output_
     return s, i, center, suffix
 
 
-def write_txt_file(p, plotting_dir, snapshot_number, suffix, testing_value):
-    txt_value_filename = plotting_dir + "/" + testing_value + "_profile_" + suffix + "_" + snapshot_number \
-                         + ".txt"
+def write_txt_file(p, plotting_dir, snapshot_number, snapshot_time, suffix, testing_value):
+    txt_value_filename = plotting_dir + "/" + testing_value + "_profile_" + suffix + "_" + str(snapshot_number) \
+                         + "_" + str(snapshot_time) + ".txt"
     print("creating txt file for ", testing_value, " with the name: ", txt_value_filename)
     with open(txt_value_filename, "w") as txt_file:
         txt_file.write("radius," + testing_value + "\r\n")
