@@ -49,7 +49,7 @@ def plot_stream(loaded_snap, value='vel', xlab='x', ylab='y', axes=[0,1], box=Fa
     # quiver(loaded_snap.pos[:,0],loaded_snap.pos[:,1],loaded_snap.vel[:,0], loaded_snap.vel[:,1],
     # scale=50)#*loaded_snap.parameters['BoxSize']/box[0])
 
-def plot_single_value(loaded_snap, value='rho',box=False, vrange=False,logplot=True, res=1024, numthreads=1,
+def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=False,logplot=True, res=1024, numthreads=1,
                       center=True,plot_points=True, additional_points_size=30,additional_points_shape='X',
                       additional_points_color='w', unit_length='cm', unit_velocity="$cm/s$",
                       unit_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
@@ -112,7 +112,7 @@ def plot_single_value(loaded_snap, value='rho',box=False, vrange=False,logplot=T
     xlab = chr(ord('x') + axes[0])
     ylab = chr(ord('x') + axes[1])
 
-    loaded_snap.plot_Aslice(value, logplot=logplot, colorbar=True, cblabel=label, center=center, vrange=vrange,
+    loaded_snap.plot_Aslice(value, logplot=logplot, colorbar=True, cblabel=label, cmap=cmap, center=center, vrange=vrange,
                                   box=box, res=res, numthreads=numthreads, newfig=newfig, axes=axes,
                             minimum=min(1e-8, 0.1*vrange[0]))
     if box == False:
@@ -168,8 +168,8 @@ def get_snapshot_number_list(snapshotDir="outupt", snapshotName="snapshot_", fir
 
     return range(firstSnap, lastSnap+1, skipSteps)
 
-def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSnap=0,lastSnap=-1,skipSteps=1,box=False,
-               vrange=False,logplot=True, res=1024, numthreads=1, center=True, plot_points=True,
+def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstSnap=0,lastSnap=-1,skipSteps=1,box=False,
+               vrange=False, cmap=["hot"], logplot=True, res=1024, numthreads=1, center=True, plot_points=True,
                additional_points_size=30,additional_points_shape='X', additional_points_color='w', units_length = 'cm',
                units_velocity="$cm/s$", units_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
                axes_array=[[0,1]]):
@@ -180,14 +180,14 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
     if units_velocity is None and units_density is None:
         convert_to_cgs = True
     modified_units = False
+    curr_cmap = cmap[0]
     for snap in get_snapshot_number_list(snapshotDir, "snapshot_", firstSnap, lastSnap, skipSteps):
         print("doing snapshot ",snap)
         loaded_snap = gadget_readsnap(snap, snapshotDir)
-        print(type(value), value)
         if len(value) == 1:
             val = value[0]
             print(val)
-            plot_single_value(loaded_snap, value=val, box=get_single_value(box),
+            plot_single_value(loaded_snap, value=val, cmap=curr_cmap, box=get_single_value(box),
                               vrange=get_single_value(vrange), logplot=get_single_value(logplot), res=res,
                               numthreads=numthreads, center=center, plot_points=plot_points,
                               additional_points_size=additional_points_size,
@@ -212,7 +212,8 @@ def plot_range(value='rho', snapshotDir= "output", plottingDir="plots", firstSna
                     curr_subplot = int(num_figures*100 + 21 + index)
                 print("curr subplot: ", curr_subplot)
                 subplot(curr_subplot)
-                plot_single_value(loaded_snap,  value=val, box=get_single_value(box,index),
+                curr_cmap = index % len(cmap)
+                plot_single_value(loaded_snap,  value=val, cmap=curr_cmap, box=get_single_value(box,index),
                                   vrange=get_single_value(vrange,index), logplot=get_single_value(logplot,index),
                                   res=res,
                                   numthreads=numthreads, center=center, plot_points=plot_points,
@@ -244,6 +245,7 @@ def InitParser():
     parser.add_argument('--source_dir', type=str,  help='path to snapshot files directory', default= sys.argv[0])
     parser.add_argument('--saving_dir', type=str,  help='path to output directory', default= "plots")
     parser.add_argument('--value', nargs='+', type=str,  help='value to be plotted', default= ["rho"])
+    parser.add_argument('--cmap', nargs='+', type=str,  help='cmap for each subplot', default= ["hot"])
     parser.add_argument('--axes0', nargs='+', type=int,  help='horizonal axes to plot in', default= None)
     parser.add_argument('--axes1', nargs='+', type=int,  help='vertical axes to plot in', default= None)
     parser.add_argument('--vmin', type=float,  nargs='+', help='minimal range plotting', default=None)
@@ -305,7 +307,7 @@ if __name__ == "__main__":
     #TODO: add conversion to temperature
 
     plot_range(args.value, args.source_dir, args.saving_dir, args.beginStep, args.lastStep, args.skipStep, box=box,
-               vrange=vrange, logplot=args.logplot, res=args.res, numthreads= args.numthreads, center=center,
+               vrange=vrange, logplot=args.logplot, cmap=args.cmap, res=args.res, numthreads= args.numthreads, center=center,
                plot_points=args.plot_points, additional_points_size=args.additional_points_size,
                additional_points_shape=args.additional_points_shape,
                additional_points_color=args.additional_points_color,
