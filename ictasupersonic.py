@@ -34,7 +34,7 @@ def get_smoothed_sub_grid_sizes(boxsize, finest_grid_size):
 
     return sub_grid_sizes
 def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho=1, gamma=5.0/3, Ra=1, Rs=0.02, res=100,
-                        binary=False, semimajor = 2.5, supersonic_perscription=True):
+                        binary=False, capture=False, semimajor = 2.5, v_start=0, supersonic_perscription=True):
     vel = mach*cs
     accretion_radius = Ra
     last_sink_i = 0
@@ -46,7 +46,10 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
     if binary:
         last_sink_i = 1
         orbital_vel = 0.5 * (2 * G * sink_mass / semimajor) ** 0.5
-    num_sinks = last_sink_i + 1
+    elif capture:
+        last_sink_i = 1
+        orbital_vel = v_star
+    num_sinks = last_sink_i + 1num_s
     print("using cs= ", cs, "v_inf= ", vel, "mach= ", mach, "rho_inf= ", rho, "Ra= ", accretion_radius, "G= ", G)
 
     pointStar = initialize_dictionary_with_point_masses(sink_mass, num_sinks, boxsize)
@@ -76,6 +79,14 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
         pointStar['pos'][1, 0] -= semimajor / 2.0
         pointStar['vel'][0, 1] += orbital_vel
         pointStar['vel'][1, 1] -= orbital_vel
+    elif capture:
+        pointStar['pos'][0, 0] += semimajor / 2.0
+        pointStar['pos'][1, 0] -= semimajor / 2.0
+        pointStar['pos'][0, 1] += semimajor / 2.0
+        pointStar['pos'][1, 1] -= semimajor / 2.0
+        pointStar['vel'][0, 0] -= orbital_vel
+        pointStar['vel'][1, 0] += orbital_vel
+
 
     print(pointStar['vel'][:,0])
     for key in pointStar.keys():
