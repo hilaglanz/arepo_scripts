@@ -212,7 +212,7 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
                     curr_subplot = int(num_figures*100 + 21 + index)
                 print("curr subplot: ", curr_subplot)
                 subplot(curr_subplot)
-                curr_cmap = index % len(cmap)
+                curr_cmap = cmap[index % len(cmap)]
                 plot_single_value(loaded_snap,  value=val, cmap=curr_cmap, box=get_single_value(box,index),
                                   vrange=get_single_value(vrange,index), logplot=get_single_value(logplot,index),
                                   res=res,
