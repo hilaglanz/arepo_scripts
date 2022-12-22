@@ -8,7 +8,7 @@ def initialize_dictionary_with_point_masses(point_mass, npart, boxsize):
     pointStar['count'] = npart
     pointStar['pos'] = np.zeros( (npart,3) )
     pointStar['pos'] += 0.5 * boxsize
-    pointStar['mass'] = np.array([point_mass] * npart)
+    pointStar['mass'] = np.copy(point_mass)
     pointStar['vel'] = np.zeros( (npart,3) )
     pointStar['boxsize'] = boxsize
 
@@ -33,8 +33,66 @@ def get_smoothed_sub_grid_sizes(boxsize, finest_grid_size):
         sub_grid_sizes[-1] = boxsize
 
     return sub_grid_sizes
+
+##Pass array to this function that contains data for all sinks(!)
+def create_ic_with_sink_from_data(ic_path, sink_data, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho=1, gamma=5.0/3, Rs=0.02, res=100, supersonic_perscription=True):
+    vel = mach*cs
+    last_sink_i = 0
+    orbital_vel = 0
+
+    num_sinks = len(sink_data)
+    ##First column corresponds to the masses
+    sink_mass = sink_data[:,0]
+    ##Accretion radius for the whole collection of sink particles
+    if supersonic_perscription:
+        accretion_radius=G*np.sum(sink_mass)/(vel**2)
+    else: 
+        accretion_radius=G*np.sum(sink_mass)/(vel**2+cs**2)
+    ##Possibly make sure Rs and sink radius are always related...
+    print("using cs= ", cs, "v_inf= ", vel, "mach= ", mach, "rho_inf= ", rho, "Ra= ", accretion_radius, "G= ", G)
+    pointStar = initialize_dictionary_with_point_masses(sink_mass, num_sinks, boxsize)
+
+    finest_grid_size, highest_resolution = get_finest_grid_size_and_resolution(accretion_radius, Rs)
+    gadget_add_grid(pointStar, finest_grid_size, res=highest_resolution)
+    print("added inner grid with size of ", finest_grid_size/accretion_radius, "Ra")
+    print("minimum vol =", (finest_grid_size**3)/highest_resolution**3)
+
+    sub_grid_sizes = get_smoothed_sub_grid_sizes(boxsize, finest_grid_size)
+    gadget_add_grids(pointStar, sub_grid_sizes, res=res)
+    print(sub_grid_sizes)
+    print("added {0} sub-grids around".format(len(sub_grid_sizes)))
+    print("max vol =", (boxsize**3.0 - (sub_grid_sizes[-2])**3)/res**3)
+    
+    pointStar['type']=np.zeros(pointStar['count'])
+    pointStar['type'][:num_sinks] = [5] * num_sinks
+    for ii in range(len(pointStar)):
+        pointStar['pos']=np.copy(sink_data[:,1:3])
+        pointStar['vel']=np.copy(sink_data[:,3:])
+
+    pointStar['mass'][num_sinks:] = rho #3e-2 with read mass as density will give same densities to all subgrids cells
+    pointStar['vel'][num_sinks:,0] = vel
+    pointStar['u'] = np.zeros(pointStar['count'])
+    pointStar['u'][:] = (cs**2)/(gamma*(gamma-1))
+    print("u: ", (cs**2)/(gamma*(gamma-1)))
+    print(pointStar.keys())
+
+
+    print(pointStar['vel'][:,0])
+    for key in pointStar.keys():
+        print (key)
+        if key != 'count' and key!= 'boxsize' and pointStar[key].shape[0]>1:
+            ax = 0
+        else:
+            ax = None
+        pointStar[key] = np.flip(pointStar[key], axis=ax)
+    print(pointStar['vel'][:, 0])
+    print(pointStar['mass'])
+
+    gadget_write_ics(ic_path, pointStar, double=True, format="hdf5")
+    print("ic file saved to ", ic_path)
+
 def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho=1, gamma=5.0/3, Ra=1, Rs=0.02, res=100,
-                        binary=False, capture=False, semimajor = 2.5, v_start=0, supersonic_perscription=True):
+                        binary=False, semimajor = 2.5, supersonic_perscription=True):
     vel = mach*cs
     accretion_radius = Ra
     last_sink_i = 0
@@ -46,13 +104,10 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
     if binary:
         last_sink_i = 1
         orbital_vel = 0.5 * (2 * G * sink_mass / semimajor) ** 0.5
-    elif capture:
-        last_sink_i = 1
-        orbital_vel = v_star
-    num_sinks = last_sink_i + 1num_s
+    num_sinks = last_sink_i + 1
     print("using cs= ", cs, "v_inf= ", vel, "mach= ", mach, "rho_inf= ", rho, "Ra= ", accretion_radius, "G= ", G)
 
-    pointStar = initialize_dictionary_with_point_masses(sink_mass, num_sinks, boxsize)
+    pointStar = initialize_dictionary_with_point_masses(np.array([point_mass] * npart), num_sinks, boxsize)
 
     finest_grid_size, highest_resolution = get_finest_grid_size_and_resolution(accretion_radius, Rs)
     gadget_add_grid(pointStar, finest_grid_size, res=highest_resolution)
@@ -79,14 +134,6 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
         pointStar['pos'][1, 0] -= semimajor / 2.0
         pointStar['vel'][0, 1] += orbital_vel
         pointStar['vel'][1, 1] -= orbital_vel
-    elif capture:
-        pointStar['pos'][0, 0] += semimajor / 2.0
-        pointStar['pos'][1, 0] -= semimajor / 2.0
-        pointStar['pos'][0, 1] += semimajor / 2.0
-        pointStar['pos'][1, 1] -= semimajor / 2.0
-        pointStar['vel'][0, 0] -= orbital_vel
-        pointStar['vel'][1, 0] += orbital_vel
-
 
     print(pointStar['vel'][:,0])
     for key in pointStar.keys():
@@ -103,6 +150,7 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
     print("ic file saved to ", ic_path)
 
 
+
 def InitParser():
     parser = argparse.ArgumentParser(description='This file creates a new ic file for simulating '
                                                  'accretion on a sink particle moving inside a wind tunnel')
@@ -117,10 +165,12 @@ def InitParser():
     parser.add_argument('--G', type=float,  help='gravitational constant internal units', default=6.672e-8)
     parser.add_argument('--gamma', type=float,  help='adiabatic index', default=5.0/3.0)
     parser.add_argument('--res', type=int,  help='subgrids resolution', default=100)
+    parser.add_argument('--sink_data', type=str, help='data file for sinks', default='')
     parser.add_argument('--binary', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
                         help='do we have a binary accreting?',
                         default=False)
     parser.add_argument('--binary_separation', type=float,  help='initial separation between the binary objects', default=None)
+    parser.add_argument('--data_file', type=str, help='if specified read the sink data from a file...')
     return parser
 
 if __name__ == "__main__":
@@ -130,7 +180,12 @@ if __name__ == "__main__":
     parser = InitParser()
     args = parser.parse_args()
 
-    create_ic_with_sink(ic_path=args.ic_path, boxsize=args.boxsize, G=args.G, mach=args.mach, cs=args.cs, rho=args.rho,
+    if args.data_file:
+        create_ic_with_sink_from_data(args.ic_path, args.data_file, boxsize=args.boxsize, G=args.G, mach=args.mach, cs=args.cs, rho=args.rho,
+            gamma=args.gamma, Ra=args.Ra, Rs=args.Rs, res=args.res, binary=args.binary,
+            semimajor=args.binary_separation)
+    else:
+        create_ic_with_sink(ic_path=args.ic_path, boxsize=args.boxsize, G=args.G, mach=args.mach, cs=args.cs, rho=args.rho,
                         gamma=args.gamma, Ra=args.Ra, Rs=args.Rs, res=args.res, binary=args.binary,
                         semimajor=args.binary_separation)
 
