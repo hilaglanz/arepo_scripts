@@ -65,9 +65,8 @@ def create_ic_with_sink_from_data(ic_path, sink_data, boxsize=32, G=6.672*10**-8
     
     pointStar['type']=np.zeros(pointStar['count'])
     pointStar['type'][:num_sinks] = [5] * num_sinks
-    for ii in range(len(pointStar)):
-        pointStar['pos'][:num_sinks]+=np.copy(sink_data[:,1:4])
-        pointStar['vel'][:num_sinks]+=np.copy(sink_data[:,4:])
+    pointStar['pos'][:num_sinks]+=np.copy(sink_data[:,1:4])
+    pointStar['vel'][:num_sinks]+=np.copy(sink_data[:,4:])
 
     pointStar['mass'][num_sinks:] = rho #3e-2 with read mass as density will give same densities to all subgrids cells
     pointStar['vel'][num_sinks:,0] = vel
