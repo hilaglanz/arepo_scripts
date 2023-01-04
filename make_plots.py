@@ -53,7 +53,7 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
                       center=True,plot_points=True, additional_points_size=30,additional_points_shape='X',
                       additional_points_color='w', unit_length='cm', unit_velocity="$cm/s$",
                       unit_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
-                      newfig=True, axes=[0,1], modified_units = False):
+                      newfig=True, axes=[0,1], modified_units = False, ignore_types=[]):
     label = value
     convert_to_cgs = True
     if unit_velocity is not None:
@@ -118,7 +118,7 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
     if box == False:
         box = [loaded_snap.boxsize, loaded_snap.boxsize]
     if plot_points:
-        points, = np.where(loaded_snap.type > 0)
+        points, = np.where((loaded_snap.type > 0) & (loaded_snap.type not in ignore_types))
         if len(points) > 0:
             print("plotting points")
             for point in points:
@@ -172,7 +172,7 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
                vrange=False, cmap=["hot"], logplot=True, res=1024, numthreads=1, center=True, plot_points=True,
                additional_points_size=30,additional_points_shape='X', additional_points_color='w', units_length = 'cm',
                units_velocity="$cm/s$", units_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
-               axes_array=[[0,1]]):
+               axes_array=[[0,1]], ignore_types=[]):
 
     if not os.path.exists(plottingDir):
         os.mkdir(plottingDir)
@@ -195,7 +195,7 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
                               additional_points_color=additional_points_color, unit_length=units_length,
                               unit_velocity= units_velocity, unit_density= units_density,
                               plot_velocities=plot_velocities, plot_bfld= plot_bfld, axes=get_single_value(axes_array),
-                              modified_units=modified_units)
+                              modified_units=modified_units, ignore_types=ignore_types)
             title('time : {:.2f}'.format(loaded_snap.time) + " [" + name_and_units["time"][1] + "]")
             filename = plottingDir + "/Aslice_" + val + "_{0}.png".format(snap)
             print("saving to: ", filename)
@@ -221,7 +221,8 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
                                   additional_points_shape=additional_points_shape,
                                   additional_points_color=additional_points_color, unit_length=units_length,
                                   unit_velocity= units_velocity, unit_density= units_density,
-                                  plot_velocities=plot_velocities, plot_bfld= plot_bfld, newfig=False, axes=get_single_value(axes_array, index))
+                                  plot_velocities=plot_velocities, plot_bfld= plot_bfld, newfig=False,
+                                  axes=get_single_value(axes_array, index), ignore_types=ignore_types)
                 rcParams.update({'font.size': 40, 'font.family': 'Serif'})
                 rcParams['text.usetex'] = True
 
@@ -260,6 +261,7 @@ def InitParser():
     parser.add_argument('--center_z', type=float, help='point on z axis to be the center of the plot', default=0)
     parser.add_argument('--plot_points', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),  help='should plot other than gas?',
                         default=True)
+    parser.add_argument('--ignore_types', nargs='+', type=int,  help='particle types to ignore', default=[])
     parser.add_argument('--plot_velocities', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),  help='plot velocity field',
                         default=False)
     parser.add_argument('--plot_bfld', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),  help='plot magnetic field stream',
@@ -312,4 +314,5 @@ if __name__ == "__main__":
                additional_points_shape=args.additional_points_shape,
                additional_points_color=args.additional_points_color,
                units_length=args.units_length, units_velocity=args.units_velocity, units_density= args.units_density,
-               plot_velocities=args.plot_velocities, plot_bfld= args.plot_bfld, axes_array=axes_array)
+               plot_velocities=args.plot_velocities, plot_bfld= args.plot_bfld, axes_array=axes_array,
+               ignore_types=args.ignore_types)
