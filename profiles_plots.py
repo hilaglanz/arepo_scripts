@@ -76,7 +76,7 @@ def compute_value(s, testing_value, center=None):
 
 def plot_profiles(output_dir, snapshot_name, plotting_dir, testing_value="rho", snapshot_number_array=[0, 8, 10],
                   center=False, log=True, new_fig=True, around_objects=False, around_density_peak=False,
-                  motion_axis=0, object_num=0, output_txt_files=False):
+                  line_profile=False, motion_axis=0, object_num=0, output_txt_files=False):
     if not os.path.exists(plotting_dir):
         os.mkdir(plotting_dir)
 
@@ -87,7 +87,13 @@ def plot_profiles(output_dir, snapshot_name, plotting_dir, testing_value="rho", 
     labels = []
     suffix = ""
     for index, snapshot_number in enumerate(snapshot_number_array):
-        p, s, suffix, testing_value = get_radial_profile_for_snapshot(around_density_peak, around_objects, center,
+        if line_profile:
+            p, s, suffix, testing_value = get_line_profile_for_snapshot(around_density_peak, around_objects, center,
+                                                                          motion_axis, object_num, output_dir,
+                                                                          snapshot_name, snapshot_number, testing_value)
+            suffix += "_line_" + str(motion_axis)
+        else:
+            p, s, suffix, testing_value = get_radial_profile_for_snapshot(around_density_peak, around_objects, center,
                                                                       motion_axis, object_num, output_dir,
                                                                       snapshot_name, snapshot_number, testing_value)
 
@@ -131,6 +137,33 @@ def get_radial_profile_for_snapshot(around_density_peak, around_objects, center,
         p = s.get_radprof(testing_value, center)
     return p, s, suffix, testing_value
 
+def get_line_profile_for_snapshot(around_density_peak, around_objects, center, motion_axis, object_num, output_dir,
+                                    snapshot_name, snapshot_number, testing_value):
+    suffix = ""
+    if around_objects:
+        s, cell_indices, center, suffix = get_relevant_plotting_parameters_around_object(around_density_peak,
+                                                                                         motion_axis,
+                                                                                         object_num, output_dir,
+                                                                                         snapshot_name,
+                                                                                         snapshot_number)
+        testing_value = compute_value(s, testing_value, center)
+        relevant_cells = np.where((s.pos[(motion_axis+1)%3] - center[(motion_axis+1)%3] < 2 * s.data["vol"]**(1.0/3)) &
+                                (s.pos[(motion_axis+2)%3] - center[(motion_axis+2)%3] < 2 * s.data["vol"]**(1.0/3)))
+        cell_indices = np.intersect1d(cell_indices, relevant_cells)
+    else:
+        s = gadget_readsnap(snapshot_number, output_dir, snapshot_name)
+        testing_value = compute_value(s, testing_value, center)
+        if type(center) == list:
+            center = pylab.array(center)
+        elif type(center) != np.ndarray:
+            center = s.center
+        cell_indices = np.where(
+            (s.pos[(motion_axis + 1) % 3] - center[(motion_axis + 1) % 3] < 2 * s.data["vol"] ** (1.0 / 3)) &
+            (s.pos[(motion_axis + 2) % 3] - center[(motion_axis + 2) % 3] < 2 * s.data["vol"] ** (1.0 / 3)))
+    p = np.column_stack(s.data[testing_value][cell_indices],
+                        s.data["pos"][cell_indices, motion_axis] - center[motion_axis][None, :])
+
+    return p, s, suffix, testing_value
 
 def plot_to_figure(index, line_colors, log, p, s):
     print("plotting")
@@ -215,6 +248,9 @@ def InitParser():
     parser.add_argument('--around_density_peak', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
                         help='should calculate the center according to the density peak?',
                         default=False)
+    parser.add_argument('--line_profile', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
+                        help='should plot only the value along the motion axis?',
+                        default=False)
     parser.add_argument('--output_txt_files', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
                         help='should also make txt files with plotting values?',
                         default=False)
@@ -232,15 +268,16 @@ if __name__ == "__main__":
         plot_profiles(output_dir=args.output_dir, snapshot_name=args.snapshot_name, plotting_dir=args.plotting_dir,
                       testing_value=args.value, snapshot_number_array=args.snapshot_nums, log=args.logplot,
                       around_objects=args.around_objects, motion_axis=args.motion_axis,
-                      around_density_peak=args.around_density_peak, object_num=1,
+                      around_density_peak=args.around_density_peak, line_profile=args.line_profile, object_num=1,
                       output_txt_files=args.output_txt_files)
         plot_profiles(output_dir=args.output_dir, snapshot_name=args.snapshot_name, plotting_dir=args.plotting_dir,
                       testing_value=args.value, snapshot_number_array=args.snapshot_nums, log=args.logplot,
                       around_objects=args.around_objects, motion_axis=args.motion_axis,
-                      around_density_peak=args.around_density_peak, object_num=2,
+                      around_density_peak=args.around_density_peak, line_profile=args.line_profile, object_num=2,
                       output_txt_files=args.output_txt_files, new_fig=True)
     else:
         plot_profiles(output_dir=args.output_dir, snapshot_name=args.snapshot_name, plotting_dir=args.plotting_dir,
                       testing_value=args.value, snapshot_number_array=args.snapshot_nums, log=args.logplot,
                       around_objects=args.around_objects, motion_axis=args.motion_axis,
-                      around_density_peak=args.around_density_peak, output_txt_files=args.output_txt_files)
+                      around_density_peak=args.around_density_peak,  line_profile=args.line_profile,
+                      output_txt_files=args.output_txt_files)
