@@ -23,6 +23,12 @@ def calculate_mean_value(snapshot, value):
             return np.sqrt((snapshot.data[value] * snapshot.data[value]).sum(axis=1)).mean()
 
         return snapshot.data[value].mean()
+def calculate_max_value(snapshot, value):
+    if value in snapshot.data.keys():
+        if len(snapshot.data[value].shape) > 1:
+            return np.sqrt((snapshot.data[value] * snapshot.data[value]).sum(axis=1)).max()
+
+        return snapshot.data[value].max()
 
 def calculate_value(snapshot, value, sink_value=False, sink_id=0):
     if value not in snapshot.data.keys():
@@ -44,7 +50,7 @@ def calculate_value(snapshot, value, sink_value=False, sink_id=0):
     return np.sqrt((values ** 2).sum(axis=1))
 
 def calculate_value_over_time(snapshots_number_list, snapshot_dir="output", value="mass",
-                    mean=False, sink_value=False, sink_id=0):
+                    mean=False, max=False, sink_value=False, sink_id=0):
     value_over_time = []
     times = []
     value_to_calc = value
@@ -60,7 +66,10 @@ def calculate_value_over_time(snapshots_number_list, snapshot_dir="output", valu
         if mean:
             value_over_time.append(calculate_mean_value(snapshot, value_to_calc))
         else:
-            value_over_time.append(calculate_value(snapshot, value_to_calc, sink_value, sink_id))
+            if max:
+                value_over_time.append(calculate_max_value(snapshot, value_to_calc))
+            else:
+                value_over_time.append(calculate_value(snapshot, value_to_calc, sink_value, sink_id))
     print("added ", value_to_calc, " to the time evolution")
     if value_to_calc != value:
         value_diff_over_time = []
@@ -83,10 +92,10 @@ def calculate_value_over_time(snapshots_number_list, snapshot_dir="output", valu
         return value_over_time, times
 
 def make_time_plots(snapshots_number_list, snapshot_dir="output", plotting_dir="times_plots", value="mass", log=False,
-                    mean=False, sink_value=False, sink_id=0):
+                    mean=False, max=False,sink_value=False, sink_id=0):
 
     value_over_time, times = calculate_value_over_time(snapshots_number_list,
-                                                       snapshot_dir, value, mean,
+                                                       snapshot_dir, value, mean, max,
                                                        sink_value, sink_id)
     set_new_fig_properties()
     if log:
@@ -127,6 +136,8 @@ def InitParser():
                         default=True)
     parser.add_argument('--mean', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
                         help='calculate mean value', default=False)
+    parser.add_argument('--max', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
+                        help='calculate max value (only possible if not using mean value)', default=False)
     parser.add_argument('--sink_value', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
                         help='calculate value for sink', default=False)
     parser.add_argument('--sink_id', type=int, help='sink particle to plot for', default=0)
@@ -146,4 +157,4 @@ if __name__ == "__main__":
         os.mkdir(args.plotting_dir)
 
     make_time_plots(snapshot_number_list, snapshot_dir=args.output_dir, plotting_dir=args.plotting_dir, value=args.value,
-                    log=args.logplot, mean=args.mean, sink_value=args.sink_value, sink_id=args.sink_id )
+                    log=args.logplot, mean=args.mean, max=args.max, sink_value=args.sink_value, sink_id=args.sink_id )
