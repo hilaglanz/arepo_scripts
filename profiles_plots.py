@@ -163,7 +163,7 @@ def get_line_profile_for_snapshot(around_density_peak, around_objects, center, m
     print(s.data[testing_value][cell_indices].shape)
     print((s.data["pos"][cell_indices, motion_axis] - center[motion_axis]).shape)
     p = np.column_stack((s.data[testing_value][cell_indices],
-                        s.data["pos"][cell_indices, motion_axis] - center[motion_axis]))
+                         (s.data["pos"][cell_indices, motion_axis] - center[motion_axis]))[1])
 
     return p, s, suffix, testing_value
 
