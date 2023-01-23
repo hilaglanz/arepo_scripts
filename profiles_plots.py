@@ -161,7 +161,7 @@ def get_line_profile_for_snapshot(around_density_peak, around_objects, center, m
             (absolute(s.pos[:,(motion_axis + 1) % 3] - center[(motion_axis + 1) % 3]) < 2 * s.data["vol"] ** (1.0 / 3)) &
             (absolute(s.pos[:,(motion_axis + 2) % 3] - center[(motion_axis + 2) % 3]) < 2 * s.data["vol"] ** (1.0 / 3)))
     p = np.row_stack((s.data[testing_value][cell_indices],
-                         s.data["pos"][cell_indices, motion_axis] - center[motion_axis]))
+                         s.data["pos"][cell_indices, motion_axis] - center[motion_axis])).sort()
     print(p.shape)
 
     return p, s, suffix, testing_value
