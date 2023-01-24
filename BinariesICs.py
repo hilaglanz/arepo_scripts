@@ -140,10 +140,11 @@ class BinariesICs:
     def create_ic_at_apastron(self, semimajor, eccentricity=0):
         raise Exception("not implemented")
 
-    def create_ic_collision(self, impact_parameter, velocity=16e8, ic_file_name="bin.dat.ic"):
+    def create_ic_collision(self, impact_parameter, velocity=None, ic_file_name="bin.dat.ic"):
         self.relative_y = impact_parameter
         self.relative_x = self.calculate_RL()
 
+        velocity = self.calculate_escape_velocity(velocity, self.relative_x)
         self.relative_vx = velocity
         self.relative_vy = 0.0
 
@@ -151,6 +152,11 @@ class BinariesICs:
         self.place_objects_at_new_pos()
         self.change_objects_velocity()
         self.add_grids_and_save_ic(ic_file_name)
+
+    def calculate_escape_velocity(self, velocity, distance):
+        if velocity is None:
+            velocity = ((2 * G * (self.total_mass) / distance) ** 0.5)
+        return velocity
 
     def create_ic_for_next_interaction(self, ic_file_name="bin.dat.ic", relative_to_RL=True, factor=2, dist=None):
         self.initialized_new_data()
@@ -201,11 +207,11 @@ class BinariesICs:
         self.new_pos2 = np.array([self.new_x2, self.new_y2, self.pos2[2]])
 
     def create_new_velocity_array(self):
-        self.new_vx1 = - self.m2 * self.relative_vx / self.total_mass
-        self.new_vx2 = self.m1 * self.relative_vx / self.total_mass
+        self.new_vx1 = self.m2 * self.relative_vx / self.total_mass
+        self.new_vx2 = -self.m1 * self.relative_vx / self.total_mass
 
-        self.new_vy1 = - self.m2 * self.relative_vy / self.total_mass
-        self.new_vy2 = self.m1 * self.relative_vy / self.total_mass
+        self.new_vy1 = self.m2 * self.relative_vy / self.total_mass
+        self.new_vy2 = -self.m1 * self.relative_vy / self.total_mass
 
         self.new_v1 = np.array([self.new_vx1, self.new_vy1, self.v1[2]])
         self.new_v2 = np.array([self.new_vx2, self.new_vy2, self.v2[2]])
@@ -308,7 +314,7 @@ def InitParser():
     parser.add_argument('--period', type=float,  help='orbital period in seconds for mergers', default=0)
     parser.add_argument('--impact_parameter_rhocut', type=float,
                         help='calculate impact parameter according to this density cutoff', default=0)
-    parser.add_argument('--relative_velocity', type=float, help='', default=16e8)
+    parser.add_argument('--relative_velocity', type=float, help='', default=None)
     parser.add_argument('--relative_to_RL', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
                         help='is the distance should be relative to RL size?',
                         default=True)
