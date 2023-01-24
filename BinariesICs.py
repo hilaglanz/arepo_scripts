@@ -83,11 +83,11 @@ class BinariesICs:
         self.data['xnuc'][self.npart1:, :] = self.snapshot2.data['xnuc'][self.i2, :]
         self.data['pass'][self.npart1:, 1] = 1.0
 
-        self.data['pos'][:self.npart1, :] = self.snapshot1.pos[i1, :]
-        self.data['vel'][:self.npart1, :] = self.snapshot1.vel[i1, :]
+        self.data['pos'][:self.npart1, :] = self.snapshot1.pos[self.i1, :]
+        self.data['vel'][:self.npart1, :] = self.snapshot1.vel[self.i1, :]
 
-        self.data['pos'][self.npart1:, :] = self.snapshot2.pos[i2, :]
-        self.data['vel'][self.npart1:, :] = self.snapshot2.vel[i2, :]
+        self.data['pos'][self.npart1:, :] = self.snapshot2.pos[self.i2, :]
+        self.data['vel'][self.npart1:, :] = self.snapshot2.vel[self.i2, :]
 
         if 'bfld' in self.snapshot1.data.keys():
             self.data['bfld'][:self.npart1, :] = self.snapshot1.data['bfld'][self.i1, :]
