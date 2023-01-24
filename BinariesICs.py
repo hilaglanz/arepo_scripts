@@ -304,8 +304,8 @@ class SeparateBinariesLoader(BinariesICs):
         super().__init__(species_file)
 
     def get_objects_density(self, rhocut):
-        self.i1 = np.where((self.snapshot.rho > rhocut))
-        self.i2 = np.where((self.snapshot.rho > rhocut))
+        self.i1 = np.where((self.snapshot1.rho > rhocut))
+        self.i2 = np.where((self.snapshot2.rho > rhocut))
 
 
 def InitParser():
