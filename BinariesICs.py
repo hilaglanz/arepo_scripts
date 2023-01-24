@@ -107,20 +107,25 @@ class BinariesICs:
         gadget_write_ics(ic_file_name, self.data, double=True, format="hdf5")
         print("ic file saved to ", ic_file_name)
 
-    def create_ic_merger_keplerian(self,ic_file_name="bin.dat.ic", T=120, rhocut=1, relative_to_RL=True, factor=2):
+    def create_ic_merger_keplerian(self, ic_file_name="bin.dat.ic", initial_period=120, rhocut=1, relative_to_RL=True, factor=2):
         a0 = self.calculate_RL()
-        w0 = sqrt(G * m / a0 ** 3)
+        w0 = sqrt(G * self.total_mass / a0 ** 3)
         T0 = 2.0 * pi / w0
-        print('Egg:', T0, a0, w0)
+        print('orbital parameters at Roche Lobe filling (T0,a0,w0): ', T0, a0, w0)
 
-        w = 2.0 * pi / T
-        d = (G * m / (w * w)) ** (1. / 3.)
-        print('Using:', T, d, w)
+        if relative_to_RL:
+            initial_distance = a0 * factor
+            orbital_vel = sqrt(G * self.total_mass / initial_distance ** 3)
+            initial_period = 2.0 * pi / orbital_vel
+        else:
+            orbital_vel = 2.0 * pi / initial_period
+            initial_distance = (G * self.total_mass / (orbital_vel * orbital_vel)) ** (1. / 3.)
+        print('Using orbital parameters (T,a,w): ', initial_period, initial_distance, orbital_vel)
 
         self.initialized_new_data()
         self.copy_old_data()
 
-        self.relative_x = d
+        self.relative_x = initial_distance
         self.relative_y = 0
         self.relative_vx = 0
         self.relative_vy = 0
@@ -128,8 +133,8 @@ class BinariesICs:
         self.place_objects_at_new_pos()
 
         print("changing relative velocities according to new positions")
-        self.relative_vx = w * self.data['pos'][:,1]
-        self.relative_vy = -w * self.data['pos'][:,0]
+        self.relative_vx = orbital_vel * self.data['pos'][:,1]
+        self.relative_vy = -orbital_vel * self.data['pos'][:,0]
         self.create_new_velocity_array()
         self.change_objects_velocity()
 
@@ -340,7 +345,7 @@ if __name__ == "__main__":
                                         load_types=args.load_types)
 
     if args.period > 0:
-        binary.create_ic_merger_keplerian(ic_file_name=args.ic_file_name, T= args.period, rhocut= args.rhocut,
+        binary.create_ic_merger_keplerian(ic_file_name=args.ic_file_name, initial_period= args.period, rhocut= args.rhocut,
                                           relative_to_RL=args.relative_to_RL, factor=args.RL_factor)
     elif args.impact_parameter_rhocut > 0:
         i1 = np.where(binary.snapshot1.rho > args.impact_parameter_rhocut)
