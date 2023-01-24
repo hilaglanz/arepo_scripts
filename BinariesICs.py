@@ -96,7 +96,7 @@ class BinariesICs:
         self.data['boxsize'] = 1e10
 
     def find_new_borders(self):
-        return 4.0 * np.sqrt(self.data['pos'][:, 0] ** 2, self.data['pos'][:, 1] ** 2,
+        return 4.0 * np.sqrt(self.data['pos'][:, 0] ** 2 + self.data['pos'][:, 1] ** 2 +
                              self.data['pos'][:, 2] ** 2).max()
 
     def add_grids_and_save_ic(self, ic_file_name):
