@@ -96,7 +96,7 @@ class BinariesICs:
         self.data['boxsize'] = 1e10
 
     def find_new_borders(self):
-        return 4.0 * np.sqrt(self.data['pos'][:, 0] ** 2 + self.data['pos'][:, 1] ** 2 +
+        return 1.5 * np.sqrt(self.data['pos'][:, 0] ** 2 + self.data['pos'][:, 1] ** 2 +
                              self.data['pos'][:, 2] ** 2).max()
 
     def add_grids_and_save_ic(self, ic_file_name):
@@ -150,14 +150,17 @@ class BinariesICs:
     def create_ic_collision(self, impact_parameter, velocity=None, ic_file_name="bin.dat.ic"):
         self.relative_y = impact_parameter
         self.relative_x = self.calculate_RL()
+        print("relative positions= ", self.relative_x, self.relative_y)
 
         velocity = self.calculate_escape_velocity(velocity, self.relative_x)
+        print("using relative velocity= ", velocity)
         self.relative_vx = velocity
         self.relative_vy = 0.0
 
         self.create_new_position_velocity_arrays()
         self.place_objects_at_new_pos()
         self.change_objects_velocity()
+        self.add_magnetic_field()
         self.add_grids_and_save_ic(ic_file_name)
 
     def calculate_escape_velocity(self, velocity, distance):
