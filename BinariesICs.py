@@ -12,6 +12,8 @@ class BinariesICs:
             self.init_species(species_file)
         self.init_object_properties()
         self.init_orbital_parameters()
+        self.initialized_new_data()
+        self.copy_old_data()
 
     def init_species(self, species_file):
         self.sp = loaders.load_species(species_file)
@@ -122,8 +124,8 @@ class BinariesICs:
             initial_distance = (G * self.total_mass / (orbital_vel * orbital_vel)) ** (1. / 3.)
         print('Using orbital parameters (T,a,w): ', initial_period, initial_distance, orbital_vel)
 
-        self.initialized_new_data()
-        self.copy_old_data()
+        '''self.initialized_new_data()
+        self.copy_old_data()''' #TODO:remove
 
         self.relative_x = initial_distance
         self.relative_y = 0
@@ -164,8 +166,8 @@ class BinariesICs:
         return velocity
 
     def create_ic_for_next_interaction(self, ic_file_name="bin.dat.ic", relative_to_RL=True, factor=2, dist=None):
-        self.initialized_new_data()
-        self.copy_old_data()
+        '''self.initialized_new_data()
+                self.copy_old_data()'''  # TODO:remove
         if relative_to_RL:
             dist = factor * self.calculate_RL() # factor*RL
         elif dist is None:
