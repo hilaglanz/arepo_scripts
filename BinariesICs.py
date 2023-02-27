@@ -23,8 +23,8 @@ class BinariesICs:
             
 
     def init_object_properties(self):
-        self.m1 = self.snapshot1.mass[self.i1].sum()
-        self.m2 = self.snapshot2.mass[self.i2].sum()
+        self.m1 = self.snapshot1.mass[self.i1].astype('float64').sum()
+        self.m2 = self.snapshot2.mass[self.i2].astype('float64').sum()
         self.total_mass = self.m1 + self.m2
         print("masses: ",self.m1," , ",self.m2)
         self.d1 = self.snapshot1.r()[self.i1].max() #maximum distance from the center of the box
@@ -36,8 +36,8 @@ class BinariesICs:
 
     def init_orbital_parameters(self):
         print("setting orbital parameters")
-        self.pos1 = (self.snapshot1.pos[self.i1] * self.snapshot1.mass[self.i1][:, None]).sum(axis=0) / self.m1
-        self.pos2 = (self.snapshot2.pos[self.i2] * self.snapshot2.mass[self.i2][:, None]).sum(axis=0) / self.m2
+        self.pos1 = (self.snapshot1.pos[self.i1, :].astype('f8') * self.snapshot1.mass[self.i1][:, None]).sum(axis=0) / self.m1
+        self.pos2 = (self.snapshot2.pos[self.i2, :].astype('f8') * self.snapshot2.mass[self.i2][:, None]).sum(axis=0) / self.m2
         print("pos1: ", self.pos1, "pos2: ", self.pos2)
         self.r1 = self.snapshot1.r(center=self.pos1)[self.i1].max() #radius of particles1
         self.r2 = self.snapshot2.r(center=self.pos2)[self.i2].max() #radius of particles2
@@ -45,8 +45,8 @@ class BinariesICs:
         print("loaded separation: ", self.loaded_separation)
         self.center_of_mass = (self.m1 * self.pos1 + self.m2 * self.pos2) / self.total_mass
         print("binary center of mass: ", self.center_of_mass)
-        self.v1 = (self.snapshot1.vel[self.i1] * self.snapshot1.mass[self.i1][:, None]).sum(axis=0) / self.m1
-        self.v2 = (self.snapshot2.vel[self.i2] * self.snapshot2.mass[self.i2][:, None]).sum(axis=0) / self.m2
+        self.v1 = (self.snapshot1.vel[self.i1, :].astype('f8')  * self.snapshot1.mass[self.i1][:, None]).sum(axis=0) / self.m1
+        self.v2 = (self.snapshot2.vel[self.i2, :].astype('f8') * self.snapshot2.mass[self.i2][:, None]).sum(axis=0) / self.m2
         self.velocity_difference = self.v2 - self.v1
         print("relative velocity: ", self.velocity_difference)
         self.angular_momentum = np.cross(self.loaded_separation, self.velocity_difference)
@@ -239,16 +239,19 @@ class BinariesICs:
 
     def add_magnetic_field(self):
         mm = np.array([0., 0., 1e3 * 1e9 ** 3 / 2.])  # 1e3 G at 1e9 cm
+        box_center = 0.5 * self.data['boxsize']
         c1 = (self.data['pos'] * self.data['mass'][:,None] * self.data['pass'][:,0][:,None]).sum( axis=0 ) / self.m1
+        print("c1 in magnetic field calculations= ",c1, " new_pos1= ", self.new_pos1, "new_pos1+center= ", self.new_pos1+box_center)
         r1 = np.maximum(np.sqrt(((self.data['pos'] - c1[None, :]) ** 2).sum(axis=1)), 3e7).astype('float64')
-        i, = np.where(r1 < 1e10)
+        i, = np.where(r1 < self.data['boxsize'])
         rad1 = self.data['pos'][i, :] - c1[None, :]
         self.data['bfld'][i, :] = 3. * rad1 * (mm[None, :] * rad1).sum(axis=1)[:, None] / (r1[i] ** 5)[:, None] - \
                                   mm[None,:] / (r1[i] ** 3)[:, None]
 
         c2 = (self.data['pos'] * self.data['mass'][:, None] * self.data['pass'][:, 1][:, None]).sum(axis=0) / self.m2
+        print("c2 in magnetic field calculations= ",c2, " new_pos2= ", self.new_pos2, "new_pos2+center= ", self.new_pos2+box_center)
         r2 = np.maximum(np.sqrt(((self.data['pos'] - c2[None, :]) ** 2).sum(axis=1)), 3e7).astype('float64')
-        i, = np.where(r2 < 1e10)
+        i, = np.where(r2 < self.data['boxsize'])
         rad2 = self.data['pos'][i, :] - c2[None, :]
         self.data['bfld'][i, :] += 3. * rad2 * (mm[None, :] * rad2).sum(axis=1)[:, None] / (r2[i] ** 5)[:, None] - \
                               mm[None, :] / (r2[i] ** 3)[:, None]
