@@ -286,22 +286,22 @@ class BinariesLoader(BinariesICs):
         super().__init__(species_file)
 
     def get_objects_position_density(self, conditional_axis, rhocut):
-        self.i1 = np.where((self.binary_snapshot.pos[:,conditional_axis] - self.binary_snapshot.center[conditional_axis] > 0) &
+        self.i1, = np.where((self.binary_snapshot.pos[:,conditional_axis] - self.binary_snapshot.center[conditional_axis] > 0) &
                         (self.binary_snapshot.rho > rhocut))
-        self.i2 = np.where((self.binary_snapshot.pos[:,conditional_axis] - self.binary_snapshot.center[conditional_axis] < 0) &
+        self.i2, = np.where((self.binary_snapshot.pos[:,conditional_axis] - self.binary_snapshot.center[conditional_axis] < 0) &
                         (self.binary_snapshot.rho > rhocut))
 
     def get_objects_position(self, conditional_axis):
-        self.i1 = np.where((self.binary_snapshot.pos[:,conditional_axis] - self.binary_snapshot.center[conditional_axis] > 0))
-        self.i2 = np.where((self.binary_snapshot.pos[:,conditional_axis] - self.binary_snapshot.center[conditional_axis] < 0))
+        self.i1, = np.where((self.binary_snapshot.pos[:,conditional_axis] - self.binary_snapshot.center[conditional_axis] > 0))
+        self.i2, = np.where((self.binary_snapshot.pos[:,conditional_axis] - self.binary_snapshot.center[conditional_axis] < 0))
 
     def get_objects_density(self, rhocut):
-        self.i1 = np.where((self.binary_snapshot.pass00 == 1) & (self.binary_snapshot.rho > rhocut))
-        self.i2 = np.where((self.binary_snapshot.pass01 == 1) & (self.binary_snapshot.rho > rhocut))
+        self.i1, = np.where((self.binary_snapshot.pass00 == 1) & (self.binary_snapshot.rho > rhocut))
+        self.i2, = np.where((self.binary_snapshot.pass01 == 1) & (self.binary_snapshot.rho > rhocut))
 
     def get_objects(self):
-        self.i1 = np.where((self.binary_snapshot.pass00 == 1))
-        self.i2 = np.where((self.binary_snapshot.pass01 == 1))
+        self.i1, = np.where((self.binary_snapshot.pass00 == 1))
+        self.i2, = np.where((self.binary_snapshot.pass01 == 1))
 
 
 class SeparateBinariesLoader(BinariesICs):
@@ -312,8 +312,8 @@ class SeparateBinariesLoader(BinariesICs):
         super().__init__(species_file)
 
     def get_objects_density(self, rhocut):
-        self.i1 = np.where((self.snapshot1.rho > rhocut))
-        self.i2 = np.where((self.snapshot2.rho > rhocut))
+        self.i1, = np.where((self.snapshot1.rho > rhocut))
+        self.i2, = np.where((self.snapshot2.rho > rhocut))
 
 
 def InitParser():
@@ -356,8 +356,8 @@ if __name__ == "__main__":
         binary.create_ic_merger_keplerian(ic_file_name=args.ic_file_name, initial_period= args.period, rhocut= args.rhocut,
                                           relative_to_RL=args.relative_to_RL, factor=args.RL_factor)
     elif args.impact_parameter_rhocut > 0:
-        i1 = np.where(binary.snapshot1.rho > args.impact_parameter_rhocut)
-        i2 = np.where(binary.snapshot2.rho > args.impact_parameter_rhocut)
+        i1, = np.where(binary.snapshot1.rho > args.impact_parameter_rhocut)
+        i2, = np.where(binary.snapshot2.rho > args.impact_parameter_rhocut)
         b = binary.snapshot1.r()[i1].max() + binary.snapshot2.r()[i2].max()
         binary.create_ic_collision(b, args.relative_velocity, args.ic_file_name)
     elif args.find_next_interaction:
