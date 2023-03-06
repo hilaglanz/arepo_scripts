@@ -235,15 +235,17 @@ class BinariesICs:
         self.new_v2 = np.array([self.new_vx2, self.new_vy2, self.v2[2]])
 
     def place_objects_at_new_pos(self):
-        self.data['pos'][:self.npart1, :] = self.data['pos'][:self.npart1, :] + self.new_pos1 - self.pos1
-        self.data['pos'][self.npart1:, :] = self.data['pos'][self.npart1:, :] + self.new_pos2 - self.pos2
+        self.data['pos'][:self.npart1, :] = self.data['pos'][:self.npart1, :] + \
+                                            self.new_pos1[None, :] - self.pos1[None, :]
+        self.data['pos'][self.npart1:, :] = self.data['pos'][self.npart1:, :] + \
+                                            self.new_pos2[None, :] - self.pos2[None, :]
 
         self.data['boxsize'] = max(self.find_new_borders(), 1e10)
         self.data['pos'] += 0.5 * self.data['boxsize']
 
     def change_objects_velocity(self):
-        self.data['vel'][:self.npart1, :] = self.data['vel'][:self.npart1, :] + self.new_v1 - self.v1
-        self.data['vel'][self.npart1:, :] = self.data['vel'][self.npart1:, :] + self.new_v1 - self.v2
+        self.data['vel'][:self.npart1, :] = self.data['vel'][:self.npart1, :] + self.new_v1[None, :] - self.v1[None, :]
+        self.data['vel'][self.npart1:, :] = self.data['vel'][self.npart1:, :] + self.new_v1[None, :] - self.v2[None, :]
 
     def add_magnetic_field(self):
         mm = np.array([0., 0., 1e3 * 1e9 ** 3 / 2.])  # 1e3 G at 1e9 cm
