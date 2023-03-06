@@ -6,7 +6,15 @@ from loadmodules import *
 
 
 class BinariesICs:
+    snapshot1 = None
+    snapshot2 = None
+    i1 = []
+    i2 = []
     def __init__(self, species_file="species55.txt"):
+        if self.snapshot1 is None or self.snapshot2 is None:
+            print("snapshot weren't initialized exiting")
+            return
+
         print("initializing general binary info")
         if species_file is not None:
             self.init_species(species_file)
@@ -359,6 +367,7 @@ if __name__ == "__main__":
         i1, = np.where(binary.snapshot1.rho > args.impact_parameter_rhocut)
         i2, = np.where(binary.snapshot2.rho > args.impact_parameter_rhocut)
         b = binary.snapshot1.r()[i1].max() + binary.snapshot2.r()[i2].max()
+        print("b = ",b)
         binary.create_ic_collision(b, args.relative_velocity, args.ic_file_name)
     elif args.find_next_interaction:
         binary.create_ic_for_next_interaction(args.ic_file_name, args.relative_to_RL, args.RL_factor, args.separation)
