@@ -108,11 +108,15 @@ class BinariesICs:
                              self.data['pos'][:, 2] ** 2).max()
 
     def add_grids_and_save_ic(self, ic_file_name):
-        boxsize = self.data['boxsize']
-        print("using inner boxsize= ", boxsize)
         xnuc = np.zeros(self.sp['count'])
         xnuc[self.iC12] = 0.5
         xnuc[self.iO16] = 0.5
+
+        self.data['boxsize'] = max(self.find_new_borders(), 1e10)
+        self.data['pos'] += 0.5 * self.data['boxsize']
+        boxsize = self.data['boxsize']
+        print("using inner boxsize= ", boxsize)
+
         gadget_add_grids(self.data, [boxsize, 10 * boxsize, 100 * boxsize], 32, xnuc=xnuc)
         gadget_write_ics(ic_file_name, self.data, double=True, format="hdf5")
         print("ic file saved to ", ic_file_name)
@@ -240,18 +244,14 @@ class BinariesICs:
         self.data['pos'][self.npart1:, :] = self.data['pos'][self.npart1:, :] + \
                                             self.new_pos2[None, :] - self.pos2[None, :]
 
-        self.data['boxsize'] = max(self.find_new_borders(), 1e10)
-        self.data['pos'] += 0.5 * self.data['boxsize']
-
     def change_objects_velocity(self):
         self.data['vel'][:self.npart1, :] = self.data['vel'][:self.npart1, :] + self.new_v1[None, :] - self.v1[None, :]
         self.data['vel'][self.npart1:, :] = self.data['vel'][self.npart1:, :] + self.new_v2[None, :] - self.v2[None, :]
 
     def add_magnetic_field(self):
         mm = np.array([0., 0., 1e3 * 1e9 ** 3 / 2.])  # 1e3 G at 1e9 cm
-        box_center = 0.5 * self.data['boxsize']
         c1 = (self.data['pos'] * self.data['mass'][:,None] * self.data['pass'][:,0][:,None]).sum( axis=0 ) / self.m1
-        print("c1 in magnetic field calculations= ",c1, " new_pos1= ", self.new_pos1, "new_pos1+center= ", self.new_pos1+box_center)
+        print("c1 in magnetic field calculations= ",c1, " new_pos1= ", self.new_pos1)
         r1 = np.maximum(np.sqrt(((self.data['pos'] - c1[None, :]) ** 2).sum(axis=1)), 3e7).astype('float64')
         i, = np.where(r1 < self.data['boxsize'])
         rad1 = self.data['pos'][i, :] - c1[None, :]
@@ -259,7 +259,7 @@ class BinariesICs:
                                   mm[None,:] / (r1[i] ** 3)[:, None]
 
         c2 = (self.data['pos'] * self.data['mass'][:, None] * self.data['pass'][:, 1][:, None]).sum(axis=0) / self.m2
-        print("c2 in magnetic field calculations= ",c2, " new_pos2= ", self.new_pos2, "new_pos2+center= ", self.new_pos2+box_center)
+        print("c2 in magnetic field calculations= ",c2, " new_pos2= ", self.new_pos2)
         r2 = np.maximum(np.sqrt(((self.data['pos'] - c2[None, :]) ** 2).sum(axis=1)), 3e7).astype('float64')
         i, = np.where(r2 < self.data['boxsize'])
         rad2 = self.data['pos'][i, :] - c2[None, :]
