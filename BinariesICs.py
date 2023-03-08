@@ -245,7 +245,7 @@ class BinariesICs:
 
     def change_objects_velocity(self):
         self.data['vel'][:self.npart1, :] = self.data['vel'][:self.npart1, :] + self.new_v1[None, :] - self.v1[None, :]
-        self.data['vel'][self.npart1:, :] = self.data['vel'][self.npart1:, :] + self.new_v1[None, :] - self.v2[None, :]
+        self.data['vel'][self.npart1:, :] = self.data['vel'][self.npart1:, :] + self.new_v2[None, :] - self.v2[None, :]
 
     def add_magnetic_field(self):
         mm = np.array([0., 0., 1e3 * 1e9 ** 3 / 2.])  # 1e3 G at 1e9 cm
