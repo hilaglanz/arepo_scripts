@@ -107,7 +107,13 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
     if value == "vel":
         loaded_snap.data['vel_size'] = np.sqrt((loaded_snap.vel ** 2).sum(axis=1))
         value = "vel_size"
-        
+
+    if value == "mach":
+        loaded_snap.computeMach()
+    if value == "cs" or "sound" in value:
+        loaded_snap.computeMach()
+        value = "sound"
+
     print(value)
     xlab = chr(ord('x') + axes[0])
     ylab = chr(ord('x') + axes[1])

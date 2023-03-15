@@ -71,6 +71,15 @@ def compute_value(s, testing_value, center=None):
         print("adding cummulative nass")
         compute_cumulative_mass(s, center)
 
+    if testing_value == "mach":
+        print("adding mach")
+        s.computeMach()
+
+    if testing_value == "cs" or testing_value == "csound" or testing_value == "sound":
+        if "sound" not in s.data.keys():
+            print("adding mach and cs")
+            s.computeMach()
+
     return testing_value
 
 
