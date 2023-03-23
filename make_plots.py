@@ -202,7 +202,7 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
                               unit_velocity= units_velocity, unit_density= units_density,
                               plot_velocities=plot_velocities, plot_bfld= plot_bfld, axes=get_single_value(axes_array),
                               modified_units=modified_units, ignore_types=ignore_types)
-            title('time : {:.2f}'.format(loaded_snap.time) + " [" + name_and_units["time"][1] + "]")
+            title('time : {:.2g}'.format(loaded_snap.time) + " [" + name_and_units["time"][1] + "]")
             filename = plottingDir + "/Aslice_" + val + "_{0}.png".format(snap)
             print("saving to: ", filename)
             savefig(filename)
@@ -233,7 +233,7 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
                 rcParams['text.usetex'] = True
 
             #title('time : {:.2f} [s]'.format(loaded_snap.time))
-            suptitle('time : {:.2f}'.format(loaded_snap.time) + " [" + name_and_units["time"][1] + "]", fontsize='x-large')
+            suptitle('time : {:.2g}'.format(loaded_snap.time) + " [" + name_and_units["time"][1] + "]", fontsize='x-large')
             rcParams.update({'font.size': 40, 'font.family': 'Serif'})
             rcParams['text.usetex'] = True
             filename = plottingDir + "/Aslice_" + "_".join(value) + "_{0}.png".format(snap)
