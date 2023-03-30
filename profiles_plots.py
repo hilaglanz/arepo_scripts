@@ -130,21 +130,35 @@ def get_radial_profile_for_snapshot(around_density_peak, around_objects, center,
                                                                                          snapshot_name,
                                                                                          snapshot_number)
         testing_value = compute_value(s, testing_value, center)
-        nshells = 200
-        dr = 0
-        p = calcGrid.calcRadialProfile(s.data['pos'].astype('float64')[cell_indices],
-                                       s.data[testing_value].astype('float64')[cell_indices], 2, nshells, dr,
-                                       center[0],
-                                       center[1], center[2])
+
     else:
         s = gadget_readsnap(snapshot_number, output_dir, snapshot_name)
         testing_value = compute_value(s, testing_value, center)
-        if type(center) == list:
-            center = pylab.array(center)
-        elif type(center) != np.ndarray:
-            center = s.center
-        p = s.get_radprof(testing_value, center)
+        cell_indices = s.data['type'] == 0
+
+    p = plot_cells_around_center(cell_indices, center, s, testing_value)
+
     return p, s, suffix, testing_value
+
+
+def plot_cells_around_center(cell_indices, center, s, testing_value):
+    nshells = 200
+    dr = 0
+    if type(center) == list:
+        center = pylab.array(center)
+    elif type(center) != np.ndarray:
+        center = s.center
+    mode = 2
+    value = testing_value
+    if testing_value == 'rho':
+        mode = 1
+        value = 'mass'
+    p = calcGrid.calcRadialProfile(s.data['pos'].astype('float64')[cell_indices],
+                                   s.data[value].astype('float64')[cell_indices], mode, nshells, dr,
+                                   center[0],
+                                   center[1], center[2])
+    return p
+
 
 def get_line_profile_for_snapshot(around_density_peak, around_objects, center, motion_axis, object_num, output_dir,
                                     snapshot_name, snapshot_number, testing_value):
