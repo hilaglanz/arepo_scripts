@@ -48,10 +48,11 @@ def calculate_value(snapshot, value, sink_value=False, sink_id=0):
 
     if len(snapshot.data[value].shape) > 1:
         values = (snapshot.data[value] * snapshot.mass[:, None]).sum(axis=0) / snapshot.mass.sum()
+        return np.sqrt((values ** 2).sum(axis=1))
     else:
         values = (snapshot.data[value] * snapshot.mass).sum(axis=0) / snapshot.mass.sum()
+        return np.sqrt((values ** 2).sum())
 
-    return np.sqrt((values ** 2).sum(axis=1))
 
 def calculate_value_over_time(snapshots_number_list, snapshot_dir="output", value="mass",
                     mean=False, max=False, sink_value=False, sink_id=0):
