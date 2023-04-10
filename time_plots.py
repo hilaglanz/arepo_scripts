@@ -46,7 +46,7 @@ def calculate_value(snapshot, value, sink_value=False, sink_id=0):
 
         return curr_val
 
-    if (snapshot.data[value].shape) > 1:
+    if len(snapshot.data[value].shape) > 1:
         values = (snapshot.data[value] * snapshot.mass[:, None]).sum(axis=0) / snapshot.mass.sum()
     else:
         values = (snapshot.data[value] * snapshot.mass).sum(axis=0) / snapshot.mass.sum()
