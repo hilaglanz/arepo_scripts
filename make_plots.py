@@ -50,8 +50,8 @@ def plot_stream(loaded_snap, value='vel', xlab='x', ylab='y', axes=[0,1], box=Fa
     # scale=50)#*loaded_snap.parameters['BoxSize']/box[0])
 
 def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=False,logplot=True, res=1024, numthreads=1,
-                      center=True,plot_points=True, additional_points_size=30,additional_points_shape='X',
-                      additional_points_color='w', unit_length='cm', unit_velocity="$cm/s$",
+                      relative_to_sink_id=None, center=True,plot_points=True, additional_points_size=30,
+                      additional_points_shape='X', additional_points_color='w', unit_length='cm', unit_velocity="$cm/s$",
                       unit_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
                       newfig=True, axes=[0,1], modified_units = False, ignore_types=[]):
     label = value
@@ -114,6 +114,35 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
         loaded_snap.computeMach()
         value = "sound"
 
+    if "grap" in value or (value == "HSE" and relative_to_sink_id is None):
+        loaded_snap.data['grapx'] = loaded_snap.data["grap"][:, 0]
+        loaded_snap.data['grapy'] = loaded_snap.data["grap"][:, 1]
+        loaded_snap.data['grapz'] = loaded_snap.data["grap"][:, 2]
+
+    if value == "grap" or (value == "HSE" and relative_to_sink_id is None):
+        if relative_to_sink_id is None:
+            loaded_snap.data['grap_size'] = np.sqrt((loaded_snap.grap ** 2).sum(axis=1))
+            value = "grap_size"
+        else:
+            sink_idk = get_sink_idk(loaded_snap, relative_to_sink_id)
+            sink_pos = loaded_snap.pos[sink_idk]
+            r = loaded_snap.pos[np.where(loaded_snap.type == 0)]-sink_pos[None,:]
+            dist = np.sqrt((r*r).sum(axis=1))
+            loaded_snap.data['grap_r'] = (((loaded_snap.pos[np.where(loaded_snap.type == 0)]-
+                                            sink_pos[None,:])*loaded_snap.grap).sum(axis=1))/dist
+            if value != "HSE":
+                value = "grap_r"
+
+    if (value == "g_sink" or value == "HSE") and relative_to_sink_id is None:
+        sink_idk = get_sink_idk(loaded_snap, relative_to_sink_id)
+        sink_pos = loaded_snap.pos[sink_idk]
+        r = loaded_snap.pos[np.where(loaded_snap.type == 0)]-sink_pos[None,:]
+        dist = np.sqrt((r*r).sum(axis=1))
+        loaded_snap.data['g_sink'] = G * loaded_snap.mass[sink_idk] / dist**2
+
+    if value == "HSE" and relative_to_sink_id is None:
+        loaded_snap.data["HSE"] = loaded_snap.data["grap_r"]/(loaded_snap.data["g_sink"] * loaded_snap.rho)
+
     print(value)
     xlab = chr(ord('x') + axes[0])
     ylab = chr(ord('x') + axes[1])
@@ -147,6 +176,14 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
     xlabel(xlab + ' [' + unit_length + ']', loc="left")
     ylabel(ylab + ' [' + unit_length + ']')
 
+
+def get_sink_idk(loaded_snap, relative_to_sink_id):
+    sink_idks = np.where(loaded_snap.type == 5)
+    sink_idk = sink_idks[0][relative_to_sink_id]
+    print("doing for sink particle")
+    return sink_idk
+
+
 def get_single_value(value,index=0):
     if value is None:
         return value
@@ -175,7 +212,8 @@ def get_snapshot_number_list(snapshotDir="outupt", snapshotName="snapshot_", fir
     return range(firstSnap, lastSnap+1, skipSteps)
 
 def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstSnap=0,lastSnap=-1,skipSteps=1,box=False,
-               vrange=False, cmap=["hot"], logplot=True, res=1024, numthreads=1, center=True, plot_points=True,
+               vrange=False, cmap=["hot"], logplot=True, res=1024, numthreads=1, center=True, relative_to_sink_id=None,
+               plot_points=True,
                additional_points_size=30,additional_points_shape='X', additional_points_color='w', units_length = 'cm',
                units_velocity="$cm/s$", units_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
                axes_array=[[0,1]], ignore_types=[]):
@@ -195,7 +233,8 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
             print(val)
             plot_single_value(loaded_snap, value=val, cmap=curr_cmap, box=get_single_value(box),
                               vrange=get_single_value(vrange), logplot=get_single_value(logplot), res=res,
-                              numthreads=numthreads, center=center, plot_points=plot_points,
+                              numthreads=numthreads, center=center, relative_to_sink_id=relative_to_sink_id,
+                              plot_points=plot_points,
                               additional_points_size=additional_points_size,
                               additional_points_shape=additional_points_shape,
                               additional_points_color=additional_points_color, unit_length=units_length,
@@ -222,7 +261,8 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
                 plot_single_value(loaded_snap,  value=val, cmap=curr_cmap, box=get_single_value(box,index),
                                   vrange=get_single_value(vrange,index), logplot=get_single_value(logplot,index),
                                   res=res,
-                                  numthreads=numthreads, center=center, plot_points=plot_points,
+                                  numthreads=numthreads, center=center, relative_to_sink_id=relative_to_sink_id,
+                                  plot_points=plot_points,
                                   additional_points_size=additional_points_size,
                                   additional_points_shape=additional_points_shape,
                                   additional_points_color=additional_points_color, unit_length=units_length,
@@ -265,6 +305,7 @@ def InitParser():
     parser.add_argument('--center_x', type=float, help='point on x axis to be the center of the plot', default=None)
     parser.add_argument('--center_y', type=float, help='point on y axis to be the center of the plot', default=None)
     parser.add_argument('--center_z', type=float, help='point on z axis to be the center of the plot', default=0)
+    parser.add_argument('--relative_to_sink_id', nargs='+', type=int,  help='id of sink particle ro use as a reference point', default= None)
     parser.add_argument('--plot_points', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),  help='should plot other than gas?',
                         default=True)
     parser.add_argument('--ignore_types', nargs='+', type=int,  help='particle types to ignore', default=[])
@@ -316,6 +357,7 @@ if __name__ == "__main__":
 
     plot_range(args.value, args.source_dir, args.saving_dir, args.beginStep, args.lastStep, args.skipStep, box=box,
                vrange=vrange, logplot=args.logplot, cmap=args.cmap, res=args.res, numthreads= args.numthreads, center=center,
+               relative_to_sink_id=args.relative_to_sink_id,
                plot_points=args.plot_points, additional_points_size=args.additional_points_size,
                additional_points_shape=args.additional_points_shape,
                additional_points_color=args.additional_points_color,
