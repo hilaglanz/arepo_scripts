@@ -149,7 +149,7 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
         loaded_snap.data['g_sink'] = G * loaded_snap.mass[sink_idk] / dist**2
 
     if value == "HSE" and relative_to_sink_id is not None:
-        loaded_snap.data["HSE"] = loaded_snap.data["grap_r"]/(loaded_snap.data["g_sink"] * loaded_snap.rho)
+        loaded_snap.data["HSE"] = -1*loaded_snap.data["grap_r"]/(loaded_snap.data["g_sink"] * loaded_snap.rho)
 
     print(value)
     xlab = chr(ord('x') + axes[0])
