@@ -126,10 +126,9 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
         else:
             sink_idk = get_sink_idk(loaded_snap, relative_to_sink_id)
             sink_pos = loaded_snap.pos[sink_idk]
-            r = loaded_snap.pos[np.where(loaded_snap.type == 0)]-sink_pos[None,:]
+            r = loaded_snap.pos[np.where(loaded_snap.type == 0)]-sink_pos
             dist = np.sqrt((r*r).sum(axis=1))
-            loaded_snap.data['grap_r'] = (((loaded_snap.pos[np.where(loaded_snap.type == 0)]-
-                                            sink_pos[None,:])*loaded_snap.grap).sum(axis=1))/dist
+            loaded_snap.data['grap_r'] = ((r*loaded_snap.grap).sum(axis=1))/dist
             if value != "HSE":
                 value = "grap_r"
 
