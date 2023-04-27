@@ -152,7 +152,7 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
     if box == False:
         box = [loaded_snap.boxsize, loaded_snap.boxsize]
     if plot_points:
-        points, = np.where((loaded_snap.type > 0) & (loaded_snap.type != ignore_types))
+        points, = np.where((loaded_snap.type > 0) & (loaded_snap.type not in ignore_types))
         if len(points) > 0:
             print("plotting points")
             for point in points:
