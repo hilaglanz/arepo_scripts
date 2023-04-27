@@ -108,6 +108,15 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
         loaded_snap.data['vel_size'] = np.sqrt((loaded_snap.vel ** 2).sum(axis=1))
         value = "vel_size"
 
+    if "vort" in value:
+        loaded_snap.data['vortx'] = loaded_snap.data["vort"][:, 0]
+        loaded_snap.data['vorty'] = loaded_snap.data["vort"][:, 1]
+        loaded_snap.data['vortz'] = loaded_snap.data["vort"][:, 2]
+
+    if value == "vort":
+        loaded_snap.data['vort_size'] = np.sqrt((loaded_snap.vort ** 2).sum(axis=1))
+        value = "vort_size"
+
     if value == "mach":
         loaded_snap.computeMach()
     if value == "cs" or "sound" in value:
