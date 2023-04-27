@@ -114,12 +114,12 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
         loaded_snap.computeMach()
         value = "sound"
 
-    if "grap" in value or (value == "HSE" and relative_to_sink_id is None):
+    if "grap" in value or (value == "HSE" and relative_to_sink_id is not None):
         loaded_snap.data['grapx'] = loaded_snap.data["grap"][:, 0]
         loaded_snap.data['grapy'] = loaded_snap.data["grap"][:, 1]
         loaded_snap.data['grapz'] = loaded_snap.data["grap"][:, 2]
 
-    if value == "grap" or (value == "HSE" and relative_to_sink_id is None):
+    if value == "grap" or (value == "HSE" and relative_to_sink_id is not None):
         if relative_to_sink_id is None:
             loaded_snap.data['grap_size'] = np.sqrt((loaded_snap.grap ** 2).sum(axis=1))
             value = "grap_size"
@@ -132,14 +132,14 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
             if value != "HSE":
                 value = "grap_r"
 
-    if (value == "g_sink" or value == "HSE") and relative_to_sink_id is None:
+    if (value == "g_sink" or value == "HSE") and relative_to_sink_id is not None:
         sink_idk = get_sink_idk(loaded_snap, relative_to_sink_id)
         sink_pos = loaded_snap.pos[sink_idk]
-        r = loaded_snap.pos[np.where(loaded_snap.type == 0)]-sink_pos[None,:]
+        r = loaded_snap.pos[np.where(loaded_snap.type == 0)]-sink_pos
         dist = np.sqrt((r*r).sum(axis=1))
         loaded_snap.data['g_sink'] = G * loaded_snap.mass[sink_idk] / dist**2
 
-    if value == "HSE" and relative_to_sink_id is None:
+    if value == "HSE" and relative_to_sink_id is not None:
         loaded_snap.data["HSE"] = loaded_snap.data["grap_r"]/(loaded_snap.data["g_sink"] * loaded_snap.rho)
 
     print(value)
