@@ -176,7 +176,7 @@ def calculate_label_and_value(loaded_snap, value, relative_to_sink_id):
             value = "grap_size"
         else:
             dist, r, sink_idk = calculate_sink_properties(loaded_snap, relative_to_sink_id)
-            loaded_snap.data['grap_r'] = project_vector(loaded_snap.data[value], r)
+            loaded_snap.data['grap_r'] = project_vector(loaded_snap.data["grap"], r)
             if value != "HSE":
                 value = "grap_r"
 
@@ -201,7 +201,7 @@ def calculate_label_and_value(loaded_snap, value, relative_to_sink_id):
             value = "grav_size"
         else:
             dist, r, sink_idk = calculate_sink_properties(loaded_snap, relative_to_sink_id)
-            loaded_snap.data['grav_r'] = project_vector(loaded_snap.data[value], r)
+            loaded_snap.data['grav_r'] = project_vector(loaded_snap.data[grav], r)
             value = "grav_r"
 
     if value == "grap_r_over_rho" and relative_to_sink_id is not None:
@@ -213,7 +213,7 @@ def calculate_label_and_value(loaded_snap, value, relative_to_sink_id):
         if relative_to_sink_id is not None:
             dist, r, sink_idk = calculate_sink_properties(loaded_snap, relative_to_sink_id)
             value = "v_grav_r"
-            loaded_snap.data[value] = project_vector(loaded_snap.data[value], r)
+            loaded_snap.data[value] = project_vector(loaded_snap.data["v_grav"], r)
 
     if value == "momentum_vdot":
         loaded_snap, temp_value = calculate_label_and_value(loaded_snap, "g_sink", relative_to_sink_id)
