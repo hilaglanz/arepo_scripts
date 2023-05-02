@@ -6,7 +6,8 @@ from loadmodules import *
 
 name_and_units = {"rho":[r'$\rho$',r'$g/cm^3$', 1.0], "temp":["Temperature","K", 1.0], "vel":["Velocity","$cm/s$", 1.0],
                   "mass":["Mass","g", 1.0], "time":["time", "s", 1.0], "length": ["length", "cm",1.0],
-                  "acc":["acceleration", "$cm/s^2$"], "pres":["Pressure", "Ba"]}
+                  "acc":["acceleration", "$cm/s^2$", 1.0], "pres":["Pressure", "Ba", 1.0]}
+
 species = ['n', 'p', '^{4}He', '^{11}B', '^{12}C', '^{13}C', '^{13}N', '^{14}N', '^{15}N', '^{15}O',
            '^{16}O', '^{17}O', '^{18}F', '^{19}Ne', '^{20}Ne', '^{21}Ne', '^{22}Ne', '^{22}Na',
            '^{23}Na', '^{23}Mg', '^{24}Mg', '^{25}Mg', '^{26}Mg', '^{25}Al', '^{26}Al',
@@ -15,6 +16,8 @@ species = ['n', 'p', '^{4}He', '^{11}B', '^{12}C', '^{13}C', '^{13}N', '^{14}N',
            '^{39}Ar', '^{39}K', '^{40}Ca', '^{43}Sc', '^{44}Ti', '^{47}V', '^{48}Cr', '^{51}Mn',
            '^{52}Fe', '^{56}Fe', '^{55}Co', '^{56}Ni', '^{58}Ni', '^{59}Ni']
 
+def add_name_and_unit(value, name, unit, factor = 1.0):
+    name_and_units[value] = [name, unit, factor]
 def change_snap_units(loaded_snap):
     loaded_snap.time *= name_and_units["time"][2]
     loaded_snap.data["pos"][:, 0] *= name_and_units["length"][2]
@@ -123,11 +126,12 @@ def calculate_label_and_value(loaded_snap, value, relative_to_sink_id):
     if "xnuc" in value:
         loaded_snap.data["rho" + value] = loaded_snap.rho * loaded_snap.data[value]
         value = "rho" + value
-        name_and_units[value] = [r'$\rho \left(' + species[int(value.split("xnuc")[-1])] + r"\right)$", name_and_units["rho"][1]]
+        add_name_and_unit(value, r'$\rho \left(' + species[int(value.split("xnuc")[-1])] + r"\right)$",
+                          name_and_units["rho"][1])
 
     if value == "mean_a":
         loaded_snap.calculate_mean_a()
-        name_and_units[value] = ["Mean Atomic Weight", ""]
+        add_name_and_unit(value, "Mean Atomic Weight", "")
 
     if value == "bfld" or value == "B":
         loaded_snap.data["B"] = np.sqrt((loaded_snap.data['bfld'] * loaded_snap.data['bfld']).sum(axis=1))
@@ -141,7 +145,7 @@ def calculate_label_and_value(loaded_snap, value, relative_to_sink_id):
     if value == "vel":
         loaded_snap.data['vel_size'] = np.sqrt((loaded_snap.vel ** 2).sum(axis=1))
         value = "vel_size"
-        name_and_units[value] = name_and_units["vel"]
+        add_name_and_unit(value, "Velocity", name_and_units["vel"][1], name_and_units["vel"][2])
 
     if "vort" in value:
         loaded_snap.data['vortx'] = loaded_snap.data["vort"][:, 0]
@@ -154,12 +158,12 @@ def calculate_label_and_value(loaded_snap, value, relative_to_sink_id):
 
     if value == "mach":
         loaded_snap.computeMach()
-        name_and_units[value] = ["Mach number", name_and_units["vel"][1]]
+        add_name_and_unit(value, "Mach number", name_and_units["vel"][1], name_and_units["vel"][2])
 
     if value == "cs" or "sound" in value:
         loaded_snap.computeMach()
         value = "sound"
-        name_and_units[value] = ["$c_s$", name_and_units["vel"][1]]
+        add_name_and_unit(value, "$c_s$", name_and_units["vel"][1], name_and_units["vel"][2])
 
     if "grap" in value or (value == "HSE" and relative_to_sink_id is not None):
         loaded_snap.data['grapx'] = loaded_snap.data["grap"][:, 0]
@@ -216,8 +220,7 @@ def calculate_label_and_value(loaded_snap, value, relative_to_sink_id):
         loaded_snap, temp_value = calculate_label_and_value(loaded_snap, "grap_r_over_rho", relative_to_sink_id)
         loaded_snap, temp_value = calculate_label_and_value(loaded_snap, "v_grav", relative_to_sink_id)
         loaded_snap.data[value] = loaded_snap.data["g_sink"] + loaded_snap.data["grap_r_over_rho"] - loaded_snap["v_grav_r"]
-        name_and_units[value] = ["$g_{sink} - \grad P/ \rho - v\cdot \grad v$", name_and_units["acc"][1]]
-
+        add_name_and_unit(value, "$g_{sink} - \grad P/ \rho - v\cdot \grad v$", name_and_units["acc"][1])
 
     return loaded_snap, value
 
