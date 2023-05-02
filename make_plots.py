@@ -5,7 +5,8 @@ import numpy as np
 from loadmodules import *
 
 name_and_units = {"rho":[r'$\rho$',r'$g/cm^3$', 1.0], "temp":["Temperature","K", 1.0], "vel":["Velocity","$cm/s$", 1.0],
-                  "mass":["Mass","g", 1.0], "time":["time", "s", 1.0], "length": ["length", "cm",1.0]}
+                  "mass":["Mass","g", 1.0], "time":["time", "s", 1.0], "length": ["length", "cm",1.0],
+                  "acc":["acceleration", "$cm/s^2$"], "pres":["Pressure", "Ba"]}
 species = ['n', 'p', '^{4}He', '^{11}B', '^{12}C', '^{13}C', '^{13}N', '^{14}N', '^{15}N', '^{15}O',
            '^{16}O', '^{17}O', '^{18}F', '^{19}Ne', '^{20}Ne', '^{21}Ne', '^{22}Ne', '^{22}Na',
            '^{23}Na', '^{23}Mg', '^{24}Mg', '^{25}Mg', '^{26}Mg', '^{25}Al', '^{26}Al',
@@ -16,22 +17,20 @@ species = ['n', 'p', '^{4}He', '^{11}B', '^{12}C', '^{13}C', '^{13}N', '^{14}N',
 
 def change_snap_units(loaded_snap):
     loaded_snap.time *= name_and_units["time"][2]
-    '''loaded_snap.pos[:,0] *= name_and_units["length"][2]
-    loaded_snap.pos[:,1] *= name_and_units["length"][2]
-    loaded_snap.pos[:,2] *= name_and_units["length"][2]'''
     loaded_snap.data["pos"][:, 0] *= name_and_units["length"][2]
     loaded_snap.data["pos"][:, 1] *= name_and_units["length"][2]
     loaded_snap.data["pos"][:, 2] *= name_and_units["length"][2]
+
     loaded_snap.center *= name_and_units["length"][2]
-    '''loaded_snap.vel[:,0] *= name_and_units["vel"][2]
-    loaded_snap.vel[:,1] *= name_and_units["vel"][2]
-    loaded_snap.vel[:,2] *= name_and_units["vel"][2]'''
     loaded_snap.data["vel"][:, 0] *= name_and_units["vel"][2]
     loaded_snap.data["vel"][:, 1] *= name_and_units["vel"][2]
     loaded_snap.data["vel"][:, 2] *= name_and_units["vel"][2]
-    # loaded_snap.mass *= name_and_units["mass"][2]
+
+    loaded_snap.data["acc"][:, 0] *= name_and_units["vel"][2]**2 / name_and_units["length"][2]
+    loaded_snap.data["acc"][:, 1] *= name_and_units["vel"][2]**2 / name_and_units["length"][2]
+    loaded_snap.data["acc"][:, 2] *= name_and_units["vel"][2]**2 / name_and_units["length"][2]
+
     loaded_snap.data["mass"] *= name_and_units["mass"][2]
-    # loaded_snap.rho *= name_and_units["rho"][2]
     loaded_snap.data["rho"] *= name_and_units["rho"][2]
     loaded_snap.data["vol"] *= (name_and_units["length"][2] ** 3)
     # TODO: convert also temperature
@@ -71,6 +70,7 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
         if convert_to_cgs:
             name_and_units["vel"][2] *= float(loaded_snap.parameters["UnitVelocity_in_cm_per_s"])
             name_and_units["length"][2] *= float(loaded_snap.parameters["UnitLength_in_cm"])
+            name_and_units["acc"][2] *= float(loaded_snap.parameters["UnitVelocity_in_cm_per_s"])**2 / float(loaded_snap.parameters["length"])
             name_and_units["time"][2] *= float(loaded_snap.parameters["UnitLength_in_cm"]) / float(loaded_snap.parameters["UnitVelocity_in_cm_per_s"])
             name_and_units["mass"][2] *= float(loaded_snap.parameters["UnitMass_in_g"])
             name_and_units["rho"][2] *= float(loaded_snap.parameters["UnitMass_in_g"]) / float(loaded_snap.parameters["UnitLength_in_cm"])**3
@@ -83,11 +83,11 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
     for val in name_and_units.values():
         print(val[0], val[2])
 
+    loaded_snap, value = calculate_label_and_value(loaded_snap, value, relative_to_sink_id)
+
     if value in name_and_units.keys():
         label = name_and_units[value][0]
         label += " [" + name_and_units[value][1] + "]"
-
-    loaded_snap, label, value = calculate_label_and_value(loaded_snap, label, value, relative_to_sink_id)
 
     print(value)
     xlab = chr(ord('x') + axes[0])
@@ -123,57 +123,71 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
     ylabel(ylab + ' [' + unit_length + ']')
 
 
-def calculate_label_and_value(loaded_snap, label, value, relative_to_sink_id):
+def calculate_label_and_value(loaded_snap, value, relative_to_sink_id):
     if "xnuc" in value:
         loaded_snap.data["rho" + value] = loaded_snap.rho * loaded_snap.data[value]
         value = "rho" + value
-        label = r'$\rho \left(' + species[int(value.split("xnuc")[-1])] + r"\right)$ [" + name_and_units["rho"][1] + "]"
-        print(value)
+        name_and_units[value] = [r'$\rho \left(' + species[int(value.split("xnuc")[-1])] + r"\right)$", name_and_units["rho"][1]]
+
     if value == "mean_a":
         loaded_snap.calculate_mean_a()
-        label = "Mean Atomic Weight"
+        name_and_units[value] = ["Mean Atomic Weight", ""]
+
     if value == "bfld" or value == "B":
         loaded_snap.data["B"] = np.sqrt((loaded_snap.data['bfld'] * loaded_snap.data['bfld']).sum(axis=1))
         value = "B"
+
     if "vel" in value:
         loaded_snap.data['velx'] = loaded_snap.data["vel"][:, 0]
         loaded_snap.data['vely'] = loaded_snap.data["vel"][:, 1]
         loaded_snap.data['velz'] = loaded_snap.data["vel"][:, 2]
+
     if value == "vel":
         loaded_snap.data['vel_size'] = np.sqrt((loaded_snap.vel ** 2).sum(axis=1))
         value = "vel_size"
+        name_and_units[value] = name_and_units["vel"]
+
     if "vort" in value:
         loaded_snap.data['vortx'] = loaded_snap.data["vort"][:, 0]
         loaded_snap.data['vorty'] = loaded_snap.data["vort"][:, 1]
         loaded_snap.data['vortz'] = loaded_snap.data["vort"][:, 2]
+
     if value == "vort":
         loaded_snap.data['vort_size'] = np.sqrt((loaded_snap.vort ** 2).sum(axis=1))
         value = "vort_size"
+
     if value == "mach":
         loaded_snap.computeMach()
+        name_and_units[value] = ["Mach number", name_and_units["vel"][1]]
+
     if value == "cs" or "sound" in value:
         loaded_snap.computeMach()
         value = "sound"
+        name_and_units[value] = ["$c_s$", name_and_units["vel"][1]]
+
     if "grap" in value or (value == "HSE" and relative_to_sink_id is not None):
         loaded_snap.data['grapx'] = loaded_snap.data["grap"][:, 0]
         loaded_snap.data['grapy'] = loaded_snap.data["grap"][:, 1]
         loaded_snap.data['grapz'] = loaded_snap.data["grap"][:, 2]
+
     if value == "grap" or (value == "HSE" and relative_to_sink_id is not None):
         if relative_to_sink_id is None:
             loaded_snap.data['grap_size'] = np.sqrt((loaded_snap.grap ** 2).sum(axis=1))
             value = "grap_size"
         else:
-            dist, r, sink_idk = claculate_sink_properties(loaded_snap, relative_to_sink_id)
+            dist, r, sink_idk = calculate_sink_properties(loaded_snap, relative_to_sink_id)
             loaded_snap.data['grap_r'] = project_vector(loaded_snap.data[value], r)
             if value != "HSE":
                 value = "grap_r"
+
     if (value == "g_sink" or value == "HSE") and relative_to_sink_id is not None:
-        dist, r, sink_idk = claculate_sink_properties(loaded_snap, relative_to_sink_id)
+        dist, r, sink_idk = calculate_sink_properties(loaded_snap, relative_to_sink_id)
         loaded_snap.data['g_sink'] = G * loaded_snap.mass[sink_idk] / dist ** 2
+        name_and_units[value] = ["g_sink", name_and_units["acc"][1]]
 
     if value == "HSE" and relative_to_sink_id is not None:
-        loaded_snap, temp_label, temp_value = calculate_label_and_value(loaded_snap, label, "g_sink", relative_to_sink_id)
-        loaded_snap, temp_label, temp_value = calculate_label_and_value(loaded_snap, label, "grap_r", relative_to_sink_id)
+        loaded_snap, temp_value = calculate_label_and_value(loaded_snap, "g_sink", relative_to_sink_id)
+        loaded_snap, temp_value = calculate_label_and_value(loaded_snap, "grap_r", relative_to_sink_id)
         loaded_snap.data["HSE"] = -1 * loaded_snap.data["grap_r"] / (loaded_snap.data["g_sink"] * loaded_snap.rho)
 
     if "grav" in value:
@@ -186,26 +200,33 @@ def calculate_label_and_value(loaded_snap, label, value, relative_to_sink_id):
             loaded_snap.data['grav_size'] = np.sqrt((loaded_snap.grav ** 2).sum(axis=1))
             value = "grav_size"
         else:
-            dist, r, sink_idk = claculate_sink_properties(loaded_snap, relative_to_sink_id)
+            dist, r, sink_idk = calculate_sink_properties(loaded_snap, relative_to_sink_id)
             loaded_snap.data['grav_r'] = project_vector(loaded_snap.data[value], r)
             value = "grav_r"
 
     if value == "grap_r_over_rho" and relative_to_sink_id is not None:
-        loaded_snap, temp_label, temp_value = calculate_label_and_value(loaded_snap, label, "grap_r",
-                                                                        relative_to_sink_id)
+        loaded_snap, temp_value = calculate_label_and_value(loaded_snap, "grap_r", relative_to_sink_id)
         loaded_snap.data[value] = -1.0 * loaded_snap.data["grap_r"] / loaded_snap.rho[np.where(loaded_snap.type == 0)]
 
     if value == "v_grav":
         loaded_snap.data[value] = (loaded_snap.v * loaded_snap.grav).sum(axis=1)
         if relative_to_sink_id is not None:
-            dist, r, sink_idk = claculate_sink_properties(loaded_snap, relative_to_sink_id)
+            dist, r, sink_idk = calculate_sink_properties(loaded_snap, relative_to_sink_id)
             value = "v_grav_r"
             loaded_snap.data[value] = project_vector(loaded_snap.data[value], r)
 
-    return loaded_snap, label, value
+    if value == "momentum_vdot":
+        loaded_snap, temp_value = calculate_label_and_value(loaded_snap, "g_sink", relative_to_sink_id)
+        loaded_snap, temp_value = calculate_label_and_value(loaded_snap, "grap_r_over_rho", relative_to_sink_id)
+        loaded_snap, temp_value = calculate_label_and_value(loaded_snap, "v_grav", relative_to_sink_id)
+        loaded_snap.data[value] = loaded_snap.data["g_sink"] + loaded_snap.data["grap_r_over_rho"] - loaded_snap["v_grav_r"]
+        name_and_units[value] = ["$g_{sink} - \grad P/ \rho - v\cdot \grad v$", name_and_units["acc"][1]]
 
 
-def claculate_sink_properties(loaded_snap, relative_to_sink_id):
+    return loaded_snap, value
+
+
+def calculate_sink_properties(loaded_snap, relative_to_sink_id):
     sink_idk = get_sink_idk(loaded_snap, relative_to_sink_id)
     sink_pos = loaded_snap.pos[sink_idk]
     r = loaded_snap.pos[np.where(loaded_snap.type == 0)] - sink_pos
