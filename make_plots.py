@@ -26,10 +26,6 @@ def change_snap_units(loaded_snap):
     loaded_snap.data["vel"][:, 1] *= name_and_units["vel"][2]
     loaded_snap.data["vel"][:, 2] *= name_and_units["vel"][2]
 
-    loaded_snap.data["acc"][:, 0] *= name_and_units["vel"][2]**2 / name_and_units["length"][2]
-    loaded_snap.data["acc"][:, 1] *= name_and_units["vel"][2]**2 / name_and_units["length"][2]
-    loaded_snap.data["acc"][:, 2] *= name_and_units["vel"][2]**2 / name_and_units["length"][2]
-
     loaded_snap.data["mass"] *= name_and_units["mass"][2]
     loaded_snap.data["rho"] *= name_and_units["rho"][2]
     loaded_snap.data["vol"] *= (name_and_units["length"][2] ** 3)
