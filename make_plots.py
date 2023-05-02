@@ -35,6 +35,8 @@ def change_snap_units(loaded_snap):
     loaded_snap.data["rho"] *= name_and_units["rho"][2]
     loaded_snap.data["vol"] *= (name_and_units["length"][2] ** 3)
     # TODO: convert also temperature
+def project_vector(v,r):
+    return (r*v).sum(axis=1)/(r**2).sum(axis=1)
 
 def plot_stream(loaded_snap, value='vel', xlab='x', ylab='y', axes=[0,1], box=False, res=1024, numthreads=1):
     loaded_snap.data[value + xlab] = loaded_snap.data[value][:, axes[0]]
@@ -85,71 +87,7 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
         label = name_and_units[value][0]
         label += " [" + name_and_units[value][1] + "]"
 
-    if "xnuc" in value:
-        loaded_snap.data["rho"+value] = loaded_snap.rho * loaded_snap.data[value]
-        value = "rho" + value
-        label = r'$\rho \left(' + species[int(value.split("xnuc")[-1])] + r"\right)$ [" + name_and_units["rho"][1] + "]"
-        print(value)
-
-    if value == "mean_a":
-        loaded_snap.calculate_mean_a()
-        label = "Mean Atomic Weight"
-
-    if value == "bfld" or value == "B":
-        loaded_snap.data["B"] = np.sqrt((loaded_snap.data['bfld']*loaded_snap.data['bfld']).sum(axis=1))
-        value = "B"
-
-    if "vel" in value:
-        loaded_snap.data['velx'] = loaded_snap.data["vel"][:, 0]
-        loaded_snap.data['vely'] = loaded_snap.data["vel"][:, 1]
-        loaded_snap.data['velz'] = loaded_snap.data["vel"][:, 2]
-
-    if value == "vel":
-        loaded_snap.data['vel_size'] = np.sqrt((loaded_snap.vel ** 2).sum(axis=1))
-        value = "vel_size"
-
-    if "vort" in value:
-        loaded_snap.data['vortx'] = loaded_snap.data["vort"][:, 0]
-        loaded_snap.data['vorty'] = loaded_snap.data["vort"][:, 1]
-        loaded_snap.data['vortz'] = loaded_snap.data["vort"][:, 2]
-
-    if value == "vort":
-        loaded_snap.data['vort_size'] = np.sqrt((loaded_snap.vort ** 2).sum(axis=1))
-        value = "vort_size"
-
-    if value == "mach":
-        loaded_snap.computeMach()
-    if value == "cs" or "sound" in value:
-        loaded_snap.computeMach()
-        value = "sound"
-
-    if "grap" in value or (value == "HSE" and relative_to_sink_id is not None):
-        loaded_snap.data['grapx'] = loaded_snap.data["grap"][:, 0]
-        loaded_snap.data['grapy'] = loaded_snap.data["grap"][:, 1]
-        loaded_snap.data['grapz'] = loaded_snap.data["grap"][:, 2]
-
-    if value == "grap" or (value == "HSE" and relative_to_sink_id is not None):
-        if relative_to_sink_id is None:
-            loaded_snap.data['grap_size'] = np.sqrt((loaded_snap.grap ** 2).sum(axis=1))
-            value = "grap_size"
-        else:
-            sink_idk = get_sink_idk(loaded_snap, relative_to_sink_id)
-            sink_pos = loaded_snap.pos[sink_idk]
-            r = loaded_snap.pos[np.where(loaded_snap.type == 0)]-sink_pos
-            dist = np.sqrt((r*r).sum(axis=1))
-            loaded_snap.data['grap_r'] = ((r*loaded_snap.grap).sum(axis=1))/dist
-            if value != "HSE":
-                value = "grap_r"
-
-    if (value == "g_sink" or value == "HSE") and relative_to_sink_id is not None:
-        sink_idk = get_sink_idk(loaded_snap, relative_to_sink_id)
-        sink_pos = loaded_snap.pos[sink_idk]
-        r = loaded_snap.pos[np.where(loaded_snap.type == 0)]-sink_pos
-        dist = np.sqrt((r*r).sum(axis=1))
-        loaded_snap.data['g_sink'] = G * loaded_snap.mass[sink_idk] / dist**2
-
-    if value == "HSE" and relative_to_sink_id is not None:
-        loaded_snap.data["HSE"] = -1*loaded_snap.data["grap_r"]/(loaded_snap.data["g_sink"] * loaded_snap.rho)
+    loaded_snap, label, value = calculate_label_and_value(loaded_snap, label, value, relative_to_sink_id)
 
     print(value)
     xlab = chr(ord('x') + axes[0])
@@ -183,6 +121,96 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
 
     xlabel(xlab + ' [' + unit_length + ']', loc="left")
     ylabel(ylab + ' [' + unit_length + ']')
+
+
+def calculate_label_and_value(loaded_snap, label, value, relative_to_sink_id):
+    if "xnuc" in value:
+        loaded_snap.data["rho" + value] = loaded_snap.rho * loaded_snap.data[value]
+        value = "rho" + value
+        label = r'$\rho \left(' + species[int(value.split("xnuc")[-1])] + r"\right)$ [" + name_and_units["rho"][1] + "]"
+        print(value)
+    if value == "mean_a":
+        loaded_snap.calculate_mean_a()
+        label = "Mean Atomic Weight"
+    if value == "bfld" or value == "B":
+        loaded_snap.data["B"] = np.sqrt((loaded_snap.data['bfld'] * loaded_snap.data['bfld']).sum(axis=1))
+        value = "B"
+    if "vel" in value:
+        loaded_snap.data['velx'] = loaded_snap.data["vel"][:, 0]
+        loaded_snap.data['vely'] = loaded_snap.data["vel"][:, 1]
+        loaded_snap.data['velz'] = loaded_snap.data["vel"][:, 2]
+    if value == "vel":
+        loaded_snap.data['vel_size'] = np.sqrt((loaded_snap.vel ** 2).sum(axis=1))
+        value = "vel_size"
+    if "vort" in value:
+        loaded_snap.data['vortx'] = loaded_snap.data["vort"][:, 0]
+        loaded_snap.data['vorty'] = loaded_snap.data["vort"][:, 1]
+        loaded_snap.data['vortz'] = loaded_snap.data["vort"][:, 2]
+    if value == "vort":
+        loaded_snap.data['vort_size'] = np.sqrt((loaded_snap.vort ** 2).sum(axis=1))
+        value = "vort_size"
+    if value == "mach":
+        loaded_snap.computeMach()
+    if value == "cs" or "sound" in value:
+        loaded_snap.computeMach()
+        value = "sound"
+    if "grap" in value or (value == "HSE" and relative_to_sink_id is not None):
+        loaded_snap.data['grapx'] = loaded_snap.data["grap"][:, 0]
+        loaded_snap.data['grapy'] = loaded_snap.data["grap"][:, 1]
+        loaded_snap.data['grapz'] = loaded_snap.data["grap"][:, 2]
+    if value == "grap" or (value == "HSE" and relative_to_sink_id is not None):
+        if relative_to_sink_id is None:
+            loaded_snap.data['grap_size'] = np.sqrt((loaded_snap.grap ** 2).sum(axis=1))
+            value = "grap_size"
+        else:
+            dist, r, sink_idk = claculate_sink_properties(loaded_snap, relative_to_sink_id)
+            loaded_snap.data['grap_r'] = project_vector(loaded_snap.data[value], r)
+            if value != "HSE":
+                value = "grap_r"
+    if (value == "g_sink" or value == "HSE") and relative_to_sink_id is not None:
+        dist, r, sink_idk = claculate_sink_properties(loaded_snap, relative_to_sink_id)
+        loaded_snap.data['g_sink'] = G * loaded_snap.mass[sink_idk] / dist ** 2
+
+    if value == "HSE" and relative_to_sink_id is not None:
+        loaded_snap, temp_label, temp_value = calculate_label_and_value(loaded_snap, label, "g_sink", relative_to_sink_id)
+        loaded_snap, temp_label, temp_value = calculate_label_and_value(loaded_snap, label, "grap_r", relative_to_sink_id)
+        loaded_snap.data["HSE"] = -1 * loaded_snap.data["grap_r"] / (loaded_snap.data["g_sink"] * loaded_snap.rho)
+
+    if "grav" in value:
+        loaded_snap.data['gravx'] = loaded_snap.data["grav"][:, 0]
+        loaded_snap.data['gravy'] = loaded_snap.data["grav"][:, 1]
+        loaded_snap.data['gravz'] = loaded_snap.data["grav"][:, 2]
+
+    if value == "grav":
+        if relative_to_sink_id is None:
+            loaded_snap.data['grav_size'] = np.sqrt((loaded_snap.grav ** 2).sum(axis=1))
+            value = "grav_size"
+        else:
+            dist, r, sink_idk = claculate_sink_properties(loaded_snap, relative_to_sink_id)
+            loaded_snap.data['grav_r'] = project_vector(loaded_snap.data[value], r)
+            value = "grav_r"
+
+    if value == "grap_r_over_rho" and relative_to_sink_id is not None:
+        loaded_snap, temp_label, temp_value = calculate_label_and_value(loaded_snap, label, "grap_r",
+                                                                        relative_to_sink_id)
+        loaded_snap.data[value] = -1.0 * loaded_snap.data["grap_r"] / loaded_snap.rho[np.where(loaded_snap.type == 0)]
+
+    if value == "v_grav":
+        loaded_snap.data[value] = (loaded_snap.v * loaded_snap.grav).sum(axis=1)
+        if relative_to_sink_id is not None:
+            dist, r, sink_idk = claculate_sink_properties(loaded_snap, relative_to_sink_id)
+            value = "v_grav_r"
+            loaded_snap.data[value] = project_vector(loaded_snap.data[value], r)
+
+    return loaded_snap, label, value
+
+
+def claculate_sink_properties(loaded_snap, relative_to_sink_id):
+    sink_idk = get_sink_idk(loaded_snap, relative_to_sink_id)
+    sink_pos = loaded_snap.pos[sink_idk]
+    r = loaded_snap.pos[np.where(loaded_snap.type == 0)] - sink_pos
+    dist = np.sqrt((r * r).sum(axis=1))
+    return dist, r, sink_idk
 
 
 def get_sink_idk(loaded_snap, relative_to_sink_id):
