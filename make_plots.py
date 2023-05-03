@@ -213,7 +213,7 @@ def calculate_label_and_value(loaded_snap, value, relative_to_sink_id):
         loaded_snap.data[value+"_y"] = (loaded_snap.vel[np.where(loaded_snap.type == 0)] * loaded_snap.grav[:,[1,4,7]]).sum(axis=1)
         loaded_snap.data[value+"_z"] = (loaded_snap.vel[np.where(loaded_snap.type == 0)] * loaded_snap.grav[:,[2,5,8]]).sum(axis=1)
         loaded_snap.data[value] = [[loaded_snap.data[value+"_x"][i], loaded_snap.data[value+"_y"][i],
-                                    loaded_snap.data[value+"_z"][i]] for i in range(loaded_snap.npart0)]
+                                    loaded_snap.data[value+"_z"][i]] for i in range(loaded_snap.nparticlesall[0])]
         if relative_to_sink_id is not None:
             dist, r, sink_idk = calculate_sink_properties(loaded_snap, relative_to_sink_id)
             value = "v_grav_r"
