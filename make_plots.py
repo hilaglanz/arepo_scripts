@@ -223,7 +223,7 @@ def calculate_label_and_value(loaded_snap, value, relative_to_sink_id):
         loaded_snap, temp_value = calculate_label_and_value(loaded_snap, "g_sink", relative_to_sink_id)
         loaded_snap, temp_value = calculate_label_and_value(loaded_snap, "grap_r_over_rho", relative_to_sink_id)
         loaded_snap, temp_value = calculate_label_and_value(loaded_snap, "v_grav", relative_to_sink_id)
-        loaded_snap.data[value] = loaded_snap.data["g_sink"] + loaded_snap.data["grap_r_over_rho"] - loaded_snap["v_grav_r"]
+        loaded_snap.data[value] = loaded_snap.data["g_sink"] + loaded_snap.data["grap_r_over_rho"] - loaded_snap.data["v_grav_r"]
         add_name_and_unit(value, "$g_{sink} - \grad P/ \rho - v\cdot \grad v$", name_and_units["acc"][1])
 
     return loaded_snap, value
