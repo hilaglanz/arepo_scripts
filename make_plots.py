@@ -209,9 +209,9 @@ def calculate_label_and_value(loaded_snap, value, relative_to_sink_id):
         loaded_snap.data[value] = -1.0 * loaded_snap.data["grap_r"] / loaded_snap.rho[np.where(loaded_snap.type == 0)]
 
     if value == "v_grav":
-        loaded_snap.data[value+"_x"] = (loaded_snap.vel[np.where(loaded_snap.type == 0)] * loaded_snap.grav[:[0,3,6]]).sum(axis=1)
-        loaded_snap.data[value+"_y"] = (loaded_snap.vel[np.where(loaded_snap.type == 0)] * loaded_snap.grav[:[1,4,7]]).sum(axis=1)
-        loaded_snap.data[value+"_z"] = (loaded_snap.vel[np.where(loaded_snap.type == 0)] * loaded_snap.grav[:[2,5,8]]).sum(axis=1)
+        loaded_snap.data[value+"_x"] = (loaded_snap.vel[np.where(loaded_snap.type == 0)] * loaded_snap.grav[:,[0,3,6]]).sum(axis=1)
+        loaded_snap.data[value+"_y"] = (loaded_snap.vel[np.where(loaded_snap.type == 0)] * loaded_snap.grav[:,[1,4,7]]).sum(axis=1)
+        loaded_snap.data[value+"_z"] = (loaded_snap.vel[np.where(loaded_snap.type == 0)] * loaded_snap.grav[:,[2,5,8]]).sum(axis=1)
         loaded_snap.data[value] = [[loaded_snap.data[value+"_x"][i], loaded_snap.data[value+"_y"][i],
                                     loaded_snap.data[value+"_z"][i]] for i in range(loaded_snap.npart0)]
         if relative_to_sink_id is not None:
