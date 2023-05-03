@@ -209,7 +209,7 @@ def calculate_label_and_value(loaded_snap, value, relative_to_sink_id):
         loaded_snap.data[value] = -1.0 * loaded_snap.data["grap_r"] / loaded_snap.rho[np.where(loaded_snap.type == 0)]
 
     if value == "v_grav":
-        loaded_snap.data[value] = (loaded_snap.v * loaded_snap.grav).sum(axis=1)
+        loaded_snap.data[value] = (loaded_snap.vel * loaded_snap.grav).sum(axis=1)
         if relative_to_sink_id is not None:
             dist, r, sink_idk = calculate_sink_properties(loaded_snap, relative_to_sink_id)
             value = "v_grav_r"
