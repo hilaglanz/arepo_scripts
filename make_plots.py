@@ -187,7 +187,7 @@ def calculate_label_and_value(loaded_snap, value, relative_to_sink_id):
     if value == "HSE" and relative_to_sink_id is not None:
         loaded_snap, temp_value = calculate_label_and_value(loaded_snap, "g_sink", relative_to_sink_id)
         loaded_snap, temp_value = calculate_label_and_value(loaded_snap, "grap", relative_to_sink_id)
-        loaded_snap.data["HSE"] = -1 * loaded_snap.data["grap_r"] / (loaded_snap.data["g_sink"] * loaded_snap.rho)
+        loaded_snap.data["HSE"] = -1.0 * loaded_snap.data["grap_r"] / (loaded_snap.data["g_sink"] * loaded_snap.rho)
 
     if "grav" in value:
         loaded_snap.data['gravx'] = loaded_snap.data["grav"][:, 0]
@@ -200,7 +200,7 @@ def calculate_label_and_value(loaded_snap, value, relative_to_sink_id):
             value = "grav_size"
         else:
             dist, r, sink_idk = calculate_sink_properties(loaded_snap, relative_to_sink_id)
-            loaded_snap.data['grav_r'] = project_vector(loaded_snap.data[grav], r)
+            loaded_snap.data['grav_r'] = project_vector(loaded_snap.data["grav"], r)
             value = "grav_r"
 
     if value == "grap_r_over_rho" and relative_to_sink_id is not None:
