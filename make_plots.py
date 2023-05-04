@@ -165,29 +165,28 @@ def calculate_label_and_value(loaded_snap, value, relative_to_sink_id):
         value = "sound"
         add_name_and_unit(value, "$c_s$", name_and_units["vel"][1], name_and_units["vel"][2])
 
-    if "grap" in value or (value == "HSE" and relative_to_sink_id is not None):
+    if "grap" in value:
         loaded_snap.data['grapx'] = loaded_snap.data["grap"][:, 0]
         loaded_snap.data['grapy'] = loaded_snap.data["grap"][:, 1]
         loaded_snap.data['grapz'] = loaded_snap.data["grap"][:, 2]
 
-    if value == "grap" or (value == "HSE" and relative_to_sink_id is not None):
+    if value == "grap":
         if relative_to_sink_id is None:
             loaded_snap.data['grap_size'] = np.sqrt((loaded_snap.grap ** 2).sum(axis=1))
             value = "grap_size"
         else:
             dist, r, sink_idk = calculate_sink_properties(loaded_snap, relative_to_sink_id)
             loaded_snap.data['grap_r'] = project_vector(loaded_snap.data["grap"], r)
-            if value != "HSE":
-                value = "grap_r"
+            value = "grap_r"
 
-    if (value == "g_sink" or value == "HSE") and relative_to_sink_id is not None:
+    if value == "g_sink":
         dist, r, sink_idk = calculate_sink_properties(loaded_snap, relative_to_sink_id)
         loaded_snap.data['g_sink'] = G * loaded_snap.mass[sink_idk] / dist ** 2
         add_name_and_unit(value, "g_sink", name_and_units["acc"][1], name_and_units["acc"][2])
 
     if value == "HSE" and relative_to_sink_id is not None:
         loaded_snap, temp_value = calculate_label_and_value(loaded_snap, "g_sink", relative_to_sink_id)
-        loaded_snap, temp_value = calculate_label_and_value(loaded_snap, "grap_r", relative_to_sink_id)
+        loaded_snap, temp_value = calculate_label_and_value(loaded_snap, "grap", relative_to_sink_id)
         loaded_snap.data["HSE"] = -1 * loaded_snap.data["grap_r"] / (loaded_snap.data["g_sink"] * loaded_snap.rho)
 
     if "grav" in value:
