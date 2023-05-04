@@ -34,7 +34,8 @@ def change_snap_units(loaded_snap):
     loaded_snap.data["vol"] *= (name_and_units["length"][2] ** 3)
     # TODO: convert also temperature
 def project_vector(v,r):
-    return (r*v).sum(axis=1)/(r**2).sum(axis=1)
+    dist = np.sqrt((r*r).sum(axis=1))
+    return ((r*v).sum(axis=1)) / dist
 
 def plot_stream(loaded_snap, value='vel', xlab='x', ylab='y', axes=[0,1], box=False, res=1024, numthreads=1):
     loaded_snap.data[value + xlab] = loaded_snap.data[value][:, axes[0]]
