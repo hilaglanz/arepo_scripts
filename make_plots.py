@@ -70,7 +70,7 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
         if convert_to_cgs:
             name_and_units["vel"][2] *= float(loaded_snap.parameters["UnitVelocity_in_cm_per_s"])
             name_and_units["length"][2] *= float(loaded_snap.parameters["UnitLength_in_cm"])
-            name_and_units["acc"][2] *= float(loaded_snap.parameters["UnitVelocity_in_cm_per_s"])**2 / float(loaded_snap.parameters["length"])
+            name_and_units["acc"][2] *= float(loaded_snap.parameters["UnitVelocity_in_cm_per_s"])**2 / float(loaded_snap.parameters["UnitLength_in_cm"])
             name_and_units["time"][2] *= float(loaded_snap.parameters["UnitLength_in_cm"]) / float(loaded_snap.parameters["UnitVelocity_in_cm_per_s"])
             name_and_units["mass"][2] *= float(loaded_snap.parameters["UnitMass_in_g"])
             name_and_units["rho"][2] *= float(loaded_snap.parameters["UnitMass_in_g"]) / float(loaded_snap.parameters["UnitLength_in_cm"])**3
