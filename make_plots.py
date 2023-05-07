@@ -217,13 +217,13 @@ def calculate_label_and_value(loaded_snap, value, relative_to_sink_id):
         if relative_to_sink_id is not None:
             dist, r, sink_idk = calculate_sink_properties(loaded_snap, relative_to_sink_id)
             value = "v_grav_r"
-            loaded_snap.data[value] = project_vector(loaded_snap.data["v_grav"], r)
+            loaded_snap.data[value] = -1.0 * project_vector(loaded_snap.data["v_grav"], r)
 
     if value == "momentum_vdot":
         loaded_snap, temp_value = calculate_label_and_value(loaded_snap, "g_sink", relative_to_sink_id)
         loaded_snap, temp_value = calculate_label_and_value(loaded_snap, "grap_r_over_rho", relative_to_sink_id)
         loaded_snap, temp_value = calculate_label_and_value(loaded_snap, "v_grav", relative_to_sink_id)
-        loaded_snap.data[value] = loaded_snap.data["g_sink"] + loaded_snap.data["grap_r_over_rho"] - loaded_snap.data["v_grav_r"]
+        loaded_snap.data[value] = loaded_snap.data["g_sink"] + loaded_snap.data["grap_r_over_rho"] + loaded_snap.data["v_grav_r"]
         add_name_and_unit(value, r"$g_{sink} - \nabla P /\rho - v\cdot \nabla v$", name_and_units["acc"][1])
 
     return loaded_snap, value
