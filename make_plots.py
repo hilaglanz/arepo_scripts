@@ -340,7 +340,7 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
             print("saving to: ", filename)
             savefig(filename)
             print("saved fig")
-
+        close('all')
         modified_units = True
 
 
