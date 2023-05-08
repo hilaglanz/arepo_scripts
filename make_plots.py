@@ -125,14 +125,14 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
 
 def calculate_label_and_value(loaded_snap, value, relative_to_sink_id):
     if value in loaded_snap.data.keys():
-        add_computed_value_to_name_and_unit_dict(loaded_snap, value)
-        
-        return loaded_snap, value
+        if loaded_snap.data[value].shape == 1:
+            add_computed_value_to_name_and_unit_dict(loaded_snap, value)
+            return loaded_snap, value
 
     if loaded_snap.computeValueGas(value) == 0:
-        add_computed_value_to_name_and_unit_dict(loaded_snap, value)
-
-        return loaded_snap, value
+        if loaded_snap.data[value].shape == 1:
+            add_computed_value_to_name_and_unit_dict(loaded_snap, value)
+            return loaded_snap, value
 
     if "xnuc" in value:
         loaded_snap.data["rho" + value] = loaded_snap.rho * loaded_snap.data[value]
