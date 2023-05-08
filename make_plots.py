@@ -6,7 +6,7 @@ from loadmodules import *
 
 name_and_units = {"rho":[r'$\rho$',r'$g/cm^3$', 1.0], "temp":["Temperature","K", 1.0], "vel":["Velocity","$cm/s$", 1.0],
                   "mass":["Mass","g", 1.0], "time":["time", "s", 1.0], "length": ["length", "cm",1.0],
-                  "acc":["acceleration", "$cm/s^2$", 1.0], "pres":["Pressure", "Ba", 1.0]}
+                  "acc":["acceleration", "$cm/s^2$", 1.0], "pres":["Pressure", "Ba", 1.0], "entr":["Entropy","", 1.0]}
 
 species = ['n', 'p', '^{4}He', '^{11}B', '^{12}C', '^{13}C', '^{13}N', '^{14}N', '^{15}N', '^{15}O',
            '^{16}O', '^{17}O', '^{18}F', '^{19}Ne', '^{20}Ne', '^{21}Ne', '^{22}Ne', '^{22}Na',
@@ -124,6 +124,16 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
 
 
 def calculate_label_and_value(loaded_snap, value, relative_to_sink_id):
+    if value in loaded_snap.data.keys():
+        add_computed_value_to_name_and_unit_dict(loaded_snap, value)
+        
+        return loaded_snap, value
+
+    if loaded_snap.computeValueGas(value) == 0:
+        add_computed_value_to_name_and_unit_dict(loaded_snap, value)
+
+        return loaded_snap, value
+
     if "xnuc" in value:
         loaded_snap.data["rho" + value] = loaded_snap.rho * loaded_snap.data[value]
         value = "rho" + value
@@ -227,6 +237,14 @@ def calculate_label_and_value(loaded_snap, value, relative_to_sink_id):
         add_name_and_unit(value, r"$g_{sink} - \nabla P /\rho - v\cdot \nabla v$", name_and_units["acc"][1])
 
     return loaded_snap, value
+
+
+def add_computed_value_to_name_and_unit_dict(loaded_snap, value):
+    if value not in name_and_units.keys():
+        name = value
+        if value in loaded_snap.hdf5_name_conversion.keys():
+            name = loaded_snap.hdf5_name_conversion.keys()
+        add_name_and_unit(value, name, "")
 
 
 def calculate_sink_properties(loaded_snap, relative_to_sink_id):
