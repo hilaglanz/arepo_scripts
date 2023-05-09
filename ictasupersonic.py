@@ -20,7 +20,7 @@ def get_finest_grid_size_and_resolution(accretion_radius, sink_radius, surroundi
     while highest_resolution > 200:
         finest_grid_size /= 2.0
         print("decreasing finest grid size to ", finest_grid_size)
-        highest_resolution = round(10.0 * finest_grid_size / sink_radius)
+        highest_resolution = round(finest_grid_size / (sink_radius * pi / surroundings))
 
     return finest_grid_size, highest_resolution
 def get_smoothed_sub_grid_sizes(boxsize, finest_grid_size):
