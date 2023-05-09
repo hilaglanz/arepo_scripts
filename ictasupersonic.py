@@ -14,9 +14,9 @@ def initialize_dictionary_with_point_masses(point_mass, npart, boxsize):
 
     return pointStar
 
-def get_finest_grid_size_and_resolution(accretion_radius, sink_radius):
+def get_finest_grid_size_and_resolution(accretion_radius, sink_radius, surroundings = 10):
     finest_grid_size = accretion_radius
-    highest_resolution = round(10.0 * finest_grid_size / sink_radius)
+    highest_resolution = round(finest_grid_size / (sink_radius * pi / surroundings))
     while highest_resolution > 200:
         finest_grid_size /= 2.0
         print("decreasing finest grid size to ", finest_grid_size)
@@ -34,7 +34,7 @@ def get_smoothed_sub_grid_sizes(boxsize, finest_grid_size):
 
     return sub_grid_sizes
 def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho=1, gamma=5.0/3, Ra=1, Rs=0.02, res=100,
-                        binary=False, semimajor = 2.5, supersonic_perscription=True):
+                        binary=False, semimajor = 2.5, supersonic_perscription=True, surroundings=10):
     vel = mach*cs
     accretion_radius = Ra
     last_sink_i = 0
@@ -51,7 +51,7 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
 
     pointStar = initialize_dictionary_with_point_masses(sink_mass, num_sinks, boxsize)
 
-    finest_grid_size, highest_resolution = get_finest_grid_size_and_resolution(accretion_radius, Rs)
+    finest_grid_size, highest_resolution = get_finest_grid_size_and_resolution(accretion_radius, Rs, surroundings)
     gadget_add_grid(pointStar, finest_grid_size, res=highest_resolution)
     print("added inner grid with size of ", finest_grid_size/accretion_radius, "Ra")
     print("minimum vol =", (finest_grid_size**3)/highest_resolution**3)
@@ -106,6 +106,7 @@ def InitParser():
     parser.add_argument('--G', type=float,  help='gravitational constant internal units', default=6.672e-8)
     parser.add_argument('--gamma', type=float,  help='adiabatic index', default=5.0/3.0)
     parser.add_argument('--res', type=int,  help='subgrids resolution', default=100)
+    parser.add_argument('--sink_surroundings', type=int, help='how many neighbours surround the sink on its plane', default=10)
     parser.add_argument('--binary', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
                         help='do we have a binary accreting?',
                         default=False)
@@ -121,6 +122,6 @@ if __name__ == "__main__":
 
     create_ic_with_sink(ic_path=args.ic_path, boxsize=args.boxsize, G=args.G, mach=args.mach, cs=args.cs, rho=args.rho,
                         gamma=args.gamma, Ra=args.Ra, Rs=args.Rs, res=args.res, binary=args.binary,
-                        semimajor=args.binary_separation)
+                        semimajor=args.binary_separation, surroundings=args.sink_surroundings)
 
 
