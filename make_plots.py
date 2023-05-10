@@ -34,14 +34,14 @@ class UnitName:
 
 basic_units = {"rho":UnitConversion(r'$g/cm^3$'), "temp":UnitConversion("K"), "vel":UnitConversion("$cm/s$"),
                "mass":UnitConversion("g"), "time":UnitConversion("s"), "length": UnitConversion("cm"),
-               "vol": UnitConversion("vol"), "acc":UnitConversion("$cm/s^2$"), "pres":UnitConversion("Ba"),
+               "vol": UnitConversion("vol"), "acce":UnitConversion("$cm/s^2$"), "pres":UnitConversion("Ba"),
                "u":UnitConversion("erg"), "entr": UnitConversion("entr"), "none":UnitConversion("")}
 
 name_and_units = {"rho":UnitName(r'$\rho$',"rho"), "temp":UnitName("Temperature","temp"), "vel":UnitName("Velocity","vel"),
                   "sound":UnitName("$c_s","vel"), "mach":UnitName(r'$\Mu$', "none"), "mass":UnitName("Mass","mass"),
                   "time":UnitName("Time", "time"), "length": UnitName("Length", "length"),
                   "pos":UnitName("Position", "legnth"), "vol":UnitName("Volume","vol"),
-                  "acc":UnitName("Acceleration", "acc"), "pres":UnitName("Pressure", "pres"),
+                  "acce":UnitName("Acceleration", "acce"), "pres":UnitName("Pressure", "pres"),
                   "entr":UnitName("Entropy","none")}
 def add_name_and_unit(value, name, unit):
     if value not in name_and_units.keys():
@@ -58,7 +58,7 @@ def change_unit_conversion(factor_length, factor_velocity, factor_mass):
     basic_units["length"].factor = factor_length
     basic_units["vol"].factor = factor_length ** 3
     basic_units["vel"].factor= factor_velocity
-    basic_units["acc"].factor= (factor_velocity ** 2) / factor_length
+    basic_units["acce"].factor= (factor_velocity ** 2) / factor_length
     basic_units["mass"].factor = factor_mass
     basic_units["time"].factor = (factor_length/factor_velocity)
     basic_units["pres"].factor = (factor_mass * factor_velocity ** 2) / (factor_length ** 3) # mass*acc/area
@@ -216,7 +216,7 @@ def calculate_label_and_value(loaded_snap, value, relative_to_sink_id):
     if value == "g_sink":
         dist, r, sink_idk = calculate_sink_properties(loaded_snap, relative_to_sink_id)
         loaded_snap.data['g_sink'] = G * loaded_snap.mass[sink_idk] / dist ** 2
-        add_name_and_unit(value, "g_sink", "acc")
+        add_name_and_unit(value, "g_sink", "acce")
 
     if value == "grap_r_over_rho" and relative_to_sink_id is not None:
         loaded_snap, temp_value = calculate_label_and_value(loaded_snap, "grap", relative_to_sink_id)
@@ -255,13 +255,13 @@ def calculate_label_and_value(loaded_snap, value, relative_to_sink_id):
         loaded_snap, temp_value = calculate_label_and_value(loaded_snap, "grap_r_over_rho", relative_to_sink_id)
         loaded_snap, temp_value = calculate_label_and_value(loaded_snap, "g_sink", relative_to_sink_id)
         loaded_snap.data[value] = loaded_snap.data["g_sink"] + loaded_snap.data["grap_r_over_rho"]
-        add_name_and_unit(value, r"$g_{sink} - \nabla P /\rho$", "acc")
+        add_name_and_unit(value, r"$g_{sink} - \nabla P /\rho$", "acce")
 
     if value == "momentum_vdot":
         loaded_snap, temp_value = calculate_label_and_value(loaded_snap, "g-grap_r_over_rho", relative_to_sink_id)
         loaded_snap, temp_value = calculate_label_and_value(loaded_snap, "v_grav", relative_to_sink_id)
         loaded_snap.data[value] = loaded_snap.data["g-grap_r_over_rho"] - loaded_snap.data["v_grav_r"]
-        add_name_and_unit(value, r"$g_{sink} - \nabla P /\rho - v\cdot \nabla v$", "acc")
+        add_name_and_unit(value, r"$g_{sink} - \nabla P /\rho - v\cdot \nabla v$", "acce")
 
     return loaded_snap, value
 
