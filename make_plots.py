@@ -51,6 +51,7 @@ def add_name_and_unit(value, name, unit):
 
 def change_snap_units(loaded_snap):
     for key in loaded_snap.data.keys():
+        add_computed_value_to_name_and_unit_dict(loaded_snap, key)
         loaded_snap.data[key] *= basic_units[name_and_units[key].unit_name].factor
 
 def change_unit_conversion(factor_length, factor_velocity, factor_mass):
