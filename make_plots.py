@@ -10,7 +10,7 @@ from loadmodules import *
 '''
 name_and_units = {"rho":[r'$\rho$',"rho"], "temp":["Temperature","temp"], "vel":["Velocity","vel"],
                   "sound":["$c_s","vel"], "mach":[r'$\Mu$', "none"], "mass":["Mass","mass"], "time":["Time", "time"],
-                  "length": ["Length", "length"], "pos":["Position", "legnth"], "vol":["Volume","vol"],
+                  "length": ["Length", "length"], "pos":["Position", "length"], "vol":["Volume","vol"],
                   "acc":["Acceleration", "acc"], "pres":["Pressure", "pres"],
                   "entr":["Entropy","none"]}
 '''
@@ -40,7 +40,7 @@ basic_units = {"rho":UnitConversion(r'$g/cm^3$'), "temp":UnitConversion("K"), "v
 name_and_units = {"rho":UnitName(r'$\rho$',"rho"), "temp":UnitName("Temperature","temp"), "vel":UnitName("Velocity","vel"),
                   "sound":UnitName("$c_s","vel"), "mach":UnitName(r'$\Mu$', "none"), "mass":UnitName("Mass","mass"),
                   "time":UnitName("Time", "time"), "length": UnitName("Length", "length"),
-                  "pos":UnitName("Position", "legnth"), "vol":UnitName("Volume","vol"),
+                  "pos":UnitName("Position", "length"), "vol":UnitName("Volume","vol"),
                   "acce":UnitName("Acceleration", "acce"), "pres":UnitName("Pressure", "pres"),
                   "entr":UnitName("Entropy","none")}
 def add_name_and_unit(value, name, unit):
