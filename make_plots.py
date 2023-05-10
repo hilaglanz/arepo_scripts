@@ -261,7 +261,7 @@ def calculate_label_and_value(loaded_snap, value, relative_to_sink_id):
     if value == "g-grap_r_over_rho":
         loaded_snap, temp_value = calculate_label_and_value(loaded_snap, "grap_r_over_rho", relative_to_sink_id)
         loaded_snap, temp_value = calculate_label_and_value(loaded_snap, "g_sink", relative_to_sink_id)
-        loaded_snap.data[value] = loaded_snap.data["g_sink"] + loaded_snap.data["grap_r_over_rho"]
+        loaded_snap.data[value] = -1.0 * loaded_snap.data["g_sink"] + loaded_snap.data["grap_r_over_rho"]
         add_name_and_unit(value, r"$g_{sink} - \nabla P /\rho$", "acce")
 
     if value == "momentum_vdot":
