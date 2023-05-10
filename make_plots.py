@@ -224,7 +224,7 @@ def calculate_label_and_value(loaded_snap, value, relative_to_sink_id):
 
     if value == "grap_r_over_rho" and relative_to_sink_id is not None:
         loaded_snap, temp_value = calculate_label_and_value(loaded_snap, "grap", relative_to_sink_id)
-        loaded_snap.data["HSE"] = -1.0 * loaded_snap.data["grap_r"] / loaded_snap.rho
+        loaded_snap.data["value"] = -1.0 * loaded_snap.data["grap_r"] / loaded_snap.rho
 
     if value == "HSE" and relative_to_sink_id is not None:
         loaded_snap, temp_value = calculate_label_and_value(loaded_snap, "grap_r_over_rho", relative_to_sink_id)
