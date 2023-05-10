@@ -120,7 +120,8 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
 
     if value in name_and_units.keys():
         label = name_and_units[value].name
-        label += " [" + basic_units[name_and_units[value].unit_name].unit + "]"
+        if name_and_units[value].unit_name != "none":
+            label += " [" + basic_units[name_and_units[value].unit_name].unit + "]"
 
     print(value)
     xlab = chr(ord('x') + axes[0])
