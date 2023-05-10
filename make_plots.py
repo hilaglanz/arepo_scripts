@@ -42,7 +42,7 @@ name_and_units = {"rho":UnitName(r'$\rho$',"rho"), "temp":UnitName("Temperature"
                   "time":UnitName("Time", "time"), "length": UnitName("Length", "length"),
                   "pos":UnitName("Position", "length"), "vol":UnitName("Volume","vol"),
                   "acce":UnitName("Acceleration", "acce"), "pres":UnitName("Pressure", "pres"),
-                  "entr":UnitName("Entropy","none")}
+                  "u": UnitName("Energy","u"), "entr":UnitName("Entropy","none")}
 def add_name_and_unit(value, name, unit):
     if value not in name_and_units.keys():
         if unit not in basic_units.keys():
@@ -52,6 +52,9 @@ def add_name_and_unit(value, name, unit):
 def change_snap_units(loaded_snap):
     for key in loaded_snap.data.keys():
         add_computed_value_to_name_and_unit_dict(loaded_snap, key)
+        if name_and_units[key].unit_name == "none":
+            continue
+        print("changing units of ", key, " by a factor of ", basic_units[name_and_units[key].unit_name].factor)
         loaded_snap.data[key] *= basic_units[name_and_units[key].unit_name].factor
 
 def change_unit_conversion(factor_length, factor_velocity, factor_mass):
