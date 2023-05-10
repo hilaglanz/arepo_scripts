@@ -95,6 +95,7 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
     convert_to_cgs = True
     if unit_velocity is not None:
         basic_units["vel"].unit = unit_velocity
+        basic_units["acce"].unit = r'$' + unit_velocity + '^2 /' + unit_length + '$'
         basic_units["time"].unit = r'$' + unit_length + "/" + unit_velocity + '$'
         convert_to_cgs = False
 
