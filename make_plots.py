@@ -160,6 +160,11 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
 
 
 def calculate_label_and_value(loaded_snap, value, relative_to_sink_id):
+    if "xnuc" in value:
+        loaded_snap.data["rho" + value] = loaded_snap.rho * loaded_snap.data[value]
+        value = "rho" + value
+        add_name_and_unit(value, r'$\rho \left(' + species[int(value.split("xnuc")[-1])] + r"\right)$", "rho")
+
     if value in loaded_snap.data.keys():
         if len(loaded_snap.data[value].shape) == 1:
             add_computed_value_to_name_and_unit_dict(loaded_snap, value)
@@ -169,11 +174,6 @@ def calculate_label_and_value(loaded_snap, value, relative_to_sink_id):
         if len(loaded_snap.data[value].shape) == 1:
             add_computed_value_to_name_and_unit_dict(loaded_snap, value)
             return loaded_snap, value
-
-    if "xnuc" in value:
-        loaded_snap.data["rho" + value] = loaded_snap.rho * loaded_snap.data[value]
-        value = "rho" + value
-        add_name_and_unit(value, r'$\rho \left(' + species[int(value.split("xnuc")[-1])] + r"\right)$", "rho")
 
     if value == "mean_a":
         loaded_snap.calculate_mean_a()
