@@ -26,7 +26,7 @@ class UnitName:
 basic_units = {"rho":UnitConversion(r'$g/cm^3$'), "temp":UnitConversion("K"), "vel":UnitConversion("$cm/s$"),
                "mass":UnitConversion("g"), "time":UnitConversion("s"), "length": UnitConversion("cm"),
                "vol": UnitConversion("vol"), "acce":UnitConversion("$cm/s^2$"), "pres":UnitConversion("Ba"),
-               "u":UnitConversion("erg"), "none":UnitConversion("")}
+               "u":UnitConversion("erg"), "none": UnitConversion("")}
 
 name_and_units = {"rho":UnitName(r'$\rho$',"rho"), "temp":UnitName("Temperature","temp"),
                   "vel":UnitName("Velocity","vel"), "sound":UnitName("$c_s","vel"),
@@ -58,7 +58,7 @@ def change_unit_conversion(factor_length, factor_velocity, factor_mass):
     basic_units["mass"].factor = factor_mass
     basic_units["time"].factor = (factor_length/factor_velocity)
     basic_units["pres"].factor = (factor_mass * factor_velocity ** 2) / (factor_length ** 3) # mass*acc/area
-    basic_units["entr"].factor = basic_units["pres"].factor / (basic_units["rho"].factor ** (5.0 / 3))
+    #basic_units["entr"].factor = basic_units["pres"].factor / (basic_units["rho"].factor ** (5.0 / 3))
     basic_units["u"].factor = factor_mass * (factor_velocity ** 2)
     # TODO: convert also temperature?
 def project_vector(v,r):
