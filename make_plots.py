@@ -9,7 +9,7 @@ from loadmodules import *
 #               "length": ["cm",1.0], "acc":["$cm/s^2$", 1.0], "pres":["Ba", 1.0], "none":["", 1.0]}
 '''
 name_and_units = {"rho":[r'$\rho$',"rho"], "temp":["Temperature","temp"], "vel":["Velocity","vel"],
-                  "sound":["$c_s","vel"], "mach":[r'$\Mu$', "none"], "mass":["Mass","mass"], "time":["Time", "time"],
+                  "sound":["$c_s","vel"], "mach":[r'$\mathcal{M}$', "none"], "mass":["Mass","mass"], "time":["Time", "time"],
                   "length": ["Length", "length"], "pos":["Position", "length"], "vol":["Volume","vol"],
                   "acc":["Acceleration", "acc"], "pres":["Pressure", "pres"],
                   "entr":["Entropy","none"]}
