@@ -25,7 +25,7 @@ class UnitName:
 
 basic_units = {"rho":UnitConversion(r'$g/cm^3$'), "temp":UnitConversion("K"), "vel":UnitConversion("$cm/s$"),
                "mass":UnitConversion("g"), "time":UnitConversion("s"), "length": UnitConversion("cm"),
-               "vol": UnitConversion("vol"), "acce":UnitConversion("$cm/s^2$"), "pres":UnitConversion("Ba"),
+               "vol": UnitConversion(r"$cm^3$"), "acce":UnitConversion("$cm/s^2$"), "pres":UnitConversion("Ba"),
                "u":UnitConversion("erg"), "none": UnitConversion("")}
 
 name_and_units = {"rho":UnitName(r'$\rho$',"rho"), "temp":UnitName("Temperature","temp"),
@@ -85,10 +85,14 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
                       newfig=True, axes=[0,1], modified_units = False, ignore_types=[]):
     label = value
     convert_to_cgs = True
+
     if unit_velocity is not None:
         basic_units["vel"].unit = unit_velocity
         basic_units["acce"].unit = r'$' + unit_velocity + '^2 /' + unit_length + '$'
         basic_units["time"].unit = r'$' + unit_length + "/" + unit_velocity + '$'
+        basic_units["vol"].unit = r'$' + unit_length + '^3$'
+        basic_units["length"].unit = r'$' + unit_length + '$'
+        basic_units["pres"].unit = r'$' + unit_density + r'\cdot' + unit_velocity + '^2$'
         convert_to_cgs = False
 
     if unit_density is not None:
