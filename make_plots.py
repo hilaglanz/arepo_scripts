@@ -5,15 +5,6 @@ import numpy as np
 from loadmodules import *
 
 
-#basic_units = {"rho":[r'$g/cm^3$', 1.0], "temp":["K", 1.0], "vel":["$cm/s$", 1.0], "mass":["g", 1.0], "time":["s", 1.0],
-#               "length": ["cm",1.0], "acc":["$cm/s^2$", 1.0], "pres":["Ba", 1.0], "none":["", 1.0]}
-'''
-name_and_units = {"rho":[r'$\rho$',"rho"], "temp":["Temperature","temp"], "vel":["Velocity","vel"],
-                  "sound":["$c_s","vel"], "mach":[r'$\mathcal{M}$', "none"], "mass":["Mass","mass"], "time":["Time", "time"],
-                  "length": ["Length", "length"], "pos":["Position", "length"], "vol":["Volume","vol"],
-                  "acc":["Acceleration", "acc"], "pres":["Pressure", "pres"],
-                  "entr":["Entropy","none"]}
-'''
 species = ['n', 'p', '^{4}He', '^{11}B', '^{12}C', '^{13}C', '^{13}N', '^{14}N', '^{15}N', '^{15}O',
            '^{16}O', '^{17}O', '^{18}F', '^{19}Ne', '^{20}Ne', '^{21}Ne', '^{22}Ne', '^{22}Na',
            '^{23}Na', '^{23}Mg', '^{24}Mg', '^{25}Mg', '^{26}Mg', '^{25}Al', '^{26}Al',
@@ -35,14 +26,15 @@ class UnitName:
 basic_units = {"rho":UnitConversion(r'$g/cm^3$'), "temp":UnitConversion("K"), "vel":UnitConversion("$cm/s$"),
                "mass":UnitConversion("g"), "time":UnitConversion("s"), "length": UnitConversion("cm"),
                "vol": UnitConversion("vol"), "acce":UnitConversion("$cm/s^2$"), "pres":UnitConversion("Ba"),
-               "u":UnitConversion("erg"), "entr": UnitConversion("entr"), "none":UnitConversion("")}
+               "u":UnitConversion("erg"), "none":UnitConversion("")}
 
-name_and_units = {"rho":UnitName(r'$\rho$',"rho"), "temp":UnitName("Temperature","temp"), "vel":UnitName("Velocity","vel"),
-                  "sound":UnitName("$c_s","vel"), "mach":UnitName(r'$\Mu$', "none"), "mass":UnitName("Mass","mass"),
+name_and_units = {"rho":UnitName(r'$\rho$',"rho"), "temp":UnitName("Temperature","temp"),
+                  "vel":UnitName("Velocity","vel"), "sound":UnitName("$c_s","vel"),
+                  "mach":UnitName(r'$\mathcal{M}$', "none"), "mass":UnitName("Mass","mass"),
                   "time":UnitName("Time", "time"), "length": UnitName("Length", "length"),
-                  "pos":UnitName("Position", "length"), "vol":UnitName("Volume","vol"),
-                  "acce":UnitName("Acceleration", "acce"), "pres":UnitName("Pressure", "pres"),
-                  "u": UnitName("Energy","u"), "entr":UnitName("Entropy","none")}
+                  "pos":UnitName("Position", "length"), "vol": UnitName("Volume","vol"),
+                  "acce":UnitName("Acceleration", "acce"), "pres": UnitName("Pressure", "pres"),
+                  "u": UnitName("Energy","u"), "entr": UnitName("Entropy", "none")}
 def add_name_and_unit(value, name, unit):
     if value not in name_and_units.keys():
         if unit not in basic_units.keys():
