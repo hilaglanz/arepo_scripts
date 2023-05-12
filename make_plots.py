@@ -92,7 +92,12 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
         basic_units["time"].unit = r'$' + unit_length + "/" + unit_velocity + '$'
         basic_units["vol"].unit = r'$' + unit_length + '^3$'
         basic_units["length"].unit = r'$' + unit_length + '$'
-        basic_units["pres"].unit = r'$' + unit_density + '\cdot' + unit_velocity + '^2$'
+
+        if unit_density is not None:
+            basic_units["pres"].unit = r'$' + unit_density + '\cdot' + unit_velocity + '^2$'
+        else:
+            basic_units["pres"].unit = r'$\rho_\infty \cdot' + unit_velocity + '^2$'
+
         convert_to_cgs = False
 
     if unit_density is not None:
