@@ -149,7 +149,7 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
                           loaded_snap.parameters['SinkFormationRadius']*basic_units["length"].factor)
                     circ = Circle((point_pos[axes[0]], point_pos[axes[1]]),
                                   loaded_snap.parameters['SinkFormationRadius']*basic_units["length"].factor
-                                  , fill=True, color='white', linestyle='dashed', linewidth=3.0)
+                                  , fill=False, color='white', linestyle='dashed', linewidth=3.0)
                     print(circ)
                     gca().add_patch(circ)
     if plot_velocities:
