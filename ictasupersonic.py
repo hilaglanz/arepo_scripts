@@ -36,7 +36,10 @@ def get_smoothed_sub_grid_sizes(boxsize, finest_grid_size):
 
 def create_hard_sphere_boundary(mass, radius, position, background_data, factor_u=10**-12):
     sphere_cells = np.where(np.sqrt((background_data['pos']-position)**2).sum(axis=1) < radius)
-    background_data['mass'][sphere_cells] = 3.0 * mass / (4 * pi * radius ** 3)
+    if mass == 0:
+        background_data['mass'] *= factor_u
+    else:
+        background_data['mass'][sphere_cells] = 3.0 * mass / (4 * pi * radius ** 3)
     background_data['u'][sphere_cells] *= factor_u
     background_data['vel'][sphere_cells,:] = 0
     background_data['bflg'][sphere_cells] = 1
@@ -85,7 +88,7 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
 
     pointStar['bflg'] = np.zeros(pointStar['count'])
     if hard_sphere:
-        pointStar = create_hard_sphere_boundary(sink_mass, Rs, pointStar['pos'][0], pointStar)
+        pointStar = create_hard_sphere_boundary(0, Rs, pointStar['pos'][0], pointStar)
 
     print(pointStar.keys())
     if num_sinks > 0:
