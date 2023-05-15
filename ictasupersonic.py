@@ -85,10 +85,10 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
     pointStar['u'][:] = (cs**2)/(gamma*(gamma-1))
     print("u: ", (cs**2)/(gamma*(gamma-1)))
 
-    pointStar['bflg'] = np.zero(pointStar['count'])
+    pointStar['bflg'] = np.zeros(pointStar['count'])
     if hard_sphere:
         pointStar = create_hard_sphere_boundary(sink_mass, Rs, pointStar['pos'][0], pointStar)
-        
+
     print(pointStar.keys())
     if num_sinks > 0:
         pointStar['type'][:num_sinks] = [5] * num_sinks
