@@ -33,8 +33,19 @@ def get_smoothed_sub_grid_sizes(boxsize, finest_grid_size):
         sub_grid_sizes[-1] = boxsize
 
     return sub_grid_sizes
+
+def create_hard_sphere_boundary(mass, radius, position, background_data, factor_u=10**-12):
+    sphere_cells = np.where(np.sqrt((background_data['pos']-position)**2).sum(axis=1) < radius)
+    background_data['rho'][sphere_cells] = 3.0 * mass / (4 * pi * radius ** 3)
+    background_data['u'][sphere_cells] *= factor_u
+    background_data['pres'][sphere_cells] *= factor_u
+    background_data['temp'][sphere_cells] *= factor_u
+    background_data['vel'][sphere_cells,:] = 0
+    background_data['bflg'][sphere_cells] = 1
+
+    return background_data
 def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho=1, gamma=5.0/3, Ra=1, Rs=0.02, res=100,
-                        binary=False, semimajor = 2.5, supersonic_perscription=True, surroundings=10):
+                        binary=False, semimajor = 2.5, supersonic_perscription=True, surroundings=10, hard_sphere=False):
     vel = mach*cs
     accretion_radius = Ra
     last_sink_i = 0
@@ -49,12 +60,19 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
     num_sinks = last_sink_i + 1
     print("using cs= ", cs, "v_inf= ", vel, "mach= ", mach, "rho_inf= ", rho, "Ra= ", accretion_radius, "G= ", G)
 
+    finest_grid_size, highest_resolution = get_finest_grid_size_and_resolution(accretion_radius, Rs, surroundings)
+
     pointStar = initialize_dictionary_with_point_masses(sink_mass, num_sinks, boxsize)
 
-    finest_grid_size, highest_resolution = get_finest_grid_size_and_resolution(accretion_radius, Rs, surroundings)
-    gadget_add_grid(pointStar, finest_grid_size, res=highest_resolution)
-    print("added inner grid with size of ", finest_grid_size/accretion_radius, "Ra")
-    print("minimum vol =", (finest_grid_size**3)/highest_resolution**3)
+    gadget_add_grid(pointStar, finest_grid_size / 2.0, res=res) # no need for so many cells well inside the sink
+    sub_grid_sizes = get_smoothed_sub_grid_sizes(boxsize, finest_grid_size*0.8)
+    gadget_add_grids(pointStar, sub_grid_sizes[::-1], res=res)#gradually increase resolution
+    gadget_add_grid(pointStar, finest_grid_size, res=highest_resolution) # should have many close to its surface
+    print("added inner grid with size of ", finest_grid_size / accretion_radius, "Ra")
+    print("minimum vol =", (finest_grid_size ** 3) / highest_resolution ** 3)
+
+    if hard_sphere:
+        num_sinks = 0
 
     sub_grid_sizes = get_smoothed_sub_grid_sizes(boxsize, finest_grid_size)
     gadget_add_grids(pointStar, sub_grid_sizes, res=res)
@@ -63,7 +81,6 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
     print("max vol =", (boxsize**3.0 - (sub_grid_sizes[-2])**3)/res**3)
     
     pointStar['type']=np.zeros(pointStar['count'])
-    pointStar['type'][:num_sinks] = [5] * num_sinks
 
     pointStar['mass'][num_sinks:] = rho #3e-2 with read mass as density will give same densities to all subgrids cells
     pointStar['vel'][num_sinks:,0] = vel
@@ -71,20 +88,26 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
     pointStar['u'][:] = (cs**2)/(gamma*(gamma-1))
     print("u: ", (cs**2)/(gamma*(gamma-1)))
     print(pointStar.keys())
-    if binary:
-        pointStar['pos'][0, 0] += semimajor / 2.0
-        pointStar['pos'][1, 0] -= semimajor / 2.0
-        pointStar['vel'][0, 1] += orbital_vel
-        pointStar['vel'][1, 1] -= orbital_vel
+    if not hard_sphere:
+        pointStar['type'][:num_sinks] = [5] * num_sinks
+        if binary:
+            pointStar['pos'][0, 0] += semimajor / 2.0
+            pointStar['pos'][1, 0] -= semimajor / 2.0
+            pointStar['vel'][0, 1] += orbital_vel
+            pointStar['vel'][1, 1] -= orbital_vel
 
-    print(pointStar['vel'][:,0])
-    for key in pointStar.keys():
-        print (key)
-        if key != 'count' and key!= 'boxsize' and pointStar[key].shape[0]>1:
-            ax = 0
-        else:
-            ax = None
-        pointStar[key] = np.flip(pointStar[key], axis=ax)
+        print(pointStar['vel'][:,0])
+        for key in pointStar.keys():
+            print (key)
+            if key != 'count' and key!= 'boxsize' and pointStar[key].shape[0]>1:
+                ax = 0
+            else:
+                ax = None
+            pointStar[key] = np.flip(pointStar[key], axis=ax)
+    else:
+        pointStar['bflg'] = np.zero(pointStar['count'])
+        pointStar = create_hard_sphere_boundary(sink_mass, Rs, pointStar['pos'][0], pointStar)
+
     print(pointStar['vel'][:, 0])
     print(pointStar['mass'])
 
@@ -111,6 +134,9 @@ def InitParser():
                         help='do we have a binary accreting?',
                         default=False)
     parser.add_argument('--binary_separation', type=float,  help='initial separation between the binary objects', default=None)
+    parser.add_argument('--hard_sphere', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
+                        help='do we have a hard sphere instead of a point mass?',
+                        default=False)
     return parser
 
 if __name__ == "__main__":
@@ -122,6 +148,7 @@ if __name__ == "__main__":
 
     create_ic_with_sink(ic_path=args.ic_path, boxsize=args.boxsize, G=args.G, mach=args.mach, cs=args.cs, rho=args.rho,
                         gamma=args.gamma, Ra=args.Ra, Rs=args.Rs, res=args.res, binary=args.binary,
-                        semimajor=args.binary_separation, surroundings=args.sink_surroundings)
+                        semimajor=args.binary_separation, surroundings=args.sink_surroundings,
+                        hard_sphere=args.hard_sphere)
 
 
