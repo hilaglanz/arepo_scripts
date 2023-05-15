@@ -38,8 +38,6 @@ def create_hard_sphere_boundary(mass, radius, position, background_data, factor_
     sphere_cells = np.where(np.sqrt((background_data['pos']-position)**2).sum(axis=1) < radius)
     background_data['mass'][sphere_cells] = 3.0 * mass / (4 * pi * radius ** 3)
     background_data['u'][sphere_cells] *= factor_u
-    background_data['pres'][sphere_cells] *= factor_u
-    background_data['temp'][sphere_cells] *= factor_u
     background_data['vel'][sphere_cells,:] = 0
     background_data['bflg'][sphere_cells] = 1
 
