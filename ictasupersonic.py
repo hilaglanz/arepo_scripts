@@ -67,8 +67,8 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
 
     pointStar = initialize_dictionary_with_point_masses(sink_mass, num_sinks, boxsize)
 
-    gadget_add_grid(pointStar, finest_grid_size / 2.0, res=min([res, highest_resolution])) # no need for so many cells well inside the sink
-    gadget_add_grid(pointStar, finest_grid_size * 0.8, res=ceil(mean([res, highest_resolution])))  # no need for so many cells well inside the sink
+    gadget_add_grid(pointStar, Rs * 0.5, res=min([res, highest_resolution])) # no need for so many cells well inside the sink
+    gadget_add_grid(pointStar, Rs * 0.8, res=ceil(mean([res, highest_resolution])))  # no need for so many cells well inside the sink
     gadget_add_grid(pointStar, finest_grid_size, res=highest_resolution) # should have many close to its surface
     print("added inner grid with size of ", finest_grid_size / accretion_radius, "Ra")
     print("minimum vol =", (finest_grid_size ** 3) / highest_resolution ** 3)
