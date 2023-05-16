@@ -26,7 +26,7 @@ class UnitName:
 basic_units = {"rho":UnitConversion(r'$g/cm^3$'), "temp":UnitConversion("K"), "vel":UnitConversion("$cm/s$"),
                "mass":UnitConversion("g"), "time":UnitConversion("s"), "length": UnitConversion("cm"),
                "vol": UnitConversion(r"$cm^3$"), "acce":UnitConversion("$cm/s^2$"), "pres":UnitConversion("Ba"),
-               "u":UnitConversion("erg"), "none": UnitConversion("")}
+               "u":UnitConversion("erg"), "ang_mom": UnitConversion(r"$cm^2 / s$") ,"none": UnitConversion("")}
 
 name_and_units = {"rho":UnitName(r'$\rho$',"rho"), "temp":UnitName("Temperature","temp"),
                   "vel":UnitName("Velocity","vel"), "sound":UnitName("$c_s","vel"),
@@ -54,6 +54,7 @@ def change_unit_conversion(factor_length, factor_velocity, factor_mass):
     basic_units["length"].factor = factor_length
     basic_units["vol"].factor = factor_length ** 3
     basic_units["vel"].factor= factor_velocity
+    basic_units["ang_mom"].factor= factor_velocity * factor_length
     basic_units["acce"].factor= (factor_velocity ** 2) / factor_length
     basic_units["mass"].factor = factor_mass
     basic_units["time"].factor = (factor_length/factor_velocity)
@@ -90,6 +91,7 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
         basic_units["vel"].unit = unit_velocity
         basic_units["acce"].unit = r'$' + unit_velocity + '^2 /' + unit_length + '$'
         basic_units["time"].unit = r'$' + unit_length + "/" + unit_velocity + '$'
+        basic_units["ang_mom"].unit = r'$' + unit_length + "\cdot " + unit_velocity + '$'
         basic_units["vol"].unit = r'$' + unit_length + '^3$'
         basic_units["length"].unit = r'$' + unit_length + '$'
 
@@ -286,6 +288,24 @@ def calculate_label_and_value(loaded_snap, value, relative_to_sink_id):
         entr_inf = get_value_at_inf("entr", loaded_snap.data)
         loaded_snap.data[value] = (loaded_snap.data["entr"] - entr_inf) / entr_inf
         add_name_and_unit(value, r"$\delta s / s_\infty$", "none")
+
+    if value == "angular_momentum":
+        ind = loaded_snap.data['type'] == 0
+        if relative_to_sink_id is not None:
+            dist, r, sink_idk = calculate_sink_properties(loaded_snap, relative_to_sink_id)
+            rcm = loaded_snap.data['pos'][sink_idk]
+            vcm = loaded_snap.data['vel'][sink_idk]
+        else:
+            rcm = loaded_snap.center
+            vcm = np.zeros((1,3))
+
+        loaded_snap.data[value] = (loaded_snap.mass[ind].astype(np.float64) * (
+                (loaded_snap.pos[ind].astype(np.float64)[:, 0] - rcm[0])
+                * (loaded_snap.vel[ind].astype(np.float64)[:, 1] - vcm[0]) -
+                (loaded_snap.pos[ind].astype(np.float64)[:, 1] - rcm[1])
+                * (loaded_snap.vel[ind].astype(np.float64)[:, 0] - vcm[1]))
+                ).sum()
+        add_name_and_unit(value, "Angular momentum", "ang_mom")
 
     return loaded_snap, value
 
