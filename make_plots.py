@@ -160,6 +160,15 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
     xlabel(xlab + ' [' + unit_length + ']', loc="left")
     ylabel(ylab + ' [' + unit_length + ']')
 
+def get_value_at_inf(value, data):
+    if value not in data:
+        print("data does not have ", value)
+        return None
+    border_ids = np.where(data['pos'][:,0] < 1)
+    val_inf = data[value][border_ids].mean()
+    print("calculated ", value, " at infinity= ", val_inf)
+
+    return val_inf
 
 def calculate_label_and_value(loaded_snap, value, relative_to_sink_id):
     if "xnuc" in value:
@@ -271,6 +280,11 @@ def calculate_label_and_value(loaded_snap, value, relative_to_sink_id):
         loaded_snap, temp_value = calculate_label_and_value(loaded_snap, "v_grav", relative_to_sink_id)
         loaded_snap.data[value] = loaded_snap.data["g-grap_r_over_rho"] - loaded_snap.data["v_grav_r"]
         add_name_and_unit(value, r"$g_{sink} - \nabla P /\rho - v\cdot \nabla v$", "acce")
+
+    if value == "entr_ratio":
+        loaded_snap, temp_value = calculate_label_and_value(loaded_snap, "entr", relative_to_sink_id)
+        entr_inf = get_value_at_inf("entr", loaded_snap)
+        loaded_snap[value] = (loaded_snap["entr"] - entr_inf) / entr_inf
 
     return loaded_snap, value
 
