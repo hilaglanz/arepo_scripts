@@ -304,6 +304,10 @@ def calculate_label_and_value(loaded_snap, value, relative_to_sink_id):
             rcm = loaded_snap.center
             vcm = np.zeros((1,3))
         print("calculating angular momentum from ", rcm, vcm)
+        print((loaded_snap.pos[ind].astype(np.float64)[:, 0] - rcm[0]))
+        print((loaded_snap.vel[ind].astype(np.float64)[:, 1] - vcm[0]))
+        print((loaded_snap.pos[ind].astype(np.float64)[:, 0] - rcm[0])
+                * (loaded_snap.vel[ind].astype(np.float64)[:, 1] - vcm[0]))
         loaded_snap.data[value] = (loaded_snap.mass[ind].astype(np.float64) * (
                 (loaded_snap.pos[ind].astype(np.float64)[:, 0] - rcm[0])
                 * (loaded_snap.vel[ind].astype(np.float64)[:, 1] - vcm[0]) -
