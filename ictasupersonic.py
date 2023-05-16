@@ -43,7 +43,7 @@ def create_hard_sphere_boundary(mass, radius, background_data, point_mass_id=0, 
     else:
         background_data['mass'][sphere_cells] = 3.0 * mass / (4 * pi * radius ** 3)
     background_data['u'][sphere_cells] *= factor_u
-    background_data['vel'][sphere_cells,:] = 0
+    background_data['vel'][sphere_cells,:] *= factor_u
     background_data['bflg'][sphere_cells] = 1
 
     return background_data
@@ -90,7 +90,7 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
 
     pointStar['bflg'] = np.zeros(pointStar['count'])
     if hard_sphere:
-        pointStar = create_hard_sphere_boundary(0, Rs, pointStar, 0)
+        pointStar = create_hard_sphere_boundary(0, Rs, pointStar, 0,1)
 
     print(pointStar.keys())
     if num_sinks > 0:
