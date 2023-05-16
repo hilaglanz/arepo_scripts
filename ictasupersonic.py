@@ -34,10 +34,10 @@ def get_smoothed_sub_grid_sizes(boxsize, finest_grid_size):
 
     return sub_grid_sizes
 
-def create_hard_sphere_boundary(mass, radius, position, background_data, factor_u=10**-12):
+def create_hard_sphere_boundary(mass, radius, background_data, point_mass_id=0, factor_u=10**-12):
+    position = background_data['pos'][point_mass_id,:]
     sphere_cells = np.where(np.sqrt((background_data['pos']-position)**2).sum(axis=1) < radius)
-    sink_particles = np.where(background_data['type'] == 5)
-    np.delete(sphere_cells, sink_particles)
+    np.delete(sphere_cells, [point_mass_id])
     if mass == 0:
         background_data['mass'][sphere_cells] *= factor_u
     else:
@@ -81,7 +81,8 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
     print("max vol =", (boxsize**3.0 - (sub_grid_sizes[-2])**3)/res**3)
     
     pointStar['type']=np.zeros(pointStar['count'])
-
+    if num_sinks > 0:
+        pointStar['type'][:num_sinks] = [5] * num_sinks
     pointStar['mass'][num_sinks:] = rho #3e-2 with read mass as density will give same densities to all subgrids cells
     pointStar['vel'][num_sinks:,0] = vel
     pointStar['u'] = np.zeros(pointStar['count'])
@@ -90,11 +91,10 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
 
     pointStar['bflg'] = np.zeros(pointStar['count'])
     if hard_sphere:
-        pointStar = create_hard_sphere_boundary(0, Rs, pointStar['pos'][0], pointStar)
+        pointStar = create_hard_sphere_boundary(0, Rs, pointStar, 0)
 
     print(pointStar.keys())
     if num_sinks > 0:
-        pointStar['type'][:num_sinks] = [5] * num_sinks
         if binary:
             pointStar['pos'][0, 0] += semimajor / 2.0
             pointStar['pos'][1, 0] -= semimajor / 2.0
