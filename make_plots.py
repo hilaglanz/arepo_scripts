@@ -298,12 +298,12 @@ def calculate_label_and_value(loaded_snap, value, relative_to_sink_id):
         ind = loaded_snap.data['type'] == 0
         if relative_to_sink_id is not None:
             dist, r, sink_idk = calculate_sink_properties(loaded_snap, relative_to_sink_id)
-            rcm = loaded_snap.data['pos'][sink_idk]
-            vcm = loaded_snap.data['vel'][sink_idk]
+            rcm = loaded_snap.data['pos'][sink_idk,:]
+            vcm = loaded_snap.data['vel'][sink_idk,:]
         else:
             rcm = loaded_snap.center
             vcm = np.zeros((1,3))
-
+        print("calculating angular momentum from ", rcm, vcm)
         loaded_snap.data[value] = (loaded_snap.mass[ind].astype(np.float64) * (
                 (loaded_snap.pos[ind].astype(np.float64)[:, 0] - rcm[0])
                 * (loaded_snap.vel[ind].astype(np.float64)[:, 1] - vcm[0]) -
