@@ -37,7 +37,7 @@ def get_smoothed_sub_grid_sizes(boxsize, finest_grid_size):
 def create_hard_sphere_boundary(mass, radius, background_data, point_mass_id=0, factor_u=10**-12):
     position = background_data['pos'][point_mass_id,:]
     sphere_cells = np.where(np.sqrt((background_data['pos']-position)**2).sum(axis=1) < radius)
-    np.delete(sphere_cells, [point_mass_id])
+    sphere_cells = np.delete(sphere_cells, [point_mass_id])
     if mass == 0:
         background_data['mass'][sphere_cells] *= factor_u
     else:
