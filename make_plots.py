@@ -284,7 +284,8 @@ def calculate_label_and_value(loaded_snap, value, relative_to_sink_id):
     if value == "entr_ratio":
         loaded_snap, temp_value = calculate_label_and_value(loaded_snap, "entr", relative_to_sink_id)
         entr_inf = get_value_at_inf("entr", loaded_snap.data)
-        loaded_snap[value] = (loaded_snap["entr"] - entr_inf) / entr_inf
+        loaded_snap.data[value] = (loaded_snap.data["entr"] - entr_inf) / entr_inf
+        add_name_and_unit(value, r"\delta s / s_\infty", "none")
 
     return loaded_snap, value
 
