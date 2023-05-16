@@ -167,6 +167,11 @@ def get_value_at_inf(value, data):
         print("data does not have ", value)
         return None
     border_ids = np.where(data['pos'][:,0] < 1)
+    n = 2
+    while len(border_ids[0] < 1):
+        border_ids = np.where(data['pos'][:,0] < n)
+        n += 1
+
     val_inf = data[value][border_ids].mean()
     print("calculated ", value, " at infinity= ", val_inf)
 
