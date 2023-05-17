@@ -70,7 +70,8 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
 
     gadget_add_grid(pointStar, Rs * 0.5, res=min([res, highest_resolution])) # no need for so many cells well inside the sink
     pointStar = background_grid.BackgroundGridAroundSphere(pointStar, boxsize=Rs, ndir=highest_resolution,
-                                                          newsize=finest_grid_size)
+                                                          newsize=finest_grid_size, grid_rho=rho,
+                                                           grid_u=(cs**2)/(gamma*(gamma-1)))
     #gadget_add_grid(pointStar, Rs * 0.8, res=ceil(mean([res, highest_resolution])))  # no need for so many cells well inside the sink
     #gadget_add_grid(pointStar, finest_grid_size, res=highest_resolution) # should have many close to its surface
     print("added inner grid with size of ", finest_grid_size / accretion_radius, "Ra")
