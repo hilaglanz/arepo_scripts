@@ -69,8 +69,8 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
     pointStar = initialize_dictionary_with_point_masses(sink_mass, num_sinks, boxsize)
     background = initialize_dictionary_with_point_masses(sink_mass,1,boxsize)
     gadget_add_grid(background, Rs * 0.5, res=min([res, highest_resolution])) # no need for so many cells well inside the sink
-    bgSphere = background_grid.BackgroundGridAroundSphere(background, boxsize=Rs*0.8, ndir=highest_resolution,
-                                                          newsize=finest_grid_size, grid_rho=rho,
+    bgSphere = background_grid.BackgroundGridAroundSphere(background, boxsize=Rs*0.7, ndir=highest_resolution,
+                                                          newsize=Rs*0.9, grid_rho=rho,
                                                            grid_u=(cs**2)/(gamma*(gamma-1)))
     background = bgSphere.add_grid()
     for key in pointStar.keys():
@@ -80,7 +80,7 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
             pointStar[key] = np.append(pointStar[key], background[key])
 
     #gadget_add_grid(pointStar, Rs * 0.8, res=ceil(mean([res, highest_resolution])))  # no need for so many cells well inside the sink
-    #gadget_add_grid(pointStar, finest_grid_size, res=highest_resolution) # should have many close to its surface
+    gadget_add_grid(pointStar, finest_grid_size, res=highest_resolution) # should have many close to its surface
     print("added inner grid with size of ", finest_grid_size / accretion_radius, "Ra")
     print("minimum vol =", (finest_grid_size ** 3) / highest_resolution ** 3)
 
