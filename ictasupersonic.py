@@ -36,7 +36,7 @@ def get_smoothed_sub_grid_sizes(boxsize, finest_grid_size):
     return sub_grid_sizes
 
 def create_hard_sphere_boundary(mass, radius, background_data, point_mass_id=0, factor_u=10**-12):
-    position = background_data['pos'][point_mass_id,:]
+    position = background_data['pos'][point_mass_id]
     sphere_cells = np.where(np.sqrt((background_data['pos']-position)**2).sum(axis=1) < radius)
     sphere_cells = np.delete(sphere_cells, [point_mass_id])
     if mass == 0:
@@ -67,12 +67,18 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
     finest_grid_size, highest_resolution = get_finest_grid_size_and_resolution(accretion_radius, Rs, surroundings)
 
     pointStar = initialize_dictionary_with_point_masses(sink_mass, num_sinks, boxsize)
-
-    gadget_add_grid(pointStar, Rs * 0.5, res=min([res, highest_resolution])) # no need for so many cells well inside the sink
-    bgSphere = background_grid.BackgroundGridAroundSphere(pointStar, boxsize=Rs, ndir=highest_resolution,
+    background = initialize_dictionary_with_point_masses(sink_mass,1,boxsize)
+    gadget_add_grid(background, Rs * 0.5, res=min([res, highest_resolution])) # no need for so many cells well inside the sink
+    bgSphere = background_grid.BackgroundGridAroundSphere(background, boxsize=Rs*0.8, ndir=highest_resolution,
                                                           newsize=finest_grid_size, grid_rho=rho,
                                                            grid_u=(cs**2)/(gamma*(gamma-1)))
-    pointStar = bgSphere.add_grid()
+    background = bgSphere.add_grid()
+    for key in pointStar.keys():
+        if key == 'count' or key == 'boxsize':
+            pointStar[key] += background[key]
+        else:
+            pointStar[key] = np.append(pointStar[key], background[key])
+
     #gadget_add_grid(pointStar, Rs * 0.8, res=ceil(mean([res, highest_resolution])))  # no need for so many cells well inside the sink
     #gadget_add_grid(pointStar, finest_grid_size, res=highest_resolution) # should have many close to its surface
     print("added inner grid with size of ", finest_grid_size / accretion_radius, "Ra")
