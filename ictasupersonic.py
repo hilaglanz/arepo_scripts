@@ -73,10 +73,13 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
                                                           newsize=Rs*0.9, grid_rho=rho,
                                                            grid_u=(cs**2)/(gamma*(gamma-1)))
     background = bgSphere.add_grid()
-    pointStar['pos'] += background['boxsize']/2
+    background['pos'] += boxsize/2.0  - 0.5 * background['boxsize']
     for key in pointStar.keys():
-        if key == 'count' or key == 'boxsize':
+        if key == 'count' :
             pointStar[key] += background[key]
+            continue
+        if key == 'boxsize':
+            continue
         else:
             pointStar[key] = np.append(pointStar[key], background[key],axis=0)
 
