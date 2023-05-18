@@ -73,11 +73,12 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
                                                           newsize=Rs*0.9, grid_rho=rho,
                                                            grid_u=(cs**2)/(gamma*(gamma-1)))
     background = bgSphere.add_grid()
+    pointStar['pos'] += background['boxsize']/2
     for key in pointStar.keys():
         if key == 'count' or key == 'boxsize':
             pointStar[key] += background[key]
         else:
-            pointStar[key] = np.append(pointStar[key], background[key])
+            pointStar[key] = np.append(pointStar[key], background[key],axis=0)
 
     #gadget_add_grid(pointStar, Rs * 0.8, res=ceil(mean([res, highest_resolution])))  # no need for so many cells well inside the sink
     gadget_add_grid(pointStar, finest_grid_size, res=highest_resolution) # should have many close to its surface
