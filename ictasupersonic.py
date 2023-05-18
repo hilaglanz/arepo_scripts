@@ -67,13 +67,14 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
     finest_grid_size, highest_resolution = get_finest_grid_size_and_resolution(accretion_radius, Rs, surroundings)
 
     pointStar = initialize_dictionary_with_point_masses(sink_mass, num_sinks, boxsize)
-    background = initialize_dictionary_with_point_masses(rho,1,boxsize)
-    gadget_add_grid(background, Rs * 0.5, res=min([res, highest_resolution])) # no need for so many cells well inside the sink
+    background = initialize_dictionary_with_point_masses(rho,1,Rs*0.1)
+    #gadget_add_grid(background, Rs * 0.5, res=min([res, highest_resolution])) # no need for so many cells well inside the sink
     bgSphere = background_grid.BackgroundGridAroundSphere(background, boxsize=Rs*0.7, ndir=highest_resolution,
-                                                          newsize=Rs*0.9, grid_rho=rho,
+                                                          newsize=Rs*1.1, grid_rho=rho,
                                                            grid_u=(cs**2)/(gamma*(gamma-1)))
     background = bgSphere.add_grid()
-    background['pos'] += boxsize/2.0  - 0.5 * background['boxsize']
+    gadget_add_grid(background, background['boxsize'], res) #filling the inner sphere
+    background['pos'] += boxsize/2.0 - 0.5 * background['boxsize']
     for key in pointStar.keys():
         if key == 'count' :
             pointStar[key] += background[key]
