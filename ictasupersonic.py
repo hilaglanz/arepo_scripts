@@ -37,7 +37,7 @@ def get_smoothed_sub_grid_sizes(boxsize, finest_grid_size):
 
 def create_hard_sphere_boundary(mass, radius, background_data, point_mass_id=0, factor_u=10**-12):
     position = background_data['pos'][point_mass_id]
-    sphere_cells = np.where(np.sqrt((background_data['pos']-position)**2).sum(axis=1) < radius)
+    sphere_cells = np.where(np.sqrt(((background_data['pos']-position)**2).sum(axis=1)) < radius)
     sphere_cells = np.delete(sphere_cells, [point_mass_id])
     if mass == 0:
         background_data['mass'][sphere_cells] *= factor_u
@@ -67,7 +67,7 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
     finest_grid_size, highest_resolution = get_finest_grid_size_and_resolution(accretion_radius, Rs, surroundings)
 
     pointStar = initialize_dictionary_with_point_masses(sink_mass, num_sinks, boxsize)
-    background = initialize_dictionary_with_point_masses(sink_mass,1,boxsize)
+    background = initialize_dictionary_with_point_masses(rho,1,boxsize)
     gadget_add_grid(background, Rs * 0.5, res=min([res, highest_resolution])) # no need for so many cells well inside the sink
     bgSphere = background_grid.BackgroundGridAroundSphere(background, boxsize=Rs*0.7, ndir=highest_resolution,
                                                           newsize=Rs*0.9, grid_rho=rho,
@@ -105,7 +105,7 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
 
     pointStar['bflg'] = np.zeros(pointStar['count'])
     if hard_sphere:
-        pointStar = create_hard_sphere_boundary(0, Rs, pointStar, 0,1)
+        pointStar = create_hard_sphere_boundary(0, 0.8*Rs, pointStar, 0,1)
 
     print(pointStar.keys())
     if num_sinks > 0:
