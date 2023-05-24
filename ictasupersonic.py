@@ -49,7 +49,8 @@ def create_hard_sphere_boundary(mass, radius, background_data, point_mass_id=0, 
 
     return background_data
 def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho=1, gamma=5.0/3, Ra=1, Rs=0.02, res=100,
-                        binary=False, semimajor = 2.5, supersonic_perscription=True, surroundings=10, hard_sphere=False):
+                        binary=False, semimajor = 2.5, supersonic_perscription=True, surroundings=10, hard_sphere=False,
+                        use_wind_ids_for_region=None):
     vel = mach*cs
     accretion_radius = Ra
     last_sink_i = 0
@@ -105,6 +106,11 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
     print("u: ", (cs**2)/(gamma*(gamma-1)))
 
     pointStar['bflg'] = np.zeros(pointStar['count'])
+    if use_wind_ids_for_region is not None:
+        pointStar['id']=np.zeros(pointStar['count'])
+        pointStar['id'][np.where(pointStar['pos'][:,0] < use_wind_ids_for_region)] += 10**9
+        pointStar['id'][np.where(pointStar['pos'][:, 0] > (pointStar['boxsize'] - use_wind_ids_for_region))] += 10 ** 9
+
     if hard_sphere:
         pointStar = create_hard_sphere_boundary(0, 0.8*Rs, pointStar, 0,1)
 
@@ -154,6 +160,9 @@ def InitParser():
     parser.add_argument('--hard_sphere', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
                         help='do we have a hard sphere instead of a point mass?',
                         default=False)
+    parser.add_argument('--use_wind_ids', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
+                        help='do we have a hard sphere instead of a point mass?',
+                        default=False)
     return parser
 
 if __name__ == "__main__":
@@ -166,6 +175,6 @@ if __name__ == "__main__":
     create_ic_with_sink(ic_path=args.ic_path, boxsize=args.boxsize, G=args.G, mach=args.mach, cs=args.cs, rho=args.rho,
                         gamma=args.gamma, Ra=args.Ra, Rs=args.Rs, res=args.res, binary=args.binary,
                         semimajor=args.binary_separation, surroundings=args.sink_surroundings,
-                        hard_sphere=args.hard_sphere)
+                        hard_sphere=args.hard_sphere, use_wind_ids=args.use_wind_ids)
 
 
