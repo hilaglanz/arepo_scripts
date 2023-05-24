@@ -68,25 +68,29 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
     finest_grid_size, highest_resolution = get_finest_grid_size_and_resolution(accretion_radius, Rs, surroundings)
 
     pointStar = initialize_dictionary_with_point_masses(sink_mass, num_sinks, boxsize)
-    background = initialize_dictionary_with_point_masses(rho,1,Rs*0.1)
-    #gadget_add_grid(background, Rs * 0.5, res=min([res, highest_resolution])) # no need for so many cells well inside the sink
-    bgSphere = background_grid.BackgroundGridAroundSphere(background, boxsize=Rs*1.5, ndir=ceil(0.8*res),
-                                                          newsize=Rs*2.0, grid_rho=rho,
-                                                           grid_u=(cs**2)/(gamma*(gamma-1)))
-    background = bgSphere.add_grid()
-    #gadget_add_grid(background, background['boxsize'], res) #filling the inner sphere
-    background['pos'] += boxsize/2.0 - 0.5 * background['boxsize']
-    for key in pointStar.keys():
-        if key == 'count' :
-            pointStar[key] += background[key]
-            continue
-        if key == 'boxsize':
-            continue
-        else:
-            pointStar[key] = np.append(pointStar[key], background[key],axis=0)
+    if not binary:
+        background = initialize_dictionary_with_point_masses(rho,1,Rs*0.1)
+        #gadget_add_grid(background, Rs * 0.5, res=min([res, highest_resolution])) # no need for so many cells well inside the sink
+        bgSphere = background_grid.BackgroundGridAroundSphere(background, boxsize=Rs*1.5, ndir=ceil(0.8*res),
+                                                              newsize=Rs*2.0, grid_rho=rho,
+                                                               grid_u=(cs**2)/(gamma*(gamma-1)))
+        background = bgSphere.add_grid()
+        #gadget_add_grid(background, background['boxsize'], res) #filling the inner sphere
+        background['pos'] += boxsize/2.0 - 0.5 * background['boxsize']
+        for key in pointStar.keys():
+            if key == 'count' :
+                pointStar[key] += background[key]
+                continue
+            if key == 'boxsize':
+                continue
+            else:
+                pointStar[key] = np.append(pointStar[key], background[key],axis=0)
 
-    #gadget_add_grid(pointStar, Rs * 0.8, res=ceil(mean([res, highest_resolution])))  # no need for so many cells well inside the sink
-    gadget_add_grid(pointStar, finest_grid_size, res=ceil(highest_resolution*0.8)) # should have many close to its surface
+        #gadget_add_grid(pointStar, Rs * 0.8, res=ceil(mean([res, highest_resolution])))  # no need for so many cells well inside the sink
+        gadget_add_grid(pointStar, finest_grid_size, res=ceil(highest_resolution*0.8)) # should have many close to its surface
+    else:
+        gadget_add_grid(pointStar, finest_grid_size, res=ceil(highest_resolution)) # should have many close to its surface
+        
     print("added inner grid with size of ", finest_grid_size / accretion_radius, "Ra")
     print("minimum vol =", (finest_grid_size ** 3) / highest_resolution ** 3)
 
