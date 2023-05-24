@@ -111,7 +111,7 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
 
     pointStar['bflg'] = np.zeros(pointStar['count'])
     if use_wind_ids_for_region is not None:
-        pointStar['id']=np.zeros(pointStar['count'])
+        pointStar['id'] = np.array([i for i in range(pointStar['count'])])
         pointStar['id'][np.where(pointStar['pos'][:,0] < use_wind_ids_for_region)] += 10**9
         pointStar['id'][np.where(pointStar['pos'][:, 0] > (pointStar['boxsize'] - use_wind_ids_for_region))] += 10 ** 9
 
