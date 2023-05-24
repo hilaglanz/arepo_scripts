@@ -90,7 +90,7 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
         gadget_add_grid(pointStar, finest_grid_size, res=ceil(highest_resolution*0.8)) # should have many close to its surface
     else:
         gadget_add_grid(pointStar, finest_grid_size, res=ceil(highest_resolution)) # should have many close to its surface
-        
+
     print("added inner grid with size of ", finest_grid_size / accretion_radius, "Ra")
     print("minimum vol =", (finest_grid_size ** 3) / highest_resolution ** 3)
 
@@ -164,9 +164,7 @@ def InitParser():
     parser.add_argument('--hard_sphere', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
                         help='do we have a hard sphere instead of a point mass?',
                         default=False)
-    parser.add_argument('--use_wind_ids', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
-                        help='do we have a hard sphere instead of a point mass?',
-                        default=False)
+    parser.add_argument('--use_wind_ids_region', type=float,  help='wind_large_ids_region', default=None)
     return parser
 
 if __name__ == "__main__":
@@ -179,6 +177,6 @@ if __name__ == "__main__":
     create_ic_with_sink(ic_path=args.ic_path, boxsize=args.boxsize, G=args.G, mach=args.mach, cs=args.cs, rho=args.rho,
                         gamma=args.gamma, Ra=args.Ra, Rs=args.Rs, res=args.res, binary=args.binary,
                         semimajor=args.binary_separation, surroundings=args.sink_surroundings,
-                        hard_sphere=args.hard_sphere, use_wind_ids=args.use_wind_ids)
+                        hard_sphere=args.hard_sphere, use_wind_ids_for_region=args.use_wind_ids_region)
 
 
