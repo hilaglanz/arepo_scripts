@@ -29,7 +29,7 @@ basic_units = {"rho":UnitConversion(r'$g/cm^3$'), "temp":UnitConversion("K"), "v
                "u":UnitConversion("erg"), "ang_mom": UnitConversion(r"$cm^2 / s$") ,"none": UnitConversion("")}
 
 name_and_units = {"rho":UnitName(r'$\rho$',"rho"), "temp":UnitName("Temperature","temp"),
-                  "vel":UnitName("Velocity","vel"), "sound":UnitName("$c_s","vel"),
+                  "vel":UnitName("Velocity","vel"), "sound":UnitName("c_s","vel"),
                   "mach":UnitName(r'$\mathcal{M}$', "none"), "mass":UnitName("Mass","mass"),
                   "time":UnitName("Time", "time"), "length": UnitName("Length", "length"),
                   "pos":UnitName("Position", "length"), "vol": UnitName("Volume","vol"),
@@ -88,7 +88,7 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
     convert_to_cgs = True
 
     if unit_velocity is not None:
-        basic_units["vel"].unit = r'$' + unit_velocity + '$'
+        basic_units["vel"].unit = unit_velocity
         basic_units["acce"].unit = r'$' + unit_velocity + '^2 /' + unit_length + '$'
         basic_units["time"].unit = r'$' + unit_length + "/" + unit_velocity + '$'
         basic_units["ang_mom"].unit = r'$' + unit_length + "\cdot " + unit_velocity + '$'
