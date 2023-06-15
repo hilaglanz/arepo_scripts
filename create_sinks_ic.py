@@ -75,6 +75,8 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
                                                               newsize=Rs*2.0, grid_rho=rho,
                                                                grid_u=(cs**2)/(gamma*(gamma-1)))
         background = bgSphere.add_grid()
+        print("added background grid of size ",2.0*Rs, " around the sphere of size ", 1.5*Rs)
+        print("minimum volume= ", (2.0*Rs/ceil(0.8*res))**3.0)
         #gadget_add_grid(background, background['boxsize'], res) #filling the inner sphere
         background['pos'] += boxsize/2.0 - 0.5 * background['boxsize']
         for key in pointStar.keys():
@@ -98,8 +100,7 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
     gadget_add_grids(pointStar, sub_grid_sizes, res=res)
     print(sub_grid_sizes)
     print("added {0} sub-grids around".format(len(sub_grid_sizes)))
-    print("max vol =", (boxsize**3.0 - (sub_grid_sizes[-2])**3)/res**3)
-    
+    print("max vol =", boxsize**3 / res ** 3.0)
     pointStar['type']=np.zeros(pointStar['count'])
     if num_sinks > 0:
         pointStar['type'][:num_sinks] = [5] * num_sinks
