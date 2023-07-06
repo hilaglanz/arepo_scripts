@@ -26,6 +26,7 @@ class UnitName:
 basic_units = {"rho":UnitConversion(r'$g/cm^3$'), "temp":UnitConversion("K"), "vel":UnitConversion("$cm/s$"),
                "mass":UnitConversion("g"), "time":UnitConversion("s"), "length": UnitConversion("cm"),
                "vol": UnitConversion(r"$cm^3$"), "acce":UnitConversion("$cm/s^2$"), "pres":UnitConversion("Ba"),
+               "force":UnitConversion("dyne"),
                "u":UnitConversion("erg"), "ang_mom": UnitConversion(r"$cm^2 / s$") ,"none": UnitConversion("")}
 
 name_and_units = {"rho":UnitName(r'$\rho$',"rho"), "temp":UnitName("Temperature","temp"),
@@ -34,6 +35,7 @@ name_and_units = {"rho":UnitName(r'$\rho$',"rho"), "temp":UnitName("Temperature"
                   "time":UnitName("Time", "time"), "length": UnitName("Length", "length"),
                   "pos":UnitName("Position", "length"), "vol": UnitName("Volume","vol"),
                   "acce":UnitName("Acceleration", "acce"), "pres": UnitName("Pressure", "pres"),
+                  "force": UnitName("Force", "force"),
                   "u": UnitName("Energy","u"), "entr": UnitName("Entropy", "none")}
 def add_name_and_unit(value, name, unit):
     if value not in name_and_units.keys():
@@ -59,6 +61,7 @@ def change_unit_conversion(factor_length, factor_velocity, factor_mass):
     basic_units["mass"].factor = factor_mass
     basic_units["time"].factor = (factor_length/factor_velocity)
     basic_units["pres"].factor = (factor_mass * factor_velocity ** 2) / (factor_length ** 3) # mass*acc/area
+    basic_units["force"].factor = (factor_mass * factor_velocity ** 2) / factor_length # mass*acc
     #basic_units["entr"].factor = basic_units["pres"].factor / (basic_units["rho"].factor ** (5.0 / 3))
     basic_units["u"].factor = factor_mass * (factor_velocity ** 2)
     # TODO: convert also temperature?
@@ -207,6 +210,15 @@ def calculate_label_and_value(loaded_snap, value, relative_to_sink_id):
         loaded_snap.data['vel_z'] = loaded_snap.data["vel"][:, 2]
         add_name_and_unit(value, "Velocity" + value.split('_')[-1], "vel")
 
+    if "drag" in value:
+        loaded_snap.data[value+'_x'] = loaded_snap.data["acce"] * loaded_snap.mass[:, None]
+        loaded_snap.data[value+'_y'] = loaded_snap.data["acce"] * loaded_snap.mass[:, None]
+        loaded_snap.data[value+'_z'] = loaded_snap.data["acce"] * loaded_snap.mass[:, None]
+        loaded_snap.data["drag"] = loaded_snap.data["acce"] * loaded_snap.mass[:, None]
+        if "drag" == value:
+            value += "_size"
+        add_name_and_unit(value, "Drag Force" + value.split('_')[-1], "force")
+
     if "_size" in value:
         loaded_snap.data[value] = np.sqrt((loaded_snap.data[value] ** 2).sum(axis=1))
 
@@ -221,6 +233,7 @@ def calculate_label_and_value(loaded_snap, value, relative_to_sink_id):
     if value == "cs" or "sound" in value:
         loaded_snap.computeMach()
         value = "sound"
+
 
     if "grap" in value:
         loaded_snap.data['grapx'] = loaded_snap.data["grap"][:, 0]
