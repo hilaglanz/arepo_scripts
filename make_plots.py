@@ -404,6 +404,7 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
         fig = figure(figsize=(36, 20))
         if horizontal:
             gs = fig.add_gridspec(1, num_figures, wspace=0, hspace=0.35)
+
         else:
             gs = fig.add_gridspec(num_figures, wspace=0.35, hspace=0)
         axes = gs.subplots(sharex=not horizontal,sharey= horizontal)
@@ -411,10 +412,14 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
         rcParams['text.usetex'] = True
         curr_cmap = cmap[index % len(cmap)]
         for snap_i, snap in enumerate(snapshots_list):
-            print("doing snapshot ",snap)
+            print("doing snapshot ", snap)
+            if horizontal:
+                curr_subplot = int(num_figures * 100 + 10*(snap_i+1) + 1)
+            else:
+                curr_subplot = int(num_figures * 100 + 10 + (snap_i + 1))
+            subplot(curr_subplot)
             loaded_snap = gadget_readsnap(snap, snapshotDir)
-            curr_subplot = snap_i + 1
-            print("curr subplot: ", curr_subplot)
+            print("curr snapshot: ", snap_i + 1)
             plot_single_value(loaded_snap,  value=val, cmap=curr_cmap, box=get_single_value(box,index),
                                   vrange=get_single_value(vrange,index), logplot=get_single_value(logplot,index),
                                   res=res,
@@ -425,7 +430,7 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
                                   additional_points_color=additional_points_color, unit_length=units_length,
                                   unit_velocity= units_velocity, unit_density= units_density,
                                   plot_velocities=plot_velocities, plot_bfld= plot_bfld, newfig=False,
-                                  axes=get_single_value(axes_array, index), ignore_types=ignore_types, colorbar=curr_subplot==num_figures)
+                                  axes=get_single_value(axes_array, index), ignore_types=ignore_types, colorbar=snap_i + 1 == num_figures)
             rcParams.update({'font.size': 40, 'font.family': 'Serif'})
             rcParams['text.usetex'] = True
 
