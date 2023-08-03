@@ -433,7 +433,7 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
             axes[snap_i].set_title('time : {:.2g}'.format(loaded_snap.time) + " [" + basic_units["time"].unit + "]", fontsize='x-large')
         rcParams.update({'font.size': 40, 'font.family': 'Serif'})
         rcParams['text.usetex'] = True
-        filename = plottingDir + "/Aslice_" + "_" + val + "_".join(str(snapshots_list)) + ".png".format(snap)
+        filename = plottingDir + "/Aslice_" + "_" + val + "_".join([str(s) for s in snapshots_list]) + ".png".format(snap)
         print("saving to: ", filename)
         savefig(filename)
         print("saved fig")
