@@ -86,7 +86,7 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
                       relative_to_sink_id=None, center=True,plot_points=True, additional_points_size=30,
                       additional_points_shape='X', additional_points_color='w', unit_length='cm', unit_velocity="$cm/s$",
                       unit_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
-                      newfig=True, axes=[0,1], modified_units = False, ignore_types=[]):
+                      newfig=True, axes=[0,1], modified_units = False, ignore_types=[], colorbar=True):
     label = value
     convert_to_cgs = True
 
@@ -134,7 +134,7 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
     xlab = chr(ord('x') + axes[0])
     ylab = chr(ord('x') + axes[1])
 
-    loaded_snap.plot_Aslice(value, logplot=logplot, colorbar=True, cblabel=label, cmap=cmap, center=center, vrange=vrange,
+    loaded_snap.plot_Aslice(value, logplot=logplot, colorbar=colorbar, cblabel=label, cmap=cmap, center=center, vrange=vrange,
                                   box=box, res=res, numthreads=numthreads, newfig=newfig, axes=axes,
                             minimum=min(1e-8, 0.1*vrange[0]))
     if box == False:
@@ -383,12 +383,77 @@ def get_snapshot_number_list(snapshotDir="outupt", snapshotName="snapshot_", fir
 
     return range(firstSnap, lastSnap+1, skipSteps)
 
+def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingDir="plots", firstSnap=0,lastSnap=-1,skipSteps=1,box=False,
+               vrange=False, cmap=["hot"], logplot=True, res=1024, numthreads=1, center=True, relative_to_sink_id=None,
+               plot_points=True,
+               additional_points_size=30,additional_points_shape='X', additional_points_color='w', units_length = 'cm',
+               units_velocity="$cm/s$", units_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
+               axes_array=[[0,1]], ignore_types=[], horizontal=True):
+    if not os.path.exists(plottingDir):
+        os.mkdir(plottingDir)
+    convert_to_cgs = False
+    if units_velocity is None and units_density is None:
+        convert_to_cgs = True
+    modified_units = False
+
+    snapshots_list = get_snapshot_number_list(snapshotDir, "snapshot_", firstSnap, lastSnap, skipSteps)
+    num_figures = len(snapshots_list)
+
+    for index, val in enumerate(value):
+        print(val)
+        fig = figure(figsize=(36, 20))
+        if horizontal:
+            gs = fig.add_gridspec(1, num_figures, wspace=0, hspace=0.35)
+        else:
+            gs = fig.add_gridspec(num_figures, wspace=0.35, hspace=0)
+        axes = gs.subplots(sharex=not horizontal,sharey= horizontal)
+        rcParams.update({'font.size': 40, 'font.family': 'Serif'})
+        rcParams['text.usetex'] = True
+        curr_cmap = cmap[index % len(cmap)]
+        for snap_i, snap in enumerate(snapshots_list):
+            print("doing snapshot ",snap)
+            loaded_snap = gadget_readsnap(snap, snapshotDir)
+            curr_subplot = snap_i + 1
+            print("curr subplot: ", curr_subplot)
+            plot_single_value(loaded_snap,  value=val, cmap=curr_cmap, box=get_single_value(box,index),
+                                  vrange=get_single_value(vrange,index), logplot=get_single_value(logplot,index),
+                                  res=res,
+                                  numthreads=numthreads, center=center, relative_to_sink_id=relative_to_sink_id,
+                                  plot_points=plot_points,
+                                  additional_points_size=additional_points_size,
+                                  additional_points_shape=additional_points_shape,
+                                  additional_points_color=additional_points_color, unit_length=units_length,
+                                  unit_velocity= units_velocity, unit_density= units_density,
+                                  plot_velocities=plot_velocities, plot_bfld= plot_bfld, newfig=False,
+                                  axes=get_single_value(axes_array, index), ignore_types=ignore_types, colorbar=curr_subplot==num_figures)
+            rcParams.update({'font.size': 40, 'font.family': 'Serif'})
+            rcParams['text.usetex'] = True
+
+            #title('time : {:.2f} [s]'.format(loaded_snap.time))
+            axes[snap_i].set_title('time : {:.2g}'.format(loaded_snap.time) + " [" + basic_units["time"].unit + "]", fontsize='x-large')
+        rcParams.update({'font.size': 40, 'font.family': 'Serif'})
+        rcParams['text.usetex'] = True
+        filename = plottingDir + "/Aslice_" + "_".join(value) + "_".join(snapshots_list) + ".png".format(snap)
+        print("saving to: ", filename)
+        savefig(filename)
+        print("saved fig")
+        close('all')
+        modified_units = True
+
 def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstSnap=0,lastSnap=-1,skipSteps=1,box=False,
                vrange=False, cmap=["hot"], logplot=True, res=1024, numthreads=1, center=True, relative_to_sink_id=None,
                plot_points=True,
                additional_points_size=30,additional_points_shape='X', additional_points_color='w', units_length = 'cm',
                units_velocity="$cm/s$", units_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
-               axes_array=[[0,1]], ignore_types=[]):
+               axes_array=[[0,1]], ignore_types=[], per_value_evolution=False):
+
+    if per_value_evolution:
+        return plot_single_value_evolutions(value, snapshotDir, plottingDir, firstSnap, lastSnap, skipSteps, box,
+               vrange, cmap, logplot, res, numthreads, center, relative_to_sink_id,
+               plot_points,
+               additional_points_size,additional_points_shape, additional_points_color, units_length,
+               units_velocity, units_density, plot_velocities, plot_bfld,
+               axes_array, ignore_types, per_value_evolution)
 
     if not os.path.exists(plottingDir):
         os.mkdir(plottingDir)
@@ -478,6 +543,9 @@ def InitParser():
     parser.add_argument('--center_y', type=float, help='point on y axis to be the center of the plot', default=None)
     parser.add_argument('--center_z', type=float, help='point on z axis to be the center of the plot', default=0)
     parser.add_argument('--relative_to_sink_id', nargs='+', type=int,  help='id of sink particle ro use as a reference point', default= None)
+    parser.add_argument('--plot_per_value_evolution', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
+                        help='should plot value evolution figure from the different snapshot of each value?',
+                        default=False)
     parser.add_argument('--plot_points', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),  help='should plot other than gas?',
                         default=True)
     parser.add_argument('--ignore_types', nargs='+', type=int,  help='particle types to ignore', default=[])
@@ -531,4 +599,4 @@ if __name__ == "__main__":
                additional_points_color=args.additional_points_color,
                units_length=args.units_length, units_velocity=args.units_velocity, units_density= args.units_density,
                plot_velocities=args.plot_velocities, plot_bfld= args.plot_bfld, axes_array=axes_array,
-               ignore_types=args.ignore_types)
+               ignore_types=args.ignore_types, per_value_evolution=args.plot_per_value_evolution)
