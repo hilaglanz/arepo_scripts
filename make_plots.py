@@ -437,11 +437,11 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
                                   axes=get_single_value(axes_array, index), ignore_types=ignore_types, colorbar=(snap_i+1==num_figures),
                               plot_xlabel=((not horizontal) and (snap_i == num_figures)),
                               plot_ylabel=((horizontal) and (snap_i == 0)))
+            suptitle('time : {:.2g}'.format(loaded_snap.time) + " [" + basic_units["time"].unit + "]", fontsize='x-large')
             rcParams.update({'font.size': 40, 'font.family': 'Serif'})
             rcParams['text.usetex'] = True
             #colorbar(ax=ax, cmap=curr_cmap, clabel= name_and_units[value].name + " [" + basic_units[name_and_units[value].unit_name].unit + "]")
             #title('time : {:.2f} [s]'.format(loaded_snap.time))
-            suptitle('time : {:.2g}'.format(loaded_snap.time) + " [" + basic_units["time"].unit + "]", fontsize='x-large')
         rcParams.update({'font.size': 40, 'font.family': 'Serif'})
         rcParams['text.usetex'] = True
         filename = plottingDir + "/Aslice_" + val + "_" + "_".join([str(s) for s in snapshots_list]) + ".png".format(snap)
