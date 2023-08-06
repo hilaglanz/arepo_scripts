@@ -436,6 +436,10 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
             curr_ax.set_title('time : {:.2g}'.format(loaded_snap.time) + " [" + basic_units["time"].unit + "]", fontsize='x-large')
             rcParams.update({'font.size': 40, 'font.family': 'Serif'})
             rcParams['text.usetex'] = True
+            if horizontal is True and snap_i!=0:
+                curr_ax.set_axis_off()
+            if horizontal is False and snap_i+1!=num_figures:
+                curr_ax.set_axis_off()
         if horizontal:
             fig.subplots_adjust(wspace=0, hspace=0.35)
         else:
