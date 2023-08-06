@@ -404,10 +404,6 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
     for index, val in enumerate(value):
         print(val)
         fig = figure(figsize=(36, 16))
-        if horizontal:
-            fig.subplots_adjust(wspace=0, hspace=0.35)
-        else:
-            fig.subplots_adjust(wspace=0.35, hspace=0)
         #axes = gs.subplots(sharex=not horizontal,sharey= horizontal)
         rcParams.update({'font.size': 40, 'font.family': 'Serif'})
         rcParams['text.usetex'] = True
@@ -441,10 +437,13 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
             curr_ax.set_title('time : {:.2g}'.format(loaded_snap.time) + " [" + basic_units["time"].unit + "]", fontsize='x-large')
             rcParams.update({'font.size': 40, 'font.family': 'Serif'})
             rcParams['text.usetex'] = True
-            if (snap_i + 1 == num_figures):
-                cax = fig.add_axes([0.83, 0.1, 0.02, 0.8])
-                fig.colorbar(cax=cax, cmap=curr_cmap, clabel= name_and_units[value].name + " [" + basic_units[name_and_units[value].unit_name].unit + "]", aspect=15, pad=0, shrink=0.95)
-            #title('time : {:.2f} [s]'.format(loaded_snap.time))
+        if horizontal:
+            fig.subplots_adjust(wspace=0, hspace=0.35)
+        else:
+            fig.subplots_adjust(wspace=0.35, hspace=0)
+        cax = fig.add_axes([0.83, 0.1, 0.02, 0.8])
+        fig.colorbar(cax=cax, cmap=curr_cmap, clabel= name_and_units[value].name + " [" + basic_units[name_and_units[value].unit_name].unit + "]", aspect=15, pad=0, shrink=0.95)
+        #title('time : {:.2f} [s]'.format(loaded_snap.time))
         rcParams.update({'font.size': 40, 'font.family': 'Serif'})
         rcParams['text.usetex'] = True
         filename = plottingDir + "/Aslice_" + val + "_" + "_".join([str(s) for s in snapshots_list]) + ".png".format(snap)
