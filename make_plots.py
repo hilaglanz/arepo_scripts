@@ -403,7 +403,7 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
 
     for index, val in enumerate(value):
         print(val)
-        fig = figure(figsize=(36, 16))
+        fig = figure(figsize=(33, 16))
         #axes = gs.subplots(sharex=not horizontal,sharey= horizontal)
         rcParams.update({'font.size': 40, 'font.family': 'Serif'})
         rcParams['text.usetex'] = True
@@ -431,8 +431,8 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
                                   unit_velocity= units_velocity, unit_density= units_density,
                                   plot_velocities=plot_velocities, plot_bfld= plot_bfld, newfig=False,
                                   axes=get_single_value(axes_array, index), ignore_types=ignore_types, colorbar=False,
-                              plot_xlabel=((not horizontal) and (snap_i == num_figures)),
-                              plot_ylabel=((horizontal) and (snap_i == 0)))
+                              plot_xlabel=(horizontal is True or ((not horizontal) and (snap_i == num_figures))),
+                              plot_ylabel=(not horizontal or ((horizontal) and (snap_i == 0))))
             #subplot(curr_subplot)
             curr_ax.set_title('time : {:.2g}'.format(loaded_snap.time) + " [" + basic_units["time"].unit + "]", fontsize='x-large')
             rcParams.update({'font.size': 40, 'font.family': 'Serif'})
@@ -442,7 +442,8 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
         else:
             fig.subplots_adjust(wspace=0.35, hspace=0)
         cax = fig.add_axes([0.83, 0.1, 0.02, 0.8])
-        fig.colorbar(cax=cax, cmap=curr_cmap, clabel= name_and_units[value].name + " [" + basic_units[name_and_units[value].unit_name].unit + "]", aspect=15, pad=0, shrink=0.95)
+        colorbar(cax=cax, label= name_and_units[val].name + " [" + basic_units[name_and_units[val].unit_name].unit + "]",
+                 aspect=15, pad=0, shrink=0.95)
         #title('time : {:.2f} [s]'.format(loaded_snap.time))
         rcParams.update({'font.size': 40, 'font.family': 'Serif'})
         rcParams['text.usetex'] = True
