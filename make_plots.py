@@ -403,7 +403,7 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
 
     for index, val in enumerate(value):
         print(val)
-        fig = figure(figsize=(36, 17))
+        fig = figure(figsize=(36, 16))
         if horizontal:
             fig.subplots_adjust(wspace=0, hspace=0.35)
         else:
