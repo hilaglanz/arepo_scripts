@@ -434,12 +434,12 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
                                   additional_points_color=additional_points_color, unit_length=units_length,
                                   unit_velocity= units_velocity, unit_density= units_density,
                                   plot_velocities=plot_velocities, plot_bfld= plot_bfld, newfig=False,
-                                  axes=get_single_value(axes_array, index), ignore_types=ignore_types, colorbar=False,
+                                  axes=get_single_value(axes_array, index), ignore_types=ignore_types, colorbar=snap_i==num_figures,
                               plot_xlabel=((not horizontal) and (snap_i == num_figures)),
                               plot_ylabel=((horizontal) and (snap_i == 0)))
             rcParams.update({'font.size': 40, 'font.family': 'Serif'})
             rcParams['text.usetex'] = True
-            colorbar(ax=ax, cmap=curr_cmap, clabel= name_and_units[value].name + " [" + basic_units[name_and_units[value].unit_name].unit + "]")
+            #colorbar(ax=ax, cmap=curr_cmap, clabel= name_and_units[value].name + " [" + basic_units[name_and_units[value].unit_name].unit + "]")
             #title('time : {:.2f} [s]'.format(loaded_snap.time))
             suptitle('time : {:.2g}'.format(loaded_snap.time) + " [" + basic_units["time"].unit + "]", fontsize='x-large')
         rcParams.update({'font.size': 40, 'font.family': 'Serif'})
