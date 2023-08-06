@@ -417,11 +417,11 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
             if horizontal:
                 curr_subplot = int(100 + 10*num_figures + (snap_i+1))
                 ax = subplot(1, num_figures, 1)
-                subplot(curr_subplot, sharey=ax)
+                curr_ax = subplot(curr_subplot, sharey=ax)
             else:
                 curr_subplot = int(num_figures * 100 + 10 + (snap_i + 1))
                 ax = subplot(num_figures, 1, 1)
-                subplot(curr_subplot, sharex=ax)
+                curr_ax = subplot(curr_subplot, sharex=ax)
             loaded_snap = gadget_readsnap(snap, snapshotDir)
             print("curr snapshot: ", snap_i + 1)
             plot_single_value(loaded_snap,  value=val, cmap=curr_cmap, box=get_single_value(box,index),
@@ -437,8 +437,8 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
                                   axes=get_single_value(axes_array, index), ignore_types=ignore_types, colorbar=(snap_i+1==num_figures),
                               plot_xlabel=((not horizontal) and (snap_i == num_figures)),
                               plot_ylabel=((horizontal) and (snap_i == 0)))
-            subplot(curr_subplot)
-            suptitle('time : {:.2g}'.format(loaded_snap.time) + " [" + basic_units["time"].unit + "]", fontsize='x-large')
+            #subplot(curr_subplot)
+            curr_ax.set_title('time : {:.2g}'.format(loaded_snap.time) + " [" + basic_units["time"].unit + "]", fontsize='x-large')
             rcParams.update({'font.size': 40, 'font.family': 'Serif'})
             rcParams['text.usetex'] = True
             #colorbar(ax=ax, cmap=curr_cmap, clabel= name_and_units[value].name + " [" + basic_units[name_and_units[value].unit_name].unit + "]")
