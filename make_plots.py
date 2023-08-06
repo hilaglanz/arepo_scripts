@@ -441,7 +441,7 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
             fig.subplots_adjust(wspace=0, hspace=0.35)
         else:
             fig.subplots_adjust(wspace=0.35, hspace=0)
-        cax = fig.add_axes([0.83, 0.1, 0.02, 0.8])
+        cax = fig.add_axes([0.89, 0.1, 0.02, 0.8])
         colorbar(cax=cax, label= name_and_units[val].name + " [" + basic_units[name_and_units[val].unit_name].unit + "]",
                  aspect=15, pad=0, shrink=0.95)
         #title('time : {:.2f} [s]'.format(loaded_snap.time))
