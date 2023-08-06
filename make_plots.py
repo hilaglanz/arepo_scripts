@@ -86,7 +86,8 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
                       relative_to_sink_id=None, center=True,plot_points=True, additional_points_size=30,
                       additional_points_shape='X', additional_points_color='w', unit_length='cm', unit_velocity="$cm/s$",
                       unit_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
-                      newfig=True, axes=[0,1], modified_units = False, ignore_types=[], colorbar=True):
+                      newfig=True, axes=[0,1], modified_units = False, ignore_types=[], colorbar=True,
+                      plot_xlabel=True, plot_ylabel=True):
     label = value
     convert_to_cgs = True
 
@@ -161,9 +162,10 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
         plot_stream(loaded_snap, value='vel', xlab=xlab, ylab=ylab, axes=axes, box=box, res=res, numthreads=numthreads)
     elif plot_bfld:
         plot_stream(loaded_snap, value='bfld', xlab=xlab, ylab=ylab, axes=axes, box=box, res=res, numthreads=numthreads)
-
-    xlabel(xlab + ' [' + unit_length + ']', loc="left")
-    ylabel(ylab + ' [' + unit_length + ']')
+    if plot_xlabel:
+        xlabel(xlab + ' [' + unit_length + ']', loc="left")
+    if plot_ylabel:
+        ylabel(ylab + ' [' + unit_length + ']')
 
 def get_value_at_inf(value, data):
     if value not in data:
@@ -432,10 +434,12 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
                                   additional_points_color=additional_points_color, unit_length=units_length,
                                   unit_velocity= units_velocity, unit_density= units_density,
                                   plot_velocities=plot_velocities, plot_bfld= plot_bfld, newfig=False,
-                                  axes=get_single_value(axes_array, index), ignore_types=ignore_types, colorbar=snap_i + 1 == num_figures)
+                                  axes=get_single_value(axes_array, index), ignore_types=ignore_types, colorbar=False,
+                              plot_xlabel=((not horizontal) and (snap_i == num_figures)),
+                              plot_ylabel=((horizontal) and (snap_i == 0)))
             rcParams.update({'font.size': 40, 'font.family': 'Serif'})
             rcParams['text.usetex'] = True
-
+            colorbar(ax=ax, cmap=curr_cmap, clabel= name_and_units[value].name + " [" + basic_units[name_and_units[value].unit_name].unit + "]")
             #title('time : {:.2f} [s]'.format(loaded_snap.time))
             suptitle('time : {:.2g}'.format(loaded_snap.time) + " [" + basic_units["time"].unit + "]", fontsize='x-large')
         rcParams.update({'font.size': 40, 'font.family': 'Serif'})
