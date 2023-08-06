@@ -403,21 +403,21 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
         print(val)
         fig = figure(figsize=(36, 20))
         if horizontal:
-            gs = fig.add_gridspec(1, num_figures, wspace=0, hspace=0.35)
+            gs = fig.subplots_adjust(wspace=0, hspace=0.35)
 
         else:
-            gs = fig.add_gridspec(num_figures, wspace=0.35, hspace=0)
-        axes = gs.subplots(sharex=not horizontal,sharey= horizontal)
+            fig.subplots_adjust(wspace=0.35, hspace=0)
+        #axes = gs.subplots(sharex=not horizontal,sharey= horizontal)
         rcParams.update({'font.size': 40, 'font.family': 'Serif'})
         rcParams['text.usetex'] = True
         curr_cmap = cmap[index % len(cmap)]
         for snap_i, snap in enumerate(snapshots_list):
             print("doing snapshot ", snap)
             if horizontal:
-                curr_subplot = int(num_figures * 100 + 10*(snap_i+1) + 1)
+                curr_subplot = int(100 + 11*(snap_i+1))
             else:
                 curr_subplot = int(num_figures * 100 + 10 + (snap_i + 1))
-            subplot(curr_subplot)
+            subplot(curr_subplot, sharex=not horizontal, sharey=horizontal)
             loaded_snap = gadget_readsnap(snap, snapshotDir)
             print("curr snapshot: ", snap_i + 1)
             plot_single_value(loaded_snap,  value=val, cmap=curr_cmap, box=get_single_value(box,index),
