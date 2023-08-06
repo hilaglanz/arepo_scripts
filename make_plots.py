@@ -442,7 +442,8 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
             rcParams.update({'font.size': 40, 'font.family': 'Serif'})
             rcParams['text.usetex'] = True
             if (snap_i + 1 == num_figures):
-                fig.colorbar(ax=curr_ax.ravel().tolist(), cmap=curr_cmap, clabel= name_and_units[value].name + " [" + basic_units[name_and_units[value].unit_name].unit + "]", aspect=15, pad=0, shrink=0.95)
+                cax = fig.add_axes([0.83, 0.1, 0.02, 0.8])
+                fig.colorbar(cax=cax, cmap=curr_cmap, clabel= name_and_units[value].name + " [" + basic_units[name_and_units[value].unit_name].unit + "]", aspect=15, pad=0, shrink=0.95)
             #title('time : {:.2f} [s]'.format(loaded_snap.time))
         rcParams.update({'font.size': 40, 'font.family': 'Serif'})
         rcParams['text.usetex'] = True
