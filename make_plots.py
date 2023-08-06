@@ -403,8 +403,7 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
         print(val)
         fig = figure(figsize=(36, 20))
         if horizontal:
-            gs = fig.subplots_adjust(wspace=0, hspace=0.35)
-
+            fig.subplots_adjust(wspace=0, hspace=0.35)
         else:
             fig.subplots_adjust(wspace=0.35, hspace=0)
         #axes = gs.subplots(sharex=not horizontal,sharey= horizontal)
@@ -414,10 +413,13 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
         for snap_i, snap in enumerate(snapshots_list):
             print("doing snapshot ", snap)
             if horizontal:
-                curr_subplot = int(100 + 11*(snap_i+1))
+                curr_subplot = int(100 + 10*num_figures + (snap_i+1))
+                ax = subplot(1, num_figures, 1)
+                subplot(curr_subplot, sharey=ax)
             else:
                 curr_subplot = int(num_figures * 100 + 10 + (snap_i + 1))
-            subplot(curr_subplot, sharex=not horizontal, sharey=horizontal)
+                ax = subplot(num_figures, 1, 1)
+                subplot(curr_subplot, sharex=ax)
             loaded_snap = gadget_readsnap(snap, snapshotDir)
             print("curr snapshot: ", snap_i + 1)
             plot_single_value(loaded_snap,  value=val, cmap=curr_cmap, box=get_single_value(box,index),
