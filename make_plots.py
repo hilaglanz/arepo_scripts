@@ -441,10 +441,10 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
             if horizontal is False and snap_i+1!=num_figures:
                 curr_ax.set_axis_off()
         if horizontal:
-            fig.subplots_adjust(wspace=0.02, hspace=0.35)
+            fig.subplots_adjust(wspace=0.002, hspace=0.35)
         else:
-            fig.subplots_adjust(wspace=0.35, hspace=0.02)
-        cax = fig.add_axes([0.89, 0.1, 0.04/num_figures, 0.78])
+            fig.subplots_adjust(wspace=0.35, hspace=0.002)
+        cax = fig.add_axes([0.89, 0.1, 0.04/num_figures, 0.795])
         if "xnuc" in val:
             val = "rho" + val
         colorbar(cax=cax, label= name_and_units[val].name + " [" + basic_units[name_and_units[val].unit_name].unit + "]",
