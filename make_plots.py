@@ -403,7 +403,7 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
 
     for index, val in enumerate(value):
         print(val)
-        fig = figure(figsize=(num_figures*15.5, 16))
+        fig = figure(figsize=(num_figures*15, 16))
         rcParams.update({'font.size': 40, 'font.family': 'Serif'})
         rcParams['text.usetex'] = True
         curr_cmap = cmap[index % len(cmap)]
@@ -441,14 +441,15 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
             if horizontal is False and snap_i+1!=num_figures:
                 curr_ax.set_axis_off()
         if horizontal:
-            fig.subplots_adjust(wspace=0.002, hspace=0.35)
+            fig.subplots_adjust(wspace=0.002, hspace=0.2)
         else:
-            fig.subplots_adjust(wspace=0.35, hspace=0.002)
-        cax = fig.add_axes([0.9, 0.101, 0.04/num_figures, 0.79])
+            fig.subplots_adjust(wspace=0.2, hspace=0.002)
+        cax = fig.add_axes([0.903, 0.122, 0.04/num_figures, 0.7877])
         if "xnuc" in val:
             val = "rho" + val
         colorbar(cax=cax, label= name_and_units[val].name + " [" + basic_units[name_and_units[val].unit_name].unit + "]",
-                 aspect=15, pad=0, shrink=0.93)
+                 aspect=15, pad=0, shrink=1)
+        tight_layout(pad=0, h_pad=0, w_pad=0, rect=(0.01, 0, 0.9, 1))
         #title('time : {:.2f} [s]'.format(loaded_snap.time))
         rcParams.update({'font.size': 40, 'font.family': 'Serif'})
         rcParams['text.usetex'] = True
