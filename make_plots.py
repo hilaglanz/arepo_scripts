@@ -2,7 +2,6 @@ import os
 import glob
 import argparse
 import numpy as np
-from mpl_toolkits.axes_grid1 import AxesGrid, make_axes_locatable
 from loadmodules import *
 
 
@@ -408,25 +407,18 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
         rcParams.update({'font.size': 40, 'font.family': 'Serif'})
         rcParams['text.usetex'] = True
         curr_cmap = cmap[index % len(cmap)]
-        if horizontal:
-            grid = AxesGrid(fig, 111, nrows_ncols=(1, num_figures), axes_pad=0.002, cbar_mode='single',
-                            cbar_location='right', cbar_pad=0.002)
-        else:
-            grid = AxesGrid(fig, 111, nrows_ncols=(num_figures,1), axes_pad=0.002, cbar_mode='single',
-                            cbar_location='right', cbar_pad=0.002)
         for snap_i, snap in enumerate(snapshots_list):
             print("doing snapshot ", snap)
-
+            if horizontal:
+                curr_subplot = int(100 + 10*num_figures + (snap_i+1))
+                ax = subplot(1, num_figures, 1)
+                curr_ax = subplot(curr_subplot, sharey=ax)
+            else:
+                curr_subplot = int(num_figures * 100 + 10 + (snap_i + 1))
+                ax = subplot(num_figures, 1, 1)
+                curr_ax = subplot(curr_subplot, sharex=ax)
             loaded_snap = gadget_readsnap(snap, snapshotDir)
             print("curr snapshot: ", snap_i + 1)
-            curr_ax = grid[snap_i]
-            curr_ax.set_title('time : {:.2g}'.format(loaded_snap.time) + " [" + basic_units["time"].unit + "]", fontsize='x-large')
-            rcParams.update({'font.size': 40, 'font.family': 'Serif'})
-            rcParams['text.usetex'] = True
-            if horizontal is True and snap_i!=0:
-                curr_ax.set_axis_off()
-            if horizontal is False and snap_i+1!=num_figures:
-                curr_ax.set_axis_off()
             plot_single_value(loaded_snap,  value=val, cmap=curr_cmap, box=get_single_value(box,index),
                                   vrange=get_single_value(vrange,index), logplot=get_single_value(logplot,index),
                                   res=res,
@@ -440,12 +432,19 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
                                   axes=get_single_value(axes_array, index), ignore_types=ignore_types, colorbar=False,
                               plot_xlabel=(horizontal is True or ((not horizontal) and (snap_i == num_figures))),
                               plot_ylabel=(not horizontal or ((horizontal) and (snap_i == 0))))
-
-        #cax = fig.add_axes([0.903, 0.122, 0.04/num_figures, 0.7877])
-        ax_div = make_axes_locatable(curr_ax)
-        cax = ax_div.append_axes("right", size="7%", pad="2%")
-        colorbar(cax=curr_ax, label=name_and_units[val].name + " [" + basic_units[name_and_units[val].unit_name].unit + "]",
-                 aspect=15, pad=0, shrink=1)
+            #subplot(curr_subplot)
+            curr_ax.set_title('time : {:.2g}'.format(loaded_snap.time) + " [" + basic_units["time"].unit + "]", fontsize='x-large')
+            rcParams.update({'font.size': 40, 'font.family': 'Serif'})
+            rcParams['text.usetex'] = True
+            if horizontal is True and snap_i!=0:
+                curr_ax.set_axis_off()
+            if horizontal is False and snap_i+1!=num_figures:
+                curr_ax.set_axis_off()
+        if horizontal:
+            fig.subplots_adjust(bottom=0.1, top=0.9, left=0.1, right=0.8, wspace=0.002, hspace=0.2)
+        else:
+            fig.subplots_adjust(bottom=0.1, top=0.9, left=0.1, right=0.8, wspace=0.2, hspace=0.002)
+        cax = fig.add_axes([0.83, 0.1, 0.04/num_figures, 0.7877])
         if "xnuc" in val:
             val = "rho" + val
         colorbar(cax=cax, label= name_and_units[val].name + " [" + basic_units[name_and_units[val].unit_name].unit + "]",
