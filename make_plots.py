@@ -403,7 +403,7 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
 
     for index, val in enumerate(value):
         print(val)
-        fig = figure(figsize=(num_figures*16+1, 16))
+        fig = figure(figsize=(num_figures*15.5, 16))
         rcParams.update({'font.size': 40, 'font.family': 'Serif'})
         rcParams['text.usetex'] = True
         curr_cmap = cmap[index % len(cmap)]
@@ -444,7 +444,7 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
             fig.subplots_adjust(wspace=0.002, hspace=0.35)
         else:
             fig.subplots_adjust(wspace=0.35, hspace=0.002)
-        cax = fig.add_axes([0.89, 0.101, 0.04/num_figures, 0.8])
+        cax = fig.add_axes([0.9, 0.101, 0.04/num_figures, 0.79])
         if "xnuc" in val:
             val = "rho" + val
         colorbar(cax=cax, label= name_and_units[val].name + " [" + basic_units[name_and_units[val].unit_name].unit + "]",
