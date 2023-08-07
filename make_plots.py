@@ -444,7 +444,7 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
             fig.subplots_adjust(wspace=0.002, hspace=0.35)
         else:
             fig.subplots_adjust(wspace=0.35, hspace=0.002)
-        cax = fig.add_axes([0.89, 0.1, 0.04/num_figures, 0.795])
+        cax = fig.add_axes([0.89, 0.11, 0.04/num_figures, 0.799])
         if "xnuc" in val:
             val = "rho" + val
         colorbar(cax=cax, label= name_and_units[val].name + " [" + basic_units[name_and_units[val].unit_name].unit + "]",
