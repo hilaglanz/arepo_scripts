@@ -3,7 +3,7 @@ import glob
 import argparse
 import numpy as np
 from loadmodules import *
-
+import pickle
 
 species = ['n', 'p', '^{4}He', '^{11}B', '^{12}C', '^{13}C', '^{13}N', '^{14}N', '^{15}N', '^{15}O',
            '^{16}O', '^{17}O', '^{18}F', '^{19}Ne', '^{20}Ne', '^{21}Ne', '^{22}Ne', '^{22}Na',
@@ -213,16 +213,16 @@ def calculate_label_and_value(loaded_snap, value, relative_to_sink_id):
         add_name_and_unit(value, "Velocity" + value.split('_')[-1], "vel")
 
     if "drag" in value:
-        loaded_snap.data[value+'_x'] = loaded_snap.data["acce"] * loaded_snap.mass[:, None]
-        loaded_snap.data[value+'_y'] = loaded_snap.data["acce"] * loaded_snap.mass[:, None]
-        loaded_snap.data[value+'_z'] = loaded_snap.data["acce"] * loaded_snap.mass[:, None]
-        loaded_snap.data["drag"] = loaded_snap.data["acce"] * loaded_snap.mass[:, None]
+        loaded_snap.data['drag_x'] = loaded_snap.data["acce"][:,0]
+        loaded_snap.data['drag_y'] = loaded_snap.data["acce"][:,1]
+        loaded_snap.data['drag_z'] = loaded_snap.data["acce"][:,2]
+        loaded_snap.data['drag'] = loaded_snap.data["acce"]
         if "drag" == value:
             value += "_size"
         add_name_and_unit(value, "Drag Force" + value.split('_')[-1], "force")
 
     if "_size" in value:
-        loaded_snap.data[value] = np.sqrt((loaded_snap.data[value] ** 2).sum(axis=1))
+        loaded_snap.data[value] = np.sqrt((loaded_snap.data[value.replace('_size', '')] ** 2).sum(axis=1))
 
     if "vort" in value:
         loaded_snap.data['vort_x'] = loaded_snap.data["vort"][:, 0]
@@ -464,7 +464,7 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
                plot_points=True,
                additional_points_size=30,additional_points_shape='X', additional_points_color='w', units_length = 'cm',
                units_velocity="$cm/s$", units_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
-               axes_array=[[0,1]], ignore_types=[], per_value_evolution=False):
+               axes_array=[[0,1]], ignore_types=[], per_value_evolution=False, save_pickle=False):
 
     if per_value_evolution:
         return plot_single_value_evolutions(value, snapshotDir, plottingDir, firstSnap, lastSnap, skipSteps, box,
@@ -502,6 +502,11 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
             print("saving to: ", filename)
             savefig(filename)
             print("saved fig")
+
+            if save_pickle:
+                tmp_fig = gcf()
+                with open(plottingDir + "/Aslice_" + val + "_{0}.p".format(snap), 'wb') as pickle1:
+                    pickle.dump(tmp_fig, pickle1)
         else:
             fig = figure(figsize=(36,20))
             fig.subplots_adjust(hspace=0.4,wspace=0.4)
@@ -572,6 +577,8 @@ def InitParser():
                         default=False)
     parser.add_argument('--plot_bfld', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),  help='plot magnetic field stream',
                         default=False)
+    parser.add_argument('--save_pickle', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),  help='save pickle of figure (currently only implemented in single panel case)',
+                        default=False)
     parser.add_argument('--additional_points_size', type=float,  help='point sizes in plot', default = 30)
     parser.add_argument('--additional_points_shape', type=str,  help='point shapes in plot', default= "X")
     parser.add_argument('--additional_points_color', type=str,  help='point colors in plot', default= "w")
@@ -618,4 +625,4 @@ if __name__ == "__main__":
                additional_points_color=args.additional_points_color,
                units_length=args.units_length, units_velocity=args.units_velocity, units_density= args.units_density,
                plot_velocities=args.plot_velocities, plot_bfld= args.plot_bfld, axes_array=axes_array,
-               ignore_types=args.ignore_types, per_value_evolution=args.plot_per_value_evolution)
+               ignore_types=args.ignore_types, per_value_evolution=args.plot_per_value_evolution, save_pickle=args.save_pickle)
