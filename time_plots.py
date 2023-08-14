@@ -95,7 +95,7 @@ def calculate_value(snapshot, value, sink_value=False, sink_id=0, ind=[]):
 
 def calculate_value_over_time(snapshots_number_list, snapshot_dir="output", value="mass",
                     mean=False, max=False, sink_value=False, sink_id=0, around_objects=False, around_density_peak=False,
-                              object_num=0, motion_axis=0):
+                              object_num=0, motion_axis=0, along_axis_line=False):
     value_over_time = []
     times = []
     value_to_calc = value
@@ -107,11 +107,13 @@ def calculate_value_over_time(snapshots_number_list, snapshot_dir="output", valu
                                                                                              "snapshot_",
                                                                                              snapshot_num)
             #TODO: currently center is ignored- and is plotted around the center of the box
+            center = snapshot.center
 
         else:
             snapshot = gadget_readsnap(snapshot_num, snapshot_dir)
             cell_indices = snapshot.data['mass'] != 0
             suffix = ""
+            center = snapshot.center
         times.append(snapshot.time)
 
         if "dot" in value:
@@ -120,6 +122,12 @@ def calculate_value_over_time(snapshots_number_list, snapshot_dir="output", valu
         if "diff" in value:
             print("plotting difference of value")
             value_to_calc = value.split("diff")[0]
+        if along_axis_line:
+            relevant_cells = np.where((absolute(s.pos[:, (motion_axis + 1) % 3] - center[(motion_axis + 1) % 3]) < (
+                        2 * snapshot.data["vol"] ** (1.0 / 3))) &
+                                      (absolute(snapshot.pos[:, (motion_axis + 2) % 3] - center[(motion_axis + 2) % 3]) < (
+                                                  2 * snapshot.data["vol"] ** (1.0 / 3))))
+            cell_indices = np.intersect1d(cell_indices, relevant_cells)
         if mean:
             value_over_time.append(calculate_mean_value(snapshot, value_to_calc, ind=cell_indices))
         else:
@@ -149,12 +157,14 @@ def calculate_value_over_time(snapshots_number_list, snapshot_dir="output", valu
         return value_over_time, times
 
 def make_time_plots(snapshots_number_list, snapshot_dir="output", plotting_dir="times_plots", value="mass", log=False,
-                    mean=False, max=False,sink_value=False, sink_id=0, around_objects=False, motion_axis=0, object_num=0):
+                    mean=False, max=False,sink_value=False, sink_id=0, around_objects=False, motion_axis=0, object_num=0,
+                    along_axis_line=False):
 
     value_over_time, times = calculate_value_over_time(snapshots_number_list,
                                                        snapshot_dir, value, mean, max,
                                                        sink_value, sink_id, around_objects=around_objects,
-                                                       object_num=object_num, motion_axis=motion_axis)
+                                                       object_num=object_num, motion_axis=motion_axis,
+                                                       along_axis_line=along_axis_line)
     set_new_fig_properties()
     if log:
         pylab.semilogy(times, value_over_time)
@@ -167,6 +177,8 @@ def make_time_plots(snapshots_number_list, snapshot_dir="output", plotting_dir="
         suffix = str(object_num)
     else:
         suffix = ""
+    if along_axis_line:
+        suffix += "_along_" + chr(ord('x') + motion_axis)
     filename = plotting_dir + "/" + value + suffix + "_over_time_" + \
                str(snapshots_number_list[0]) + "_to_" + str(snapshots_number_list[-1]) + ".png"
     print("saving to: ", filename)
@@ -207,6 +219,8 @@ def InitParser():
                         help='should plot around each of the object in the binary system',
                         default=False)
     parser.add_argument('--motion_axis', type=int, help='axis of motion when plotting around objects', default=None)
+    parser.add_argument('--along_axis', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
+                        help='considering only values along the line of motion', default=None)
     parser.add_argument('--take_single_object', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
                         help='should plot around one  of the object',
                         default=False)
