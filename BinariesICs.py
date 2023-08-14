@@ -6,13 +6,15 @@ from loadmodules import *
 
 
 class SingleObject:
-    def __init__(self, snapshot, rhocut=1e0):
+    def __init__(self, snapshot, rhocut=1e0, relevant_ind=[]):
         self.pos = None
         self.v = None
         self.r = None
-        self.i = []
         self.snapshot = snapshot
-        self.get_objects_density(rhocut)
+        if len(relevant_ind) > 0:
+            self.i = relevant_ind
+        else:
+            self.get_objects_density(rhocut)
         self.m = self.snapshot.mass[self.i].astype('float64').sum()
         self.max_distance = self.snapshot.r()[self.i].max()  # maximum distance from the center of the box
         self.npart = size(self.i)
@@ -76,8 +78,8 @@ class BinariesICs:
             print("snapshot weren't initialized exiting")
             return
 
-        self.obj1 = SingleObject(self.snapshot1, rhocut)
-        self.obj2 = SingleObject(self.snapshot2, rhocut)
+        self.obj1 = SingleObject(self.snapshot1, rhocut, self.i1)
+        self.obj2 = SingleObject(self.snapshot2, rhocut, self.i2)
 
         print("initializing general binary info")
         if species_file is not None:
@@ -98,8 +100,8 @@ class BinariesICs:
         self.m2 = self.obj2.m
         self.total_mass = self.m1 + self.m2
         print("masses: ", self.m1, " , ", self.m2)
-        self.npart1 = self.obj1.i
-        self.npart2 = self.obj2.i
+        self.npart1 = self.obj1.npart
+        self.npart2 = self.obj2.npart
         self.npart = self.npart1 + self.npart2
         print("objects properties set")
 
