@@ -191,8 +191,14 @@ def make_time_plots(snapshots_number_list, snapshot_dir="output", plotting_dir="
         suffix = str(object_num)
     else:
         suffix = ""
+    if relative_to_motion is not None:
+        if relative_to_motion == 0:
+            suffix += "_v"
+        else:
+            suffix += "_u"
     if along_axis_line:
         suffix += "_along_" + chr(ord('x') + motion_axis)
+
     filename = plotting_dir + "/" + value + suffix + "_over_time_" + \
                str(snapshots_number_list[0]) + "_to_" + str(snapshots_number_list[-1]) + ".png"
     print("saving to: ", filename)
