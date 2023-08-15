@@ -126,7 +126,7 @@ def calculate_value_over_time(snapshots_number_list, snapshot_dir="output", valu
             print("plotting difference of value")
             value_to_calc = value.split("diff")[0]
         if along_axis_line:
-            relevant_cells = np.where((absolute(s.pos[:, (motion_axis + 1) % 3] - center[(motion_axis + 1) % 3]) < (
+            relevant_cells = np.where((absolute(snapshot.pos[:, (motion_axis + 1) % 3] - center[(motion_axis + 1) % 3]) < (
                         2 * snapshot.data["vol"] ** (1.0 / 3))) &
                                       (absolute(snapshot.pos[:, (motion_axis + 2) % 3] - center[(motion_axis + 2) % 3]) < (
                                                   2 * snapshot.data["vol"] ** (1.0 / 3))))
