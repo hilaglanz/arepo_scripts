@@ -123,7 +123,6 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
     print("units: ")
     for val in name_and_units.values():
         print(val.name, basic_units[val.unit_name].factor)
-
     loaded_snap, value = calculate_label_and_value(loaded_snap, value, relative_to_sink_id)
 
     if value in name_and_units.keys():
@@ -333,7 +332,19 @@ def calculate_label_and_value(loaded_snap, value, relative_to_sink_id):
 
     return loaded_snap, value
 
-
+def calculate_value_relative_to_vector(loaded_snap, value, vector, ind=[]):
+    if len(ind) == 0:
+        ind = loaded_snap.data['mass'] != 0
+    if value not in loaded_snap.data.keys() or len(loaded_snap.data[value].shape) <= 1:
+        print("cannot compute ", value, " relative to the motion axis")
+        return
+    else:
+        vector_size = np.sqrt((vector ** 2).sum())
+        loaded_snap.data[value+"_v"] = np.sqrt((loaded_snap.data[value][ind] * vector).sum(axis=1)) / vector_size
+        loaded_snap.data[value+"_u"] = np.sqrt((loaded_snap.data[value][ind] ** 2).sum(axis=1) - loaded_snap.data[value+"_v"]**2)
+        add_name_and_unit(value+"_v", name_and_units[value].name + "_v", name_and_units[value].unit_name)
+        add_name_and_unit(value+"_u", name_and_units[value].name + "_u", name_and_units[value].unit_name)
+        return loaded_snap
 def add_computed_value_to_name_and_unit_dict(loaded_snap, value):
     if value not in name_and_units.keys():
         name = value
@@ -390,7 +401,7 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
                plot_points=True,
                additional_points_size=30,additional_points_shape='X', additional_points_color='w', units_length = 'cm',
                units_velocity="$cm/s$", units_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
-               axes_array=[[0,1]], ignore_types=[], horizontal=True):
+               axes_array=[[0,1]], ignore_types=[], horizontal=True, relative_to_motion=False):
     if not os.path.exists(plottingDir):
         os.mkdir(plottingDir)
     convert_to_cgs = False
@@ -431,7 +442,8 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
                                   plot_velocities=plot_velocities, plot_bfld= plot_bfld, newfig=False,
                                   axes=get_single_value(axes_array, index), ignore_types=ignore_types, colorbar=False,
                               plot_xlabel=(horizontal is True or ((not horizontal) and (snap_i == num_figures))),
-                              plot_ylabel=(not horizontal or ((horizontal) and (snap_i == 0))))
+                              plot_ylabel=(not horizontal or ((horizontal) and (snap_i == 0))),
+                              relative_to_motion=relative_to_motion)
             #subplot(curr_subplot)
             curr_ax.set_title('time : {:.2g}'.format(loaded_snap.time) + " [" + basic_units["time"].unit + "]", fontsize='x-large')
             rcParams.update({'font.size': 40, 'font.family': 'Serif'})
@@ -465,7 +477,7 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
                plot_points=True,
                additional_points_size=30,additional_points_shape='X', additional_points_color='w', units_length = 'cm',
                units_velocity="$cm/s$", units_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
-               axes_array=[[0,1]], ignore_types=[], per_value_evolution=False):
+               axes_array=[[0,1]], ignore_types=[], per_value_evolution=False, relative_to_motion=False):
 
     if per_value_evolution:
         return plot_single_value_evolutions(value, snapshotDir, plottingDir, firstSnap, lastSnap, skipSteps, box,
@@ -497,7 +509,8 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
                               additional_points_color=additional_points_color, unit_length=units_length,
                               unit_velocity= units_velocity, unit_density= units_density,
                               plot_velocities=plot_velocities, plot_bfld= plot_bfld, axes=get_single_value(axes_array),
-                              modified_units=modified_units, ignore_types=ignore_types)
+                              modified_units=modified_units, ignore_types=ignore_types,
+                              relative_to_motion=relative_to_motion)
             title('time : {:.2g}'.format(loaded_snap.time) + " [" + basic_units["time"].unit + "]")
             filename = plottingDir + "/Aslice_" + val + "_{0}.png".format(snap)
             print("saving to: ", filename)
@@ -525,7 +538,8 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
                                   additional_points_color=additional_points_color, unit_length=units_length,
                                   unit_velocity= units_velocity, unit_density= units_density,
                                   plot_velocities=plot_velocities, plot_bfld= plot_bfld, newfig=False,
-                                  axes=get_single_value(axes_array, index), ignore_types=ignore_types)
+                                  axes=get_single_value(axes_array, index), ignore_types=ignore_types,
+                                  relative_to_motion=relative_to_motion)
                 rcParams.update({'font.size': 40, 'font.family': 'Serif'})
                 rcParams['text.usetex'] = True
 
