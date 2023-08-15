@@ -443,8 +443,7 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
                                   plot_velocities=plot_velocities, plot_bfld= plot_bfld, newfig=False,
                                   axes=get_single_value(axes_array, index), ignore_types=ignore_types, colorbar=False,
                               plot_xlabel=(horizontal is True or ((not horizontal) and (snap_i == num_figures))),
-                              plot_ylabel=(not horizontal or ((horizontal) and (snap_i == 0))),
-                              relative_to_motion=relative_to_motion)
+                              plot_ylabel=(not horizontal or ((horizontal) and (snap_i == 0))))
             #subplot(curr_subplot)
             curr_ax.set_title('time : {:.2g}'.format(loaded_snap.time) + " [" + basic_units["time"].unit + "]", fontsize='x-large')
             rcParams.update({'font.size': 40, 'font.family': 'Serif'})
