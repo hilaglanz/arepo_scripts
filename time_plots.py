@@ -135,11 +135,11 @@ def calculate_value_over_time(snapshots_number_list, snapshot_dir="output", valu
         if relative_to_motion is not None:
             relevant_vector = (snapshot.data["vel"][cell_indices] * snapshot.mass[cell_indices, None]).sum(axis=0) / \
                               snapshot.mass[cell_indices].sum()
-            snapshot = calculate_value_relative_to_vector(snapshot, value_to_calc, relevant_vector)
+            snapshot = calculate_value_relative_to_vector(snapshot, value, relevant_vector)
             if relative_to_motion == 0:
-                value_to_calc += "_v"
+                value_to_calc = value + "_v"
             else:
-                value_to_calc += "_u"
+                value_to_calc = value + "_u"
         if mean:
             value_over_time.append(calculate_mean_value(snapshot, value_to_calc, ind=cell_indices))
         else:
@@ -148,7 +148,7 @@ def calculate_value_over_time(snapshots_number_list, snapshot_dir="output", valu
             else:
                 value_over_time.append(calculate_value(snapshot, value_to_calc, sink_value, sink_id, ind=cell_indices))
     print("added ", value_to_calc, " to the time evolution")
-    if value_to_calc != value:
+    if "diff" in value_to_calc or "dot" in value_to_calc:
         value_diff_over_time = []
         prev_value = value_over_time[0]
         prev_time = times[0]
