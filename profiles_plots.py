@@ -178,7 +178,7 @@ def get_line_profile_for_snapshot(around_density_peak, around_objects, center, m
         elif type(center) != np.ndarray:
             center = s.center
         cell_indices = s.data['mass'] != 0
-        
+
     relevant_cells = np.where(
         (absolute(s.pos[:,(motion_axis + 1) % 3] - center[(motion_axis + 1) % 3]) < 2 * s.data["vol"] ** (1.0 / 3)) &
         (absolute(s.pos[:,(motion_axis + 2) % 3] - center[(motion_axis + 2) % 3]) < 2 * s.data["vol"] ** (1.0 / 3)))
