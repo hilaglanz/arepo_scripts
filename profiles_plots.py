@@ -170,19 +170,20 @@ def get_line_profile_for_snapshot(around_density_peak, around_objects, center, m
                                                                                          snapshot_name,
                                                                                          snapshot_number)
         testing_value = compute_value(s, testing_value, center)
-        relevant_cells = np.where((absolute(s.pos[:,(motion_axis+1)%3] - center[(motion_axis+1)%3]) < (2 * s.data["vol"]**(1.0/3))) &
-                                (absolute(s.pos[:,(motion_axis+2)%3] - center[(motion_axis+2)%3]) < (2 * s.data["vol"]**(1.0/3))))
-        cell_indices = np.intersect1d(cell_indices, relevant_cells)
     else:
-        s = gadget_readsnap(snapshot_number, output_dir, snapshot_name)
+        s = gadget_readsnap(snapshot_number, output_dir, snapshot_name, loadonlytype=[0])
         testing_value = compute_value(s, testing_value, center)
         if type(center) == list:
             center = pylab.array(center)
         elif type(center) != np.ndarray:
             center = s.center
-        cell_indices = np.where(
-            (absolute(s.pos[:,(motion_axis + 1) % 3] - center[(motion_axis + 1) % 3]) < 2 * s.data["vol"] ** (1.0 / 3)) &
-            (absolute(s.pos[:,(motion_axis + 2) % 3] - center[(motion_axis + 2) % 3]) < 2 * s.data["vol"] ** (1.0 / 3)))
+        cell_indices = s.data['mass'] != 0
+        
+    relevant_cells = np.where(
+        (absolute(s.pos[:,(motion_axis + 1) % 3] - center[(motion_axis + 1) % 3]) < 2 * s.data["vol"] ** (1.0 / 3)) &
+        (absolute(s.pos[:,(motion_axis + 2) % 3] - center[(motion_axis + 2) % 3]) < 2 * s.data["vol"] ** (1.0 / 3)))
+
+    cell_indices = np.intersect1d(cell_indices, relevant_cells)
 
     distances = (s.data["pos"][cell_indices, motion_axis] - center[motion_axis])[0]
     values = s.data[testing_value][cell_indices]
