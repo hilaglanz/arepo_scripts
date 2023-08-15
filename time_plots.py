@@ -258,16 +258,16 @@ if __name__ == "__main__":
     if args.around_objects and not args.take_single_object:
         make_time_plots(snapshot_number_list, snapshot_dir=args.output_dir, plotting_dir=args.plotting_dir, value=args.value,
                         log=args.logplot, mean=args.mean, max=args.max, sink_value=args.sink_value, sink_id=args.sink_id,
-                        around_objects=args.around_objects, along_axis_line=args.along_axis_line,
+                        around_objects=args.around_objects, along_axis_line=args.along_axis,
                         motion_axis=args.motion_axis, object_num=1,
                         relative_to_motion=args.relative_to_motion)
         make_time_plots(snapshot_number_list, snapshot_dir=args.output_dir, plotting_dir=args.plotting_dir, value=args.value,
                         log=args.logplot, mean=args.mean, max=args.max, sink_value=args.sink_value, sink_id=args.sink_id,
-                        around_objects=args.around_objects, along_axis_line=args.along_axis_line,
+                        around_objects=args.around_objects, along_axis_line=args.along_axis,
                         motion_axis=args.motion_axis, object_num=2,
                         relative_to_motion=args.relative_to_motion)
     else:
         make_time_plots(snapshot_number_list, snapshot_dir=args.output_dir, plotting_dir=args.plotting_dir, value=args.value,
                         log=args.logplot, mean=args.mean, max=args.max, sink_value=args.sink_value, sink_id=args.sink_id,
-                        along_axis_line=args.along_axis_line, motion_axis=args.motion_axis,
+                        along_axis_line=args.along_axis, motion_axis=args.motion_axis,
                         relative_to_motion=args.relative_to_motion)
