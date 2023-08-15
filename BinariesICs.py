@@ -157,7 +157,7 @@ class BinariesICs:
 
     def copy_old_data(self):
         self.copy_old_data_to_objects(0, self.npart1, self.obj1, 0)
-        self.copy_old_data_to_objects(self.npart1, -1, self.obj2, 1)
+        self.copy_old_data_to_objects(self.npart1, None, self.obj2, 1)
 
         self.data['boxsize'] = 10 * max(self.snapshot1.data['boxsize'], self.snapshot2.data['boxsize'])
 
