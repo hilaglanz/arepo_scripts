@@ -159,7 +159,7 @@ class BinariesICs:
         self.copy_old_data_to_objects(0, self.npart1, self.obj1, 0)
         self.copy_old_data_to_objects(self.npart1, None, self.obj2, 1)
 
-        self.data['boxsize'] = 10 * max(self.snapshot1.data['boxsize'], self.snapshot2.data['boxsize'])
+        self.data['boxsize'] = 10 * max(self.snapshot1.boxsize, self.snapshot2.boxsize)
 
     def find_new_borders(self):
         return 1.5 * np.sqrt(self.data['pos'][:, 0] ** 2 + self.data['pos'][:, 1] ** 2 +
