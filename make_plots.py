@@ -510,8 +510,7 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
                               additional_points_color=additional_points_color, unit_length=units_length,
                               unit_velocity= units_velocity, unit_density= units_density,
                               plot_velocities=plot_velocities, plot_bfld= plot_bfld, axes=get_single_value(axes_array),
-                              modified_units=modified_units, ignore_types=ignore_types,
-                              relative_to_motion=relative_to_motion)
+                              modified_units=modified_units, ignore_types=ignore_types)
             title('time : {:.2g}'.format(loaded_snap.time) + " [" + basic_units["time"].unit + "]")
             filename = plottingDir + "/Aslice_" + val + "_{0}.png".format(snap)
             print("saving to: ", filename)
