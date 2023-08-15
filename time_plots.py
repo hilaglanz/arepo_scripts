@@ -230,7 +230,7 @@ def InitParser():
     parser.add_argument('--around_objects', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
                         help='should plot around each of the object in the binary system',
                         default=False)
-    parser.add_argument('--motion_axis', type=int, help='axis of motion when plotting around objects', default=None)
+    parser.add_argument('--motion_axis', type=int, help='axis of motion when plotting around objects', default=0)
     parser.add_argument('--along_axis', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
                         help='considering only values along the line of motion', default=None)
     parser.add_argument('--relative_to_motion', type=int,
