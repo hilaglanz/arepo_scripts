@@ -99,7 +99,7 @@ def calculate_value(snapshot, value, sink_value=False, sink_id=0, ind=[]):
 
 def calculate_value_over_time(snapshots_number_list, snapshot_dir="output", value="mass",
                     mean=False, max=False, sink_value=False, sink_id=0, around_objects=False, around_density_peak=False,
-                              object_num=0, motion_axis=0, along_axis_line=False):
+                              object_num=0, motion_axis=0, along_axis_line=False, relative_to_motion=None):
     value_over_time = []
     times = []
     value_to_calc = value
@@ -119,7 +119,6 @@ def calculate_value_over_time(snapshots_number_list, snapshot_dir="output", valu
             suffix = ""
             center = snapshot.center
         times.append(snapshot.time)
-
         if "dot" in value:
             print("plotting time different")
             value_to_calc = value.split("dot")[0]
@@ -132,6 +131,14 @@ def calculate_value_over_time(snapshots_number_list, snapshot_dir="output", valu
                                       (absolute(snapshot.pos[:, (motion_axis + 2) % 3] - center[(motion_axis + 2) % 3]) < (
                                                   2 * snapshot.data["vol"] ** (1.0 / 3))))
             cell_indices = np.intersect1d(cell_indices, relevant_cells)
+
+        if relative_to_motion is not None:
+            relevant_vector = calculate_value(snapshot=snapshot, value="vel", ind=cell_indices)
+            snapshot = calculate_value_relative_to_vector(snapshot, value_to_calc, relevant_vector, cell_indices)
+            if relative_to_motion == 0:
+                value_to_calc += "_v"
+            else:
+                value_to_calc += "_u"
         if mean:
             value_over_time.append(calculate_mean_value(snapshot, value_to_calc, ind=cell_indices))
         else:
@@ -162,13 +169,14 @@ def calculate_value_over_time(snapshots_number_list, snapshot_dir="output", valu
 
 def make_time_plots(snapshots_number_list, snapshot_dir="output", plotting_dir="times_plots", value="mass", log=False,
                     mean=False, max=False,sink_value=False, sink_id=0, around_objects=False, motion_axis=0, object_num=0,
-                    along_axis_line=False):
+                    along_axis_line=False, relative_to_motion=None):
 
     value_over_time, times = calculate_value_over_time(snapshots_number_list,
                                                        snapshot_dir, value, mean, max,
                                                        sink_value, sink_id, around_objects=around_objects,
                                                        object_num=object_num, motion_axis=motion_axis,
-                                                       along_axis_line=along_axis_line)
+                                                       along_axis_line=along_axis_line,
+                                                       relative_to_motion=relative_to_motion)
     set_new_fig_properties()
     if log:
         pylab.semilogy(times, value_over_time)
@@ -225,6 +233,9 @@ def InitParser():
     parser.add_argument('--motion_axis', type=int, help='axis of motion when plotting around objects', default=None)
     parser.add_argument('--along_axis', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
                         help='considering only values along the line of motion', default=None)
+    parser.add_argument('--relative_to_motion', type=int,
+                        help='default is none, if 0- value is along the motion axis 1- perpendicular to the motion axis',
+                        default=None)
     parser.add_argument('--take_single_object', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
                         help='should plot around one  of the object',
                         default=False)
@@ -246,10 +257,13 @@ if __name__ == "__main__":
     if args.around_objects and not args.take_single_object:
         make_time_plots(snapshot_number_list, snapshot_dir=args.output_dir, plotting_dir=args.plotting_dir, value=args.value,
                         log=args.logplot, mean=args.mean, max=args.max, sink_value=args.sink_value, sink_id=args.sink_id,
-                        around_objects=args.around_objects, motion_axis=args.motion_axis, object_num=1)
+                        around_objects=args.around_objects, motion_axis=args.motion_axis, object_num=1,
+                        relative_to_motion=args.relative_to_motion)
         make_time_plots(snapshot_number_list, snapshot_dir=args.output_dir, plotting_dir=args.plotting_dir, value=args.value,
                         log=args.logplot, mean=args.mean, max=args.max, sink_value=args.sink_value, sink_id=args.sink_id,
-                        around_objects=args.around_objects, motion_axis=args.motion_axis, object_num=2)
+                        around_objects=args.around_objects, motion_axis=args.motion_axis, object_num=2,
+                        relative_to_motion=args.relative_to_motion)
     else:
         make_time_plots(snapshot_number_list, snapshot_dir=args.output_dir, plotting_dir=args.plotting_dir, value=args.value,
-                        log=args.logplot, mean=args.mean, max=args.max, sink_value=args.sink_value, sink_id=args.sink_id )
+                        log=args.logplot, mean=args.mean, max=args.max, sink_value=args.sink_value, sink_id=args.sink_id,
+                        relative_to_motion=args.relative_to_motion)
