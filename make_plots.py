@@ -537,8 +537,7 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
                                   additional_points_color=additional_points_color, unit_length=units_length,
                                   unit_velocity= units_velocity, unit_density= units_density,
                                   plot_velocities=plot_velocities, plot_bfld= plot_bfld, newfig=False,
-                                  axes=get_single_value(axes_array, index), ignore_types=ignore_types,
-                                  relative_to_motion=relative_to_motion)
+                                  axes=get_single_value(axes_array, index), ignore_types=ignore_types)
                 rcParams.update({'font.size': 40, 'font.family': 'Serif'})
                 rcParams['text.usetex'] = True
 
