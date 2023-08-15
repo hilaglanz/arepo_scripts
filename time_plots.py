@@ -55,17 +55,21 @@ def get_relevant_plotting_parameters_for_single(around_density_peak, output_dir,
     return s, i, center
 
 def calculate_mean_value(snapshot, value, ind=[]):
+    if len(ind) == 0:
+        ind = snapshot.data['mass'] != 0
     if value in snapshot.data.keys():
         if len(snapshot.data[value].shape) > 1:
             return np.sqrt((snapshot.data[value][ind] * snapshot.data[value][ind]).sum(axis=1)).mean()
 
         return snapshot.data[value][ind].mean()
 def calculate_max_value(snapshot, value, ind=[]):
+    if len(ind) == 0:
+        ind = snapshot.data['mass'] != 0
     if value in snapshot.data.keys():
         if len(snapshot.data[value].shape) > 1:
             return np.sqrt((snapshot.data[value][ind] * snapshot.data[value][ind]).sum(axis=1)).max()
 
-        return snapshot.data[value].max()
+        return snapshot.data[value][ind].max()
 
 def calculate_value(snapshot, value, sink_value=False, sink_id=0, ind=[]):
     if len(ind) == 0:
