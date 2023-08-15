@@ -332,21 +332,19 @@ def calculate_label_and_value(loaded_snap, value, relative_to_sink_id):
 
     return loaded_snap, value
 
-def calculate_value_relative_to_vector(loaded_snap, value, vector, ind=[]):
-    if len(ind) == 0:
-        ind = loaded_snap.data['mass'] != 0
+def calculate_value_relative_to_vector(loaded_snap, value, vector):
     if value not in loaded_snap.data.keys() or len(loaded_snap.data[value].shape) <= 1:
         print("cannot compute ", value, " relative to the motion axis")
         return
     else:
         print("computing ", value, "relative to ", vector)
         vector_size = np.sqrt((vector ** 2).sum())
-        loaded_snap.data[value+"_v"] = (loaded_snap.data[value][ind] * vector).sum(axis=1) / vector_size
-        loaded_snap.data[value+"_u"] = np.sqrt((loaded_snap.data[value][ind] ** 2).sum(axis=1) -
+        loaded_snap.data[value+"_v"] = (loaded_snap.data[value] * vector).sum(axis=1) / vector_size
+        loaded_snap.data[value+"_u"] = np.sqrt((loaded_snap.data[value] ** 2).sum(axis=1) -
                                                loaded_snap.data[value+"_v"]**2)
         add_name_and_unit(value+"_v", name_and_units[value].name + "_v", name_and_units[value].unit_name)
         add_name_and_unit(value+"_u", name_and_units[value].name + "_u", name_and_units[value].unit_name)
-        
+
         return loaded_snap
 def add_computed_value_to_name_and_unit_dict(loaded_snap, value):
     if value not in name_and_units.keys():

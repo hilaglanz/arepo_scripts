@@ -135,7 +135,7 @@ def calculate_value_over_time(snapshots_number_list, snapshot_dir="output", valu
         if relative_to_motion is not None:
             relevant_vector = (snapshot.data["vel"][cell_indices] * snapshot.mass[cell_indices, None]).sum(axis=0) / \
                               snapshot.mass[cell_indices].sum()
-            snapshot = calculate_value_relative_to_vector(snapshot, value_to_calc, relevant_vector, cell_indices)
+            snapshot = calculate_value_relative_to_vector(snapshot, value_to_calc, relevant_vector)
             if relative_to_motion == 0:
                 value_to_calc += "_v"
             else:
