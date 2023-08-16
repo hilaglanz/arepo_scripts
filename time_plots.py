@@ -136,7 +136,9 @@ def calculate_value_over_time(snapshots_number_list, snapshot_dir="output", valu
         if relative_to_motion is not None:
             relevant_vector = (snapshot.data["vel"][cell_indices] * snapshot.mass[cell_indices, None]).sum(axis=0) / \
                               snapshot.mass[cell_indices].sum()
+            snapshot['pos'] -= center
             snapshot = calculate_value_relative_to_vector(snapshot, value, relevant_vector)
+            snapshot['pos'] += center
             if relative_to_motion == 0:
                 value_to_calc = value + "_v"
             else:
