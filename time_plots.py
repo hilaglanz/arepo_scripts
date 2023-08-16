@@ -131,7 +131,9 @@ def calculate_value_over_time(snapshots_number_list, snapshot_dir="output", valu
                         2 * snapshot.data["vol"] ** (1.0 / 3))) &
                                       (absolute(snapshot.pos[:, (motion_axis + 2) % 3] - center[(motion_axis + 2) % 3]) < (
                                                   2 * snapshot.data["vol"] ** (1.0 / 3))))
+            print("relevant cells len: ", len(relevant_cells), "cell_indices len: ", len(cell_indices))
             cell_indices = np.intersect1d(cell_indices, relevant_cells)
+            print("len of intersection: ", len(cell_indices))
 
         if relative_to_motion is not None:
             relevant_vector = (snapshot.data["vel"][cell_indices] * snapshot.mass[cell_indices, None]).sum(axis=0) / \
