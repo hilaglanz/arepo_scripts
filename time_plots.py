@@ -133,8 +133,8 @@ def calculate_value_over_time(snapshots_number_list, snapshot_dir="output", valu
                                                   2 * snapshot.data["vol"] ** (1.0 / 3))))
             cell_indices = np.intersect1d(cell_indices, relevant_cells)
         if relative_to_motion is not None:
-            relevant_vector = (snapshot.data["vel"][cell_indices] * snapshot.mass[cell_indices, None]).sum(axis=0) / \
-                              snapshot.mass[cell_indices].sum()
+            relevant_vector = (snapshot.vel[cell_indices, :].astype('f8') *
+                                snapshot.mass[cell_indices][:, None]).sum(axis=0) / snapshot.mass[cell_indices].sum()
             snapshot.data['pos'] -= center
             snapshot = calculate_value_relative_to_vector(snapshot, value, relevant_vector)
             snapshot.data['pos'] += center
