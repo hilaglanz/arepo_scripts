@@ -150,7 +150,7 @@ def calculate_value_over_time(snapshots_number_list, snapshot_dir="output", valu
             else:
                 value_over_time.append(calculate_value(snapshot, value_to_calc, sink_value, sink_id, ind=cell_indices))
     print("added ", value_to_calc, " to the time evolution")
-    if "diff" in value_to_calc or "dot" in value_to_calc:
+    if "diff" in value or "dot" in value:
         value_diff_over_time = []
         prev_value = value_over_time[0]
         prev_time = times[0]
