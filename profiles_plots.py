@@ -185,7 +185,7 @@ def get_line_profile_for_snapshot(around_density_peak, around_objects, center, m
 
     cell_indices = np.intersect1d(cell_indices, relevant_cells)
 
-    distances = (s.data["pos"][cell_indices, motion_axis] - center[motion_axis])[0]
+    distances = (s.data["pos"][cell_indices, motion_axis] - center[motion_axis])
     values = s.data[testing_value][cell_indices]
     sorted_ind = np.argsort(distances)
     p = np.row_stack((values[sorted_ind], distances[sorted_ind]))
