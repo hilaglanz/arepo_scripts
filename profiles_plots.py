@@ -79,7 +79,9 @@ def compute_value(s, testing_value, center=None):
         if "sound" not in s.data.keys():
             print("adding mach and cs")
             s.computeMach()
-
+    if testing_value not in s.data.keys():
+        s.computeValueGas(testing_value)
+        
     return testing_value
 
 
