@@ -164,15 +164,14 @@ def plot_cells_around_center(cell_indices, center, s, testing_value):
 
 
 def get_line_profile_for_snapshot(around_density_peak, around_objects, center, motion_axis, object_num, output_dir,
-                                    snapshot_name, snapshot_number, testing_value):
+                                    snapshot_name, snapshot_number, testing_value, relative_to_sink=False):
     suffix = ""
     if around_objects:
         s, cell_indices, center, suffix = get_relevant_plotting_parameters_around_object(around_density_peak,
                                                                                          motion_axis,
                                                                                          object_num, output_dir,
                                                                                          snapshot_name,
-                                                                                         snapshot_number,
-                                                                                         relative_to_sink)
+                                                                                         snapshot_number)
         testing_value = compute_value(s, testing_value, center)
     else:
         s = gadget_readsnap(snapshot_number, output_dir, snapshot_name, loadonlytype=[0])
