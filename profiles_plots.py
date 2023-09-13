@@ -182,7 +182,7 @@ def get_line_profile_for_snapshot(around_density_peak, around_objects, center, m
             center = s.center
         cell_indices = np.where(s.data['mass'] != 0)
         if relative_to_sink:
-            cell_indices = np.where((sqrt(absolute(((s.pos - s.pos[-1])**2).sum(axis=1))) >
+            cell_indices = np.where((np.sqrt(absolute(((s.pos - s.pos[-1])**2).sum(axis=1))) >
                                     (s.parameters["SinkFormationRadius"]*1.1 + (3/(4*pi))*s.vol**(1.0/3))) &
                                     (s.mass !=0))
 
