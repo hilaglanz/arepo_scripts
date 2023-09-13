@@ -185,7 +185,7 @@ def get_line_profile_for_snapshot(around_density_peak, around_objects, center, m
             distance_from_sink = np.sqrt(((s.pos - s.center)**2).sum(axis=1))
             print("sink radius= ", s.parameters["SinkFormationRadius"])
             print("largest distance from sink: ", distance_from_sink.max())
-            cell_indices = np.where((distance_from_sink > (s.parameters["SinkFormationRadius"] * 1.1 + s.vol ** (1.0 / 3)))
+            cell_indices = np.where((distance_from_sink > (s.parameters["SinkFormationRadius"] + s.vol ** (1.0 / 3)))
                                     & (s.mass !=0))
             print("largest x-distance from sink: ", (s.pos[cell_indices,0] - s.center[0]).max())
             print("minimum x-distance from sink: ", (s.pos[cell_indices,0] - s.center[0]).min())
