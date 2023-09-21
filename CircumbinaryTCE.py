@@ -35,10 +35,11 @@ def AddPointMassToFile(snapshot_file, new_file_name, loadtypes, point_mass, sepa
     data['pos'][-1] = loaded_snap.center + np.array([separation, 0.0, 0.0])
     if velocity is None:
         total_mass = loaded_snap.mass.sum() + point_mass
-        velocity = np.array([0.0, (G * total_mass / separation).sqrt(), 0.0])
+        velocity = np.array([0.0, (G * total_mass / separation)**0.5, 0.0])
     data['vel'][-1] = velocity
     data['mass'][-1] = point_mass
     if (separation > 0.01 * loaded_snap.boxsize).any():
+        print("expanding the box")
         gadget_add_grids(data, loaded_snap.boxsize * [10, 100], 32)
         data['boxsize'] = loaded_snap.boxsize*100
     print("added a point mass of ",point_mass," at ", data['pos'][-1])
