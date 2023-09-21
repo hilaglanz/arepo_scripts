@@ -32,7 +32,7 @@ def copy_old_data(snapshot):
 
     return data
 def AddPointMassToFile(snapshot_file, new_file_name, loadtypes, point_mass, separation, velocity=None):
-    loaded_snap = gadget_readsnap(snapshot_file, loadonlytype=loadtypes)
+    loaded_snap = gadget_readsnapname(snapshot_file, loadonlytype=loadtypes)
     data = copy_old_data(loaded_snap)
     data['pos'][-1] = loaded_snap.center + np.array([separation, 0.0, 0.0])
     if velocity is None:
