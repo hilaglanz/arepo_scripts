@@ -222,7 +222,7 @@ def calculate_label_and_value(loaded_snap, value, relative_to_sink_id):
         add_name_and_unit(value, "Drag Force" + value.split('_')[-1], "force")
 
     if "_size" in value:
-        loaded_snap.data[value] = np.sqrt((loaded_snap.data[value] ** 2).sum(axis=1))
+        loaded_snap.data[value] = np.sqrt((loaded_snap.data[value.split('_size')[0]] ** 2).sum(axis=1))
 
     if "vort" in value:
         loaded_snap.data['vort_x'] = loaded_snap.data["vort"][:, 0]
@@ -430,7 +430,8 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
                 curr_subplot = int(num_figures * 100 + 10 + (snap_i + 1))
                 ax = subplot(num_figures, 1, 1)
                 curr_ax = subplot(curr_subplot, sharex=ax)
-            loaded_snap = gadget_readsnap(snap, snapshotDir)
+            loaded_snap = gadget_readsnap(snap, snapshotDir,
+                                          loadonlytype=[t for t in range(6) if t not in ignore_types])
             print("curr snapshot: ", snap_i + 1)
             plot_single_value(loaded_snap,  value=val, cmap=curr_cmap, box=get_single_value(box,index),
                                   vrange=get_single_value(vrange,index), logplot=get_single_value(logplot,index),
