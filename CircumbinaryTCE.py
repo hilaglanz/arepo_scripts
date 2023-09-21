@@ -6,29 +6,27 @@ from loadmodules import *
 from BinariesICs import *
 
 
-def initialized_new_data(npart):
+def initialized_new_data(npart, npart0):
     data = {}
     data['pos'] = np.zeros((npart, 3))
     data['vel'] = np.zeros((npart, 3))
-    data['bfld'] = np.zeros((npart, 3))
     data['mass'] = np.zeros(npart)
-    data['u'] = np.zeros(npart)
-    data['pass'] = np.zeros((npart, 2))
+    data['u'] = np.zeros(npart0)
     data['count'] = npart
 
     return data
 
 
 def copy_old_data(snapshot):
-    data = initialized_new_data(snapshot.npart + 1)
+    data = initialized_new_data(snapshot.npart + 1, snapshot.nparticles[0])
     data['pos'][:-1] = snapshot.data['pos']
     data['vel'][:-1] = snapshot.data['vel']
     data['mass'][:-1] = snapshot.data['mass']
-    data['u'][:-1] = snapshot.data['u']
+    data['u'] = snapshot.data['u']
     if 'bfld' in snapshot.data.keys():
-        data['bfld'][:-1] = snapshot.data['bfld']
+        data['bfld'] = snapshot.data['bfld']
     if 'pass' in snapshot.data.keys():
-        data['pass'][:-1] = snapshot.data['pass']
+        data['pass'] = snapshot.data['pass']
 
     return data
 def AddPointMassToFile(snapshot_file, new_file_name, loadtypes, point_mass, separation, velocity=None):
