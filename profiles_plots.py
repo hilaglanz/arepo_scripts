@@ -79,13 +79,15 @@ def compute_value(s, testing_value, center=None):
         if "sound" not in s.data.keys():
             print("adding mach and cs")
             s.computeMach()
-
+    if testing_value not in s.data.keys():
+        s.computeValueGas(testing_value)
+        
     return testing_value
 
 
 def plot_profiles(output_dir, snapshot_name, plotting_dir, testing_value="rho", snapshot_number_array=[0, 8, 10],
                   center=False, log=True, new_fig=True, around_objects=False, around_density_peak=False,
-                  line_profile=False, motion_axis=0, object_num=0, output_txt_files=False):
+                  line_profile=False, motion_axis=0, object_num=0, output_txt_files=False, relative_to_sink=False):
     if not os.path.exists(plotting_dir):
         os.mkdir(plotting_dir)
 
@@ -99,7 +101,8 @@ def plot_profiles(output_dir, snapshot_name, plotting_dir, testing_value="rho", 
         if line_profile:
             p, s, suffix, testing_value = get_line_profile_for_snapshot(around_density_peak, around_objects, center,
                                                                           motion_axis, object_num, output_dir,
-                                                                          snapshot_name, snapshot_number, testing_value)
+                                                                          snapshot_name, snapshot_number, testing_value,
+                                                                        relative_to_sink)
             suffix += "_line_" + str(motion_axis)
         else:
             p, s, suffix, testing_value = get_radial_profile_for_snapshot(around_density_peak, around_objects, center,
@@ -161,7 +164,7 @@ def plot_cells_around_center(cell_indices, center, s, testing_value):
 
 
 def get_line_profile_for_snapshot(around_density_peak, around_objects, center, motion_axis, object_num, output_dir,
-                                    snapshot_name, snapshot_number, testing_value):
+                                    snapshot_name, snapshot_number, testing_value, relative_to_sink=False):
     suffix = ""
     if around_objects:
         s, cell_indices, center, suffix = get_relevant_plotting_parameters_around_object(around_density_peak,
@@ -177,7 +180,15 @@ def get_line_profile_for_snapshot(around_density_peak, around_objects, center, m
             center = pylab.array(center)
         elif type(center) != np.ndarray:
             center = s.center
-        cell_indices = s.data['mass'] != 0
+        cell_indices = np.where(s.data['mass'] != 0)
+        if relative_to_sink:
+            distance_from_sink = np.sqrt(((s.pos - s.center)**2).sum(axis=1))
+            print("sink radius= ", s.parameters["SinkFormationRadius"])
+            print("largest distance from sink: ", distance_from_sink.max())
+            cell_indices = np.where((distance_from_sink > (s.parameters["SinkFormationRadius"] + s.vol ** (1.0 / 3)))
+                                    & (s.mass !=0))
+            print("largest x-distance from sink: ", (s.pos[cell_indices,0] - s.center[0]).max())
+            print("minimum x-distance from sink: ", (s.pos[cell_indices,0] - s.center[0]).min())
 
     relevant_cells = np.where(
         (absolute(s.pos[:,(motion_axis + 1) % 3] - center[(motion_axis + 1) % 3]) < 2 * s.data["vol"] ** (1.0 / 3)) &
@@ -185,7 +196,7 @@ def get_line_profile_for_snapshot(around_density_peak, around_objects, center, m
 
     cell_indices = np.intersect1d(cell_indices, relevant_cells)
 
-    distances = (s.data["pos"][cell_indices, motion_axis] - center[motion_axis])[0]
+    distances = (s.data["pos"][cell_indices, motion_axis] - center[motion_axis])
     values = s.data[testing_value][cell_indices]
     sorted_ind = np.argsort(distances)
     p = np.row_stack((values[sorted_ind], distances[sorted_ind]))
@@ -279,6 +290,9 @@ def InitParser():
     parser.add_argument('--line_profile', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
                         help='should plot only the value along the motion axis?',
                         default=False)
+    parser.add_argument('--relative_to_sink', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
+                        help='should plot relative to sink position and radius, aassuming it is the last cell in the arrays',
+                        default=False)
     parser.add_argument('--output_txt_files', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
                         help='should also make txt files with plotting values?',
                         default=False)
@@ -297,15 +311,15 @@ if __name__ == "__main__":
                       testing_value=args.value, snapshot_number_array=args.snapshot_nums, log=args.logplot,
                       around_objects=args.around_objects, motion_axis=args.motion_axis,
                       around_density_peak=args.around_density_peak, line_profile=args.line_profile, object_num=1,
-                      output_txt_files=args.output_txt_files)
+                      output_txt_files=args.output_txt_files, relative_to_sink=args.relative_to_sink)
         plot_profiles(output_dir=args.output_dir, snapshot_name=args.snapshot_name, plotting_dir=args.plotting_dir,
                       testing_value=args.value, snapshot_number_array=args.snapshot_nums, log=args.logplot,
                       around_objects=args.around_objects, motion_axis=args.motion_axis,
                       around_density_peak=args.around_density_peak, line_profile=args.line_profile, object_num=2,
-                      output_txt_files=args.output_txt_files, new_fig=True)
+                      output_txt_files=args.output_txt_files, new_fig=True,relative_to_sink=args.relative_to_sink)
     else:
         plot_profiles(output_dir=args.output_dir, snapshot_name=args.snapshot_name, plotting_dir=args.plotting_dir,
                       testing_value=args.value, snapshot_number_array=args.snapshot_nums, log=args.logplot,
                       around_objects=args.around_objects, motion_axis=args.motion_axis,
                       around_density_peak=args.around_density_peak,  line_profile=args.line_profile,
-                      output_txt_files=args.output_txt_files)
+                      output_txt_files=args.output_txt_files, relative_to_sink=args.relative_to_sink)

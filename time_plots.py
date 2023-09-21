@@ -51,12 +51,12 @@ def get_relevant_plotting_parameters_for_single(around_density_peak, output_dir,
     else:
         center = s.centerofmass()
     print("around center: ", center)
-    i = np.where(s.rho > 100)
+    i, = np.where(s.rho > 100)
     return s, i, center
 
 def calculate_mean_value(snapshot, value, ind=[]):
     if len(ind) == 0:
-        ind = snapshot.data['mass'] != 0
+        ind, = np.where(snapshot.data['mass'] != 0)
     if value in snapshot.data.keys():
         if len(snapshot.data[value].shape) > 1:
             return np.sqrt((snapshot.data[value][ind] * snapshot.data[value][ind]).sum(axis=1)).mean()
@@ -64,7 +64,7 @@ def calculate_mean_value(snapshot, value, ind=[]):
         return snapshot.data[value][ind].mean()
 def calculate_max_value(snapshot, value, ind=[]):
     if len(ind) == 0:
-        ind = snapshot.data['mass'] != 0
+        ind, = np.where(snapshot.data['mass'] != 0)
     if value in snapshot.data.keys():
         if len(snapshot.data[value].shape) > 1:
             return np.sqrt((snapshot.data[value][ind] * snapshot.data[value][ind]).sum(axis=1)).max()
@@ -73,7 +73,7 @@ def calculate_max_value(snapshot, value, ind=[]):
 
 def calculate_value(snapshot, value, sink_value=False, sink_id=0, ind=[]):
     if len(ind) == 0:
-        ind = snapshot.data['mass'] != 0
+        ind, = np.where(snapshot.data['mass'] != 0)
     if value not in snapshot.data.keys():
         if "drag" in value:
             snapshot.data[value] = snapshot.data["acce"][ind] * snapshot.mass[ind,None]
@@ -116,7 +116,7 @@ def calculate_value_over_time(snapshots_number_list, snapshot_dir="output", valu
 
         else:
             snapshot = gadget_readsnap(snapshot_num, snapshot_dir, loadonlytype=loadonlytype)
-            cell_indices = snapshot.data['mass'] != 0
+            cell_indices, = np.where(snapshot.data['mass'] != 0)
             suffix = ""
             center = snapshot.center
         times.append(snapshot.time)
@@ -127,16 +127,17 @@ def calculate_value_over_time(snapshots_number_list, snapshot_dir="output", valu
             print("plotting difference of value")
             value_to_calc = value.split("diff")[0]
         if along_axis_line:
-            relevant_cells = np.where((absolute(snapshot.pos[:, (motion_axis + 1) % 3] - center[(motion_axis + 1) % 3]) < (
+            relevant_cells, = np.where((absolute(snapshot.pos[:, (motion_axis + 1) % 3] - center[(motion_axis + 1) % 3]) < (
                         2 * snapshot.data["vol"] ** (1.0 / 3))) &
                                       (absolute(snapshot.pos[:, (motion_axis + 2) % 3] - center[(motion_axis + 2) % 3]) < (
                                                   2 * snapshot.data["vol"] ** (1.0 / 3))))
             cell_indices = np.intersect1d(cell_indices, relevant_cells)
-
         if relative_to_motion is not None:
-            relevant_vector = (snapshot.data["vel"][cell_indices] * snapshot.mass[cell_indices, None]).sum(axis=0) / \
-                              snapshot.mass[cell_indices].sum()
+            relevant_vector = (snapshot.vel[cell_indices, :].astype('f8') *
+                                snapshot.mass[cell_indices][:, None]).sum(axis=0) / snapshot.mass[cell_indices].sum()
+            snapshot.data['pos'] -= center
             snapshot = calculate_value_relative_to_vector(snapshot, value, relevant_vector)
+            snapshot.data['pos'] += center
             if relative_to_motion == 0:
                 value_to_calc = value + "_v"
             else:
@@ -149,7 +150,7 @@ def calculate_value_over_time(snapshots_number_list, snapshot_dir="output", valu
             else:
                 value_over_time.append(calculate_value(snapshot, value_to_calc, sink_value, sink_id, ind=cell_indices))
     print("added ", value_to_calc, " to the time evolution")
-    if "diff" in value_to_calc or "dot" in value_to_calc:
+    if "diff" in value or "dot" in value:
         value_diff_over_time = []
         prev_value = value_over_time[0]
         prev_time = times[0]
