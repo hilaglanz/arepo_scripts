@@ -29,7 +29,7 @@ def copy_old_data(snapshot):
         data['bfld'] = snapshot.data['bfld']
     if 'pass' in snapshot.data.keys():
         data['pass'] = snapshot.data['pass']
-    data['boxsize'] = snapshot.data['boxsize']
+    data['boxsize'] = snapshot.boxsize
 
     return data
 def AddPointMassToFile(snapshot_file, new_file_name, loadtypes, point_mass, separation, velocity=None):
