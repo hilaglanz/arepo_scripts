@@ -13,6 +13,7 @@ def initialized_new_data(npart, npart0):
     data['mass'] = np.zeros(npart)
     data['u'] = np.zeros(npart0)
     data['count'] = npart
+    data['type'] = np.zeros(npart)
 
     return data
 
