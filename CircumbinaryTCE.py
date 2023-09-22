@@ -22,6 +22,7 @@ def copy_old_data(snapshot):
     data['pos'][:-1] = snapshot.data['pos']
     data['vel'][:-1] = snapshot.data['vel']
     data['mass'][:-1] = snapshot.data['mass']
+    data['type'][:-1] = snapshot.data['type']
     data['u'] = snapshot.data['u']
     if 'bfld' in snapshot.data.keys():
         data['bfld'] = snapshot.data['bfld']
@@ -38,9 +39,11 @@ def AddPointMassToFile(snapshot_file, new_file_name, loadtypes, point_mass, sepa
         velocity = np.array([0.0, (G * total_mass / separation)**0.5, 0.0])
     data['vel'][-1] = velocity
     data['mass'][-1] = point_mass
+    data['type'][-1] = 1     #dm particle
+    gadget_add_grid(data, loaded_snap.boxsize * 10, 32)
     if (separation > 0.01 * loaded_snap.boxsize).any():
         print("expanding the box")
-        gadget_add_grids(data, loaded_snap.boxsize * [10, 100], 32)
+        gadget_add_grid(data, loaded_snap.boxsize * 100, 32)
         data['boxsize'] = loaded_snap.boxsize*100
     print("added a point mass of ",point_mass," at ", data['pos'][-1])
     gadget_write_ics(new_file_name, data, format='hdf5', double=True)
