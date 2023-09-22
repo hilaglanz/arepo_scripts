@@ -521,6 +521,7 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
     if units_velocity is None and units_density is None:
         convert_to_cgs = True
     modified_units = False
+
     curr_cmap = cmap[0]
     for snap in get_snapshot_number_list(snapshotDir, "snapshot_", firstSnap, lastSnap, skipSteps):
         print("doing snapshot ",snap)
@@ -625,7 +626,7 @@ def InitParser():
     parser.add_argument('--factor_length', type=float,  help='multiply length unit by this factor', default=1.0)
     parser.add_argument('--factor_velocity', type=float,  help='multiply velocity unit by this factor', default=1.0)
     parser.add_argument('--factor_value', nargs='+', type=float,  help='multiply value unit by this factor', default=[1.0])
-    parser.add_argument('--units_value', nargs='+', type=str,  help='name of the value units', default=None)
+    parser.add_argument('--units_value', nargs='+', type=str,  help='name of the value units', default=[None])
 
     return parser
 
