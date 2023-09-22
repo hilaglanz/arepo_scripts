@@ -136,11 +136,11 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
 
     if value in basic_units.keys():
         basic_units[value].factor = factor_value
-        if units_value is not None:
+        if units_value is not None and units_value != "None":
             basic_units[value].unit = units_value
     elif "size" in value and value.split("_size")[0] in basic_units.keys():
         basic_units[value.split("_size")[0]].factor = factor_value
-        if units_value is not None:
+        if units_value is not None and units_value != "None":
             basic_units[value.split("_size")[0]].unit = units_value
 
     print("units: ")
@@ -505,7 +505,7 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
                additional_points_size=30,additional_points_shape='X', additional_points_color='w', units_length = 'cm',
                units_velocity="$cm/s$", units_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
                axes_array=[[0,1]], ignore_types=[], per_value_evolution=False, relative_to_motion=False,
-               factor_value=1.0, units_value=None):
+               factor_value=[1.0], units_value=[None]):
 
     if per_value_evolution:
         return plot_single_value_evolutions(value, snapshotDir, plottingDir, firstSnap, lastSnap, skipSteps, box,
@@ -538,7 +538,7 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
                               unit_velocity= units_velocity, unit_density= units_density,
                               plot_velocities=plot_velocities, plot_bfld= plot_bfld, axes=get_single_value(axes_array),
                               modified_units=modified_units, ignore_types=ignore_types,
-                              factor_value=factor_value, units_value=units_value)
+                              factor_value=factor_value[0], units_value=units_value[0])
             title('time : {:.2g}'.format(loaded_snap.time) + " [" + basic_units["time"].unit + "]")
             filename = plottingDir + "/Aslice_" + val + "_{0}.png".format(snap)
             print("saving to: ", filename)
@@ -567,7 +567,7 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
                                   unit_velocity= units_velocity, unit_density= units_density,
                                   plot_velocities=plot_velocities, plot_bfld= plot_bfld, newfig=False,
                                   axes=get_single_value(axes_array, index), ignore_types=ignore_types,
-                                  factor_value=factor_value, units_value=units_value)
+                                  factor_value=factor_value[index % len(units_value)], units_value=units_value[index % len(units_value)])
                 rcParams.update({'font.size': 40, 'font.family': 'Serif'})
                 rcParams['text.usetex'] = True
 
@@ -624,8 +624,8 @@ def InitParser():
     parser.add_argument('--factor_mass', type=float,  help='multiply mass unit by this factor', default=1.0)
     parser.add_argument('--factor_length', type=float,  help='multiply length unit by this factor', default=1.0)
     parser.add_argument('--factor_velocity', type=float,  help='multiply velocity unit by this factor', default=1.0)
-    parser.add_argument('--factor_value',type=float,  help='multiply value unit by this factor', default=1.0)
-    parser.add_argument('--units_value', type=str,  help='name of the value units', default=None)
+    parser.add_argument('--factor_value', nargs='+', type=float,  help='multiply value unit by this factor', default=[1.0])
+    parser.add_argument('--units_value', nargs='+', type=str,  help='name of the value units', default=None)
 
     return parser
 
