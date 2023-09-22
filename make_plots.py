@@ -51,17 +51,17 @@ def change_snap_units(loaded_snap):
         print("changing units of ", key, " by a factor of ", basic_units[name_and_units[key].unit_name].factor)
         loaded_snap.data[key] *= basic_units[name_and_units[key].unit_name].factor
 
-def copy_dictionary(old_dictionary, new_dictionary=None):
+def copy_basic_units(old_dictionary, new_dictionary=None):
     if new_dictionary is None:
         new_dictionary = {}
-    for key in old_dictionary.keys():
+    for key in basic_units.keys():
         new_dictionary[key] = old_dictionary[key]
 
     return new_dictionary
 def copy_current_units():
-    return copy_dictionary(basic_units)
-def restore_previous_units(old_basic_units):
-    copy_dictionary(old_basic_units, new_dictionary=basic_units)
+    return copy_basic_units(basic_units)
+def restore_basic_units(old_basic_units):
+    basic_units = copy_basic_units(old_basic_units, new_dictionary=basic_units)
 
 def change_unit_conversion(factor_length, factor_velocity, factor_mass):
     basic_units["rho"].factor *= (factor_mass / (factor_length ** 3))
@@ -190,7 +190,7 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
     if plot_ylabel:
         ylabel(ylab + ' [' + unit_length + ']')
 
-    restore_previous_units(old_basic_units)
+    restore_basic_units(old_basic_units)
 
 def get_value_at_inf(value, data):
     if value not in data:
@@ -568,7 +568,8 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
                                   unit_velocity= units_velocity, unit_density= units_density,
                                   plot_velocities=plot_velocities, plot_bfld= plot_bfld, newfig=False,
                                   axes=get_single_value(axes_array, index), ignore_types=ignore_types,
-                                  factor_value=factor_value[index % len(units_value)], units_value=units_value[index % len(units_value)])
+                                  factor_value=factor_value[index % len(units_value)],
+                                  units_value=units_value[index % len(units_value)])
                 rcParams.update({'font.size': 40, 'font.family': 'Serif'})
                 rcParams['text.usetex'] = True
 
