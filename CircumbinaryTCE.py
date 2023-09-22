@@ -39,7 +39,7 @@ def AddPointMassToFile(snapshot_file, new_file_name, loadtypes, point_mass, sepa
     inner_binary = SnapshotComponent.from_snapshot_name(snapshot_file)
     tertiary = PointMassComponent(mass=point_mass, offset=[separation, 0, 0])
     triple.add_components_as_binary(inner_binary, tertiary)
-    triple.write_ics(filename=new_file_name)
+    triple.create_ics(model=new_file_name)
     print(triple.data['type'])
 
 def InitParser():
