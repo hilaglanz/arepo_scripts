@@ -33,12 +33,12 @@ def copy_old_data(snapshot):
     return data
 
 def AddPointMassToFile(snapshot_file, new_file_name, loadtypes, point_mass, separation, velocity=None):
-    m = MultipleSystem(newsize=1e18, reset_dm_ids=True)
+    triple = MultipleSystem(newsize=1e18, reset_dm_ids=True)
     inner_binary = SnapshotComponent.from_snapshot_name(snapshot_file)
     tertiary = PointMassComponent(mass=point_mass, offset=[separation, 0, 0])
-    m.add_components_as_binary(inner_binary, tertiary)
-    print(m.data['type'])
-    binary.create_ics(filename=new_file_name)
+    triple.add_components_as_binary(inner_binary, tertiary)
+    triple.create_ics(filename=new_file_name)
+    print(triple.data['type'])
 
 def InitParser():
     parser = argparse.ArgumentParser(description='')
