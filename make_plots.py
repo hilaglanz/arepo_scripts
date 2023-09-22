@@ -51,19 +51,31 @@ def change_snap_units(loaded_snap):
         print("changing units of ", key, " by a factor of ", basic_units[name_and_units[key].unit_name].factor)
         loaded_snap.data[key] *= basic_units[name_and_units[key].unit_name].factor
 
+def copy_dictionary(old_dictionary, new_dictionary=None):
+    if new_dictionary is None:
+        new_dictionary = {}
+    for key in old_dictionary.keys():
+        new_dictionary[key] = old_dictionary[key]
+
+    return new_dictionary
+def copy_current_units():
+    return copy_dictionary(basic_units)
+def restore_previous_units(old_basic_units):
+    copy_dictionary(old_basic_units, new_dictionary=basic_units)
+
 def change_unit_conversion(factor_length, factor_velocity, factor_mass):
-    basic_units["rho"].factor = factor_mass / (factor_length ** 3)
-    basic_units["length"].factor = factor_length
-    basic_units["vol"].factor = factor_length ** 3
-    basic_units["vel"].factor= factor_velocity
-    basic_units["ang_mom"].factor= factor_velocity * factor_length
-    basic_units["acce"].factor= (factor_velocity ** 2) / factor_length
-    basic_units["mass"].factor = factor_mass
-    basic_units["time"].factor = (factor_length/factor_velocity)
-    basic_units["pres"].factor = (factor_mass * factor_velocity ** 2) / (factor_length ** 3) # mass*acc/area
-    basic_units["force"].factor = (factor_mass * factor_velocity ** 2) / factor_length # mass*acc
-    #basic_units["entr"].factor = basic_units["pres"].factor / (basic_units["rho"].factor ** (5.0 / 3))
-    basic_units["u"].factor = factor_mass * (factor_velocity ** 2)
+    basic_units["rho"].factor *= (factor_mass / (factor_length ** 3))
+    basic_units["length"].factor *= factor_length
+    basic_units["vol"].factor *= factor_length ** 3
+    basic_units["vel"].factor *= factor_velocity
+    basic_units["ang_mom"].factor *= factor_velocity * factor_length
+    basic_units["acce"].factor *= ((factor_velocity ** 2) / factor_length)
+    basic_units["mass"].factor *= factor_mass
+    basic_units["time"].factor *= (factor_length/factor_velocity)
+    basic_units["pres"].factor *= ((factor_mass * factor_velocity ** 2) / (factor_length ** 3)) # mass*acc/area
+    basic_units["force"].factor *= ((factor_mass * factor_velocity ** 2) / factor_length) # mass*acc
+    #basic_units["entr"].factor = (basic_units["pres"].factor / (basic_units["rho"].factor ** (5.0 / 3)))
+    basic_units["u"].factor *= (factor_mass * (factor_velocity ** 2))
     # TODO: convert also temperature?
 def project_vector(v,r):
     dist = np.sqrt((r*r).sum(axis=1))
@@ -87,19 +99,11 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
                       additional_points_shape='X', additional_points_color='w', unit_length='cm', unit_velocity="$cm/s$",
                       unit_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
                       newfig=True, axes=[0,1], modified_units = False, ignore_types=[], colorbar=True,
-                      plot_xlabel=True, plot_ylabel=True, no_change_value_units=False):
+                      plot_xlabel=True, plot_ylabel=True, factor_value=1.0, units_value=None):
     label = value
     convert_to_cgs = True
-    if no_change_value_units:
-        old_units = ""
-        old_factor = 1
-        if value in basic_units.keys():
-            old_units = basic_units[value].unit
-            old_factor = basic_units[value].factor
-        elif "size" in value and value.split("_size")[0] in basic_units.keys():
-            old_units = basic_units[value.split("_size")[0]].unit
-            old_factor = basic_units[value.split("_size")[0]].factor
 
+    old_basic_units = copy_current_units()
 
     if unit_velocity is not None:
         basic_units["vel"].unit = unit_velocity
@@ -130,14 +134,14 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
     change_snap_units(loaded_snap)
     modified_units = True
 
-    if no_change_value_units:
-        if value in basic_units.keys():
-            basic_units[value].unit = old_units
-            basic_units[value].factor = old_factor
-
-        elif "size" in value and value.split("_size")[0] in basic_units.keys():
-            basic_units[value.split("_size")[0]].unit = old_units
-            basic_units[value.split("_size")[0]].factor = old_factor
+    if value in basic_units.keys():
+        basic_units[value].factor = factor_value
+        if units_value is not None:
+            basic_units[value].unit = units_value
+    elif "size" in value and value.split("_size")[0] in basic_units.keys():
+        basic_units[value.split("_size")[0]].factor = factor_value
+        if units_value is not None:
+            basic_units[value.split("_size")[0]].unit = units_value
 
     print("units: ")
     for val in name_and_units.values():
@@ -185,6 +189,8 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
         xlabel(xlab + ' [' + unit_length + ']', loc="left")
     if plot_ylabel:
         ylabel(ylab + ' [' + unit_length + ']')
+
+    restore_previous_units(old_basic_units)
 
 def get_value_at_inf(value, data):
     if value not in data:
@@ -499,7 +505,7 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
                additional_points_size=30,additional_points_shape='X', additional_points_color='w', units_length = 'cm',
                units_velocity="$cm/s$", units_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
                axes_array=[[0,1]], ignore_types=[], per_value_evolution=False, relative_to_motion=False,
-               no_change_value_units=False):
+               factor_value=1.0, units_value=None):
 
     if per_value_evolution:
         return plot_single_value_evolutions(value, snapshotDir, plottingDir, firstSnap, lastSnap, skipSteps, box,
@@ -532,7 +538,7 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
                               unit_velocity= units_velocity, unit_density= units_density,
                               plot_velocities=plot_velocities, plot_bfld= plot_bfld, axes=get_single_value(axes_array),
                               modified_units=modified_units, ignore_types=ignore_types,
-                              no_change_value_units=no_change_value_units)
+                              factor_value=factor_value, units_value=units_value)
             title('time : {:.2g}'.format(loaded_snap.time) + " [" + basic_units["time"].unit + "]")
             filename = plottingDir + "/Aslice_" + val + "_{0}.png".format(snap)
             print("saving to: ", filename)
@@ -561,7 +567,7 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
                                   unit_velocity= units_velocity, unit_density= units_density,
                                   plot_velocities=plot_velocities, plot_bfld= plot_bfld, newfig=False,
                                   axes=get_single_value(axes_array, index), ignore_types=ignore_types,
-                                  no_change_value_units=no_change_value_units)
+                                  factor_value=factor_value, units_value=units_value)
                 rcParams.update({'font.size': 40, 'font.family': 'Serif'})
                 rcParams['text.usetex'] = True
 
@@ -618,9 +624,8 @@ def InitParser():
     parser.add_argument('--factor_mass', type=float,  help='multiply mass unit by this factor', default=1.0)
     parser.add_argument('--factor_length', type=float,  help='multiply length unit by this factor', default=1.0)
     parser.add_argument('--factor_velocity', type=float,  help='multiply velocity unit by this factor', default=1.0)
-    parser.add_argument('--no_change_value_units', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
-                        help='should we keep the units of the plotted value in the internal units?',
-                        default=False)
+    parser.add_argument('--factor_value',type=float,  help='multiply value unit by this factor', default=1.0)
+    parser.add_argument('--units_value', type=str,  help='name of the value units', default=None)
 
     return parser
 
@@ -659,4 +664,4 @@ if __name__ == "__main__":
                units_length=args.units_length, units_velocity=args.units_velocity, units_density= args.units_density,
                plot_velocities=args.plot_velocities, plot_bfld= args.plot_bfld, axes_array=axes_array,
                ignore_types=args.ignore_types, per_value_evolution=args.plot_per_value_evolution,
-               no_change_value_units=args.no_change_value_units)
+               factor_value=args.factor_value, units_value=args.units_value)
