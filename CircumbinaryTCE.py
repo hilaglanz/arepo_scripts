@@ -3,6 +3,7 @@ import sys
 import os
 
 from loadmodules import *
+from stellar_ics.multiple_star import MultipleSystem, SnapshotComponent, PointMassComponent
 from BinariesICs import *
 
 
@@ -17,13 +18,11 @@ def initialized_new_data(npart, npart0):
 
     return data
 
-
 def copy_old_data(snapshot):
-    data = initialized_new_data(snapshot.npart + 1, snapshot.nparticles[0])
-    data['pos'][:-1] = snapshot.data['pos']
-    data['vel'][:-1] = snapshot.data['vel']
-    data['mass'][:-1] = snapshot.data['mass']
-    data['type'][:-1] = snapshot.data['type']
+    data = initialized_new_data(snapshot.nparticles[0], snapshot.nparticles[0])
+    data['pos'] = snapshot.data['pos'][:snapshot.nparticles[0]]
+    data['vel']= snapshot.data['vel'][:snapshot.nparticles[0]]
+    data['mass'] = snapshot.data['mass'][:snapshot.nparticles[0]]
     data['u'] = snapshot.data['u']
     if 'bfld' in snapshot.data.keys():
         data['bfld'] = snapshot.data['bfld']
@@ -34,23 +33,12 @@ def copy_old_data(snapshot):
     return data
 
 def AddPointMassToFile(snapshot_file, new_file_name, loadtypes, point_mass, separation, velocity=None):
-    loaded_snap = gadget_readsnapname(snapshot_file, loadonlytype=loadtypes)
-    data = copy_old_data(loaded_snap)
-    data['pos'][-1] = loaded_snap.center + np.array([separation, 0.0, 0.0])
-    print(data['pos'].shape)
-    if velocity is None:
-        total_mass = loaded_snap.mass.sum() + point_mass
-        velocity = (G * total_mass / separation)**0.5
-    data['vel'][-1,2] = velocity
-    data['mass'][-1] = point_mass
-    data['type'][-1] = 1     #dm particle
-    gadget_add_grid(data, loaded_snap.boxsize * 10, 32)
-    if (separation > 0.01 * loaded_snap.boxsize).any():
-        print("expanding the box")
-        gadget_add_grid(data, loaded_snap.boxsize * 100, 32)
-        data['boxsize'] = loaded_snap.boxsize*100
-    print("added a point mass of ",point_mass," at ", data['pos'][-1])
-    gadget_write_ics(new_file_name, data, format='hdf5', double=True)
+    m = MultipleSystem(newsize=1e18, reset_dm_ids=True)
+    inner_binary = SnapshotComponent.from_snapshot_name(snapshot_file)
+    tertiary = PointMassComponent(mass=point_mass, offset=[separation, 0, 0])
+    m.add_components_as_binary(inner_binary, tertiary)
+    print(m.data['type'])
+    binary.create_ics(filename=new_file_name)
 
 def InitParser():
     parser = argparse.ArgumentParser(description='')
