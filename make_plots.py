@@ -54,6 +54,7 @@ def change_snap_units(loaded_snap):
 def copy_basic_units(old_dictionary, new_dictionary=None):
     if new_dictionary is None:
         new_dictionary = {}
+    print("replacing existing dictionary")
     for key in basic_units.keys():
         new_dictionary[key] = old_dictionary[key]
 
@@ -61,7 +62,7 @@ def copy_basic_units(old_dictionary, new_dictionary=None):
 def copy_current_units():
     return copy_basic_units(basic_units)
 def restore_basic_units(old_basic_units):
-    basic_units = copy_basic_units(old_basic_units, new_dictionary=basic_units)
+    copy_basic_units(old_basic_units, new_dictionary=basic_units)
 
 def change_unit_conversion(factor_length, factor_velocity, factor_mass):
     basic_units["rho"].factor *= (factor_mass / (factor_length ** 3))
