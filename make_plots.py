@@ -96,6 +96,10 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
         if value in basic_units.keys():
             old_units = basic_units[value].unit
             old_factor = basic_units[value].factor
+        elif "size" in value and value.split("_size")[0] in basic_units.keys():
+            old_units = basic_units[value.split("_size")[0]].unit
+            old_factor = basic_units[value.split("_size")[0]].factor
+
 
     if unit_velocity is not None:
         basic_units["vel"].unit = unit_velocity
@@ -127,9 +131,14 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
     modified_units = True
 
     if no_change_value_units:
-        basic_units[value].unit = old_units
-        basic_units[value].factor = old_factor
-        
+        if value in basic_units.keys():
+            basic_units[value].unit = old_units
+            basic_units[value].factor = old_factor
+
+        elif "size" in value and value.split("_size")[0] in basic_units.keys():
+            basic_units[value.split("_size")[0]].unit = old_units
+            basic_units[value.split("_size")[0]].factor = old_factor
+
     print("units: ")
     for val in name_and_units.values():
         print(val.name, basic_units[val.unit_name].factor)
