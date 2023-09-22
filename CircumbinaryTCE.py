@@ -33,7 +33,7 @@ def copy_old_data(snapshot):
     return data
 
 def AddPointMassToFile(snapshot_file, new_file_name, loadtypes, point_mass, separation, velocity=None):
-    triple = MultipleSystem(newsize=1e18, reset_dm_ids=True)
+    triple = MultipleSystem(newsize=1e18, reset_dm_ids=True, ndir=32)
     inner_binary = SnapshotComponent.from_snapshot_name(snapshot_file)
     tertiary = PointMassComponent(mass=point_mass, offset=[separation, 0, 0])
     triple.add_components_as_binary(inner_binary, tertiary)
