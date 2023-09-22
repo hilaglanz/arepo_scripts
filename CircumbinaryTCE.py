@@ -36,7 +36,8 @@ def copy_old_data(snapshot):
 def AddPointMassToFile(snapshot_file, new_file_name, loadtypes, point_mass, separation, velocity=None):
     loaded_snap = gadget_readsnapname(snapshot_file, loadonlytype=loadtypes)
     data = copy_old_data(loaded_snap)
-    data['pos'][-1,0] = loaded_snap.center + np.array([separation, 0.0, 0.0])
+    data['pos'][-1] = loaded_snap.center + np.array([separation, 0.0, 0.0])
+    plot(data['pos'].shape)
     if velocity is None:
         total_mass = loaded_snap.mass.sum() + point_mass
         velocity = (G * total_mass / separation)**0.5
