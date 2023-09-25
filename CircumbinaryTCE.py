@@ -47,16 +47,16 @@ def AddPointMassToFile(snapshot_file, new_file_name, point_mass, separation, ini
     tertiary = PointMassComponent(mass=point_mass)
     rlof_factor = 1.0
     q = inner_binary.mass / point_mass
-    current_rlof = inner_binary.get_radius() / roche_distance(q)
-    print("current Roche lobe size= ", current_rlof / rsol, " Rsun")
+    current_rlof = (inner_binary.get_radius() / rsol) / roche_distance(q)
+    print("current Roche lobe size= ", current_rlof, " Rsun")
     if initial_inner_separation is not None:
         print("calculating minimum distance from stability criteria")
         minimum_a = 2.8 * initial_inner_separation * (1 + q)**(2.0/5)
         print("minimal separation from stability criteria = ", minimum_a, " Rsun, using ",
               1.03*minimum_a)
-        separation = 1.03 * minimum_a * rsol
+        separation = 1.03 * minimum_a
     else:
-        print("using given separation of ", separation/rsol, "Rsun")
+        print("using given separation of ", separation, "Rsun")
 
     rlof_factor = separation / current_rlof
     triple.add_components_as_binary(inner_binary, tertiary, distance_fraction_rlof=separation/rlof_factor)
@@ -84,5 +84,5 @@ if __name__ == "__main__":
     parser = InitParser()
     args = parser.parse_args()
     AddPointMassToFile(args.giant_snapshot_file, new_file_name=args.ic_file_name,
-                       separation=args.outer_separation * rsol, point_mass=args.outer_mass * msol,
+                       separation=args.outer_separation, point_mass=args.outer_mass * msol,
                        initial_inner_separation=args.initial_inner_separation)
