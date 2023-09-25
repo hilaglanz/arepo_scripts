@@ -58,8 +58,8 @@ def AddPointMassToFile(snapshot_file, new_file_name, point_mass, separation, ini
     else:
         print("using given separation of ", separation, "Rsun")
 
-    rlof_factor = separation / current_rlof
-    triple.add_components_as_binary(inner_binary, tertiary, distance_fraction_rlof=separation/rlof_factor)
+    rlof_factor = current_rlof / separation
+    triple.add_components_as_binary(inner_binary, tertiary, distance_fraction_rlof=rlof_factor)
     triple.create_ics(model=new_file_name)
 
 def InitParser():
