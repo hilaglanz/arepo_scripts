@@ -107,7 +107,8 @@ def plot_profiles(output_dir, snapshot_name, plotting_dir, testing_value="rho", 
         else:
             p, s, suffix, testing_value = get_radial_profile_for_snapshot(around_density_peak, around_objects, center,
                                                                       motion_axis, object_num, output_dir,
-                                                                      snapshot_name, snapshot_number, testing_value)
+                                                                      snapshot_name, snapshot_number, testing_value,
+                                                                          relative_to_sink)
 
         if output_txt_files:
             write_txt_file(p, plotting_dir, snapshot_number, s.time, suffix, testing_value)
@@ -124,7 +125,7 @@ def plot_profiles(output_dir, snapshot_name, plotting_dir, testing_value="rho", 
 
 
 def get_radial_profile_for_snapshot(around_density_peak, around_objects, center, motion_axis, object_num, output_dir,
-                                    snapshot_name, snapshot_number, testing_value):
+                                    snapshot_name, snapshot_number, testing_value, relative_to_sink=False):
     suffix = ""
     if around_objects:
         s, cell_indices, center, suffix = get_relevant_plotting_parameters_around_object(around_density_peak,
@@ -139,7 +140,46 @@ def get_radial_profile_for_snapshot(around_density_peak, around_objects, center,
         testing_value = compute_value(s, testing_value, center)
         cell_indices = s.data['type'] == 0
 
-    p = plot_cells_around_center(cell_indices, center, s, testing_value)
+    if relative_to_sink:
+        mirror_axis = np.array([1,1,1])
+        mirror_axis[motion_axis] = -1
+        right_cells = np.where(s.pos[:,motion_axis] > center[motion_axis])
+        right_cells = np.intersect1d(right_cells, cell_indices)
+        pos_right = s.pos[right_cells] - center[motion_axis]
+        pos_right = np.concatenate((pos_right * mirror_axis, pos_right))
+        pos_right += center[motion_axis]
+        mode = 2
+        if testing_value == 'rho':
+            values_right = s.data['mass'][right_cells]
+            mode = 1
+        else:
+            values_right = s.data[testing_value][right_cells]
+        values_right = np.concatenate((values_right[::-1], values_right))
+        p_right = calcGrid.calcRadialProfile(pos_right.astype('float64'),
+                                   values_right.astype('float64'), mode, 200, 0,
+                                   center[0],
+                                   center[1], center[2])
+
+        left_cells = np.where(s.pos[:,motion_axis] < center[motion_axis])
+        left_cells = np.intersect1d(left_cells, cell_indices)
+        pos_left = s.pos[left_cells] - center[motion_axis]
+        pos_left = np.concatenate((pos_left, pos_left * mirror_axis))
+        pos_left += center[motion_axis]
+        if testing_value == 'rho':
+            values_left = s.data['mass'][left_cells]
+        else:
+            values_left = s.data[testing_value][left_cells]
+        values_left = np.concatenate((values_left, values_left[::-1]))
+        p_left = calcGrid.calcRadialProfile(pos_left.astype('float64'),
+                                   values_left.astype('float64'), mode, 200, 0,
+                                   center[0],
+                                   center[1], center[2])
+
+        p_0 = np.concatenate(p_left[0], p_right[0])
+        p_1 = np.concatenate(p_left[1]*-1.0, p_right[1])
+        p = np.row_stack((p_0, p_1))
+    else:
+        p = plot_cells_around_center(cell_indices, center, s, testing_value)
 
     return p, s, suffix, testing_value
 
@@ -202,13 +242,6 @@ def get_line_profile_for_snapshot(around_density_peak, around_objects, center, m
     p = np.row_stack((values[sorted_ind], distances[sorted_ind]))
     print(p.shape)
 
-    right_cells = np.where(s.pos[:,motion_axis] > center[motion_axis])
-    left_cells = np.where(s.pos[:,motion_axis] < center[motion_axis])
-    right_p = plot_cells_around_center(np.intersect1d(right_cells,cell_indices), center, s, testing_value)
-    left_p = plot_cells_around_center(np.intersect1d(left_cells,cell_indices), center, s, testing_value)
-    p_0 = np.concatenate((left_p[0], right_p[0]))
-    p_1 = np.concatenate((-1.0 * left_p[1], right_p[1]))
-    p = np.row_stack((p_0,p_1))
     return p, s, suffix, testing_value
 
 def plot_to_figure(index, line_colors, log, p, s):
