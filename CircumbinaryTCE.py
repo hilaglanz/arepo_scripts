@@ -33,8 +33,8 @@ def copy_old_data(snapshot):
 
     return data
 
-def AddPointMassToFile(snapshot_file, new_file_name, point_mass, separation,
-                       initial_rg_radius=None, initial_inner_separation=None, velocity=None):
+def AddPointMassToFile(snapshot_file, new_file_name, point_mass, separation, initial_inner_separation=None,
+                       velocity=None):
     snapshot=gadget_readsnapname(snapshot_file)
     new_size = snapshot.boxsize
     if separation > new_size/100:
@@ -48,7 +48,7 @@ def AddPointMassToFile(snapshot_file, new_file_name, point_mass, separation,
     rlof_factor = 1.0
     current_rlof = inner_binary.get_radius() * roche_distance(point_mass / inner_binary.mass)
     print("current Roche lobe size= ", current_rlof / rsol, " Rsun")
-    if initial_rg_radius is not None and initial_inner_separation is not None:
+    if initial_inner_separation is not None:
             print("calculating minimum distance from stability criteria")
             minimum_a = 2.8 * initial_inner_separation * (1+point_mass/inner_binary.mass)**(2.0/5)
             print("minimal separation from stability criteria = ", minimum_a, " Rsun, using ",
@@ -67,8 +67,6 @@ def InitParser():
     parser.add_argument('--load_types', type=int, nargs='+', help='load only these types, '
                                                                   'if there is a point mass companion one '
                                                                   'should also load type 1', default=[0,1])
-    parser.add_argument('--giant_initial_radius', type=float,
-                        help='initial radius of the giant in Rsun before CE', default=None)
     parser.add_argument('--initial_inner_separation', type=float,
                         help='initial inner binary separation in Rsun before CE', default=None)
     parser.add_argument('--outer_mass', type=float, help='new object mass in msun', default=1)
@@ -86,5 +84,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
     AddPointMassToFile(args.giant_snapshot_file, new_file_name=args.ic_file_name,
                        separation=args.outer_separation * rsol, point_mass=args.outer_mass * msol,
-                       initial_rg_radius=args.giant_initial_radius,
                        initial_inner_separation=args.initial_inner_separation)
