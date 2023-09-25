@@ -47,7 +47,7 @@ def AddPointMassToFile(snapshot_file, new_file_name, point_mass, separation, ini
     tertiary = PointMassComponent(mass=point_mass)
     rlof_factor = 1.0
     q = inner_binary.mass / point_mass
-    current_rlof = inner_binary.get_radius() * roche_distance(q)
+    current_rlof = inner_binary.get_radius() / roche_distance(q)
     print("current Roche lobe size= ", current_rlof / rsol, " Rsun")
     if initial_inner_separation is not None:
             print("calculating minimum distance from stability criteria")
