@@ -206,8 +206,9 @@ def get_line_profile_for_snapshot(around_density_peak, around_objects, center, m
     left_cells = np.where(s.pos[:,motion_axis] < center[motion_axis])
     right_p = plot_cells_around_center(np.intersect1d(right_cells,cell_indices), center, s, testing_value)
     left_p = plot_cells_around_center(np.intersect1d(left_cells,cell_indices), center, s, testing_value)
-    p[0] = np.concatenate((left_p[0], right_p[0]), axis=None)
-    p[1] = np.concatenate((left_p[1], right_p[1]), axis=None)
+    p_0 = np.concatenate((left_p[0], right_p[0]))
+    p_1 = np.concatenate((left_p[1], right_p[1]))
+    p = np.row_stack((p_0,p_1))
     return p, s, suffix, testing_value
 
 def plot_to_figure(index, line_colors, log, p, s):
