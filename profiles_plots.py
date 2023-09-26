@@ -289,7 +289,7 @@ def get_averaged_for_half_line(s, cell_indices, center, motion_axis, testing_val
     values = s.data[testing_value][half_cells]
     sorted_ind = np.argsort(distances)
     if max_size_shell > 0:
-        nshells = max([distances.max() / max_size_shell, 200])
+        nshells = max([ceil(distances.max() / max_size_shell), 200])
     else:
         nshells = 200
     return get_averaged_data(distances, values, distances.max(), nshells=nshells)
