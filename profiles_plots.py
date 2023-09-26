@@ -269,10 +269,12 @@ def get_line_profile_for_snapshot(around_density_peak, around_objects, center, m
 
     cell_indices = np.intersect1d(cell_indices, relevant_cells)
     smoothed_pos_left, smoothed_val_left = \
-        get_averaged_for_half_line(s, cell_indices, center, motion_axis, testing_value, right=False)
+        get_averaged_for_half_line(s, cell_indices, center, motion_axis, testing_value, right=False,
+                                   max_size_shell=0.1*s.parameters["SinkFormationRadius"])
     smoothed_pos_left *= -1.0
     smoothed_pos_right, smoothed_val_right = \
-        get_averaged_for_half_line(s, cell_indices, center, motion_axis, testing_value, right=True)
+        get_averaged_for_half_line(s, cell_indices, center, motion_axis, testing_value, right=True,
+                                   max_size_shell=0.1*s.parameters["SinkFormationRadius"])
 
     smoothed_pos = np.concatenate((smoothed_pos_left, smoothed_pos_right))
     smoothed_val = np.concatenate((smoothed_val_left, smoothed_val_right))
@@ -282,7 +284,8 @@ def get_line_profile_for_snapshot(around_density_peak, around_objects, center, m
     return p, s, suffix, testing_value
 
 
-def get_averaged_for_half_line(s, cell_indices, center, motion_axis, testing_value, right=True):
+def get_averaged_for_half_line(s, cell_indices, center, motion_axis, testing_value, right=True,
+                               max_size_shell=0):
     if right:
         half_cells = get_right_cells(s, cell_indices, center, motion_axis)
     else:
@@ -290,23 +293,26 @@ def get_averaged_for_half_line(s, cell_indices, center, motion_axis, testing_val
     distances = absolute(s.data["pos"][half_cells, motion_axis] - center[motion_axis])
     values = s.data[testing_value][half_cells]
     sorted_ind = np.argsort(distances)
+    if max_size_shell > 0:
+        nshells = max([distances.max() / max_size_shell, 200])
+    else:
+        nshells = 200
+    return get_averaged_data(distances, values, distances.max(), nshells=nshells)
 
-    return get_averaged_data(distances, values, distances.max())
 
-
-def get_averaged_data(distances, values, size):
-    dr = size / 200
+def get_averaged_data(distances, values, size, nshells=200):
+    dr = size / nshells
     print ("using dr= ", dr)
-    smoothed_val = np.zeros(200)
-    count_shells = np.zeros(200)
-    smoothed_pos = np.zeros(200)
+    smoothed_val = np.zeros(nshells)
+    count_shells = np.zeros(nshells)
+    smoothed_pos = np.zeros(nshells)
     for i in range(len(distances)):
         distance = distances[i]
         shell = floor(distance / dr)
-        if shell < 200:
+        if shell < nshells:
             smoothed_val[shell] += values[i]
             count_shells[shell] += 1
-    for shell in range(200):
+    for shell in range(nshells):
         if count_shells[shell] > 0:
             smoothed_val[shell] /= count_shells[shell]
         smoothed_pos[shell] = (shell + 0.5) * dr
