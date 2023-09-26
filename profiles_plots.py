@@ -293,7 +293,7 @@ def get_cells_out_of_sink(s):
     reference_r = s.parameters["SinkFormationRadius"]
     print("sink radius= ", s.parameters["SinkFormationRadius"])
     print("largest distance from sink: ", distance_from_sink.max())
-    cell_indices = np.where((distance_from_sink > (s.parameters["SinkFormationRadius"] + s.vol ** (1.0 / 3)))
+    cell_indices = np.where((s.type ==0) & (distance_from_sink > (s.parameters["SinkFormationRadius"] + s.vol ** (1.0 / 3)))
                             & (s.mass != 0))
     print("largest x-distance from sink: ", (s.pos[cell_indices, 0] - s.center[0]).max())
     print("minimum x-distance from sink: ", (s.pos[cell_indices, 0] - s.center[0]).min())
