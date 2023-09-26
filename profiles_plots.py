@@ -276,7 +276,7 @@ def get_line_profile_for_snapshot(around_density_peak, around_objects, center, m
 
     smoothed_pos = np.concatenate((smoothed_pos_left, smoothed_pos_right))
     smoothed_val = np.concatenate((smoothed_val_left, smoothed_val_right))
-    p = np.row_stack(smoothed_pos, smoothed_val)
+    p = np.row_stack((smoothed_pos, smoothed_val))
     print(p.shape)
 
     return p, s, suffix, testing_value
@@ -312,7 +312,7 @@ def get_averaged_data(distances, values, size):
             smoothed_val[shell] /= count_shells[shell]
         smoothed_pos[shell] = (shell + 0.5) * dr
     relevant_i = np.where(smoothed_val != 0)
-    
+
     return smoothed_pos[relevant_i], smoothed_val[relevant_i]
 
 
