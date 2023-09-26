@@ -178,7 +178,7 @@ def plot_one_side(s, cell_indices, center, motion_axis, testing_value, right=Tru
     distances = ((s.pos[half_cells] - center)**2).sum(axis=1)**0.5
     nshells = 200
     if sink_size > 0:
-        nshells = max([nshells, ceil(distances.max()/sink_size)])
+        nshells = max([nshells, ceil(distances.max()/(0.1*sink_size))])
 
     return get_averaged_data(distances, s.data[testing_value][half_cells], distances.max(), nshells)
 
