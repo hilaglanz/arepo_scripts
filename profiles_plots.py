@@ -296,17 +296,20 @@ def get_averaged_for_half_line(s, cell_indices, center, motion_axis, testing_val
 
 def get_averaged_data(distances, values, size):
     dr = size / 200
+    print ("using dr= ", dr)
     smoothed_val = np.zeros(200)
     count_shells = np.zeros(200)
-    smoothed_pos = np.zeros((200,3))
+    smoothed_pos = np.zeros(200)
     for i in range(len(distances)):
         distance = distances[i]
         shell = floor(distance / dr)
         if shell < 200:
             smoothed_val[shell] += values[i]
             count_shells[shell] += 1
+    print("count= ", count_shells)
     for shell in range(200):
-        smoothed_val[shell] /= count_shells[shell]
+        if count_shells[shell] > 0:
+            smoothed_val[shell] /= count_shells[shell]
         smoothed_pos[shell] = (shell + 0.5) * dr
 
     return smoothed_pos, smoothed_val
