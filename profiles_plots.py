@@ -140,67 +140,102 @@ def get_radial_profile_for_snapshot(around_density_peak, around_objects, center,
         testing_value = compute_value(s, testing_value, center)
         cell_indices = s.data['type'] == 0
 
-    if relative_to_sink:
-        mirror_axis = np.array([1,1,1])
-        mirror_axis[motion_axis] = -1
-        right_cells = np.where(s.pos[:,motion_axis] > center[motion_axis])
-        right_cells = np.intersect1d(right_cells, cell_indices)
-        pos_right = s.pos[right_cells] - center[motion_axis]
-        pos_right = np.concatenate((pos_right * mirror_axis, pos_right))
-        pos_right += center[motion_axis]
-        mode = 2
-        if testing_value == 'rho':
-            values_right = s.data['mass'][right_cells]
-            mode = 1
-        else:
-            values_right = s.data[testing_value][right_cells]
-        values_right = np.concatenate((values_right[::-1], values_right))
-        p_right = calcGrid.calcRadialProfile(pos_right.astype('float64'),
-                                   values_right.astype('float64'), mode, 200, 0,
-                                   center[0],
-                                   center[1], center[2])
+    center = get_center_array(s, center)
 
-        left_cells = np.where(s.pos[:,motion_axis] < center[motion_axis])
-        left_cells = np.intersect1d(left_cells, cell_indices)
-        pos_left = s.pos[left_cells] - center[motion_axis]
-        pos_left = np.concatenate((pos_left, pos_left * mirror_axis))
-        pos_left += center[motion_axis]
-        if testing_value == 'rho':
-            values_left = s.data['mass'][left_cells]
-        else:
-            values_left = s.data[testing_value][left_cells]
-        values_left = np.concatenate((values_left, values_left[::-1]))
-        p_left = calcGrid.calcRadialProfile(pos_left.astype('float64'),
-                                   values_left.astype('float64'), mode, 200, 0,
-                                   center[0],
-                                   center[1], center[2])
+    if relative_to_sink:
+        p_right = plot_one_side(s, cell_indices, center, motion_axis, testing_value, right=True)
+        p_left = plot_one_side(s, cell_indices, center, motion_axis, testing_value, right=False)
 
         p_0 = np.concatenate(p_left[0], p_right[0])
         p_1 = np.concatenate(p_left[1]*-1.0, p_right[1])
         p = np.row_stack((p_0, p_1))
     else:
-        p = plot_cells_around_center(cell_indices, center, s, testing_value)
+        p = plot_snapshot_cells_around_center(cell_indices, center, s, testing_value)
 
     return p, s, suffix, testing_value
 
 
-def plot_cells_around_center(cell_indices, center, s, testing_value):
-    nshells = 200
-    dr = 0
+def get_center_array(s, center):
     if type(center) == list:
         center = pylab.array(center)
     elif type(center) != np.ndarray:
         center = s.center
-    mode = 2
-    value = testing_value
+    return center
+
+
+def plot_one_side(s, cell_indices, center, motion_axis, testing_value, right=True):
+    if right:
+        half_cells = get_right_cells(s, cell_indices, center, motion_axis)
+    else:
+        half_cells = get_left_cells(s, cell_indices, center, motion_axis)
+    pos_half = miror_positions(s, half_cells, center, motion_axis, right_to_left=right)
+    values_half, mode = mirror_values(s, half_cells, testing_value, right_to_left=right)
+    p = plot_profile_arrays_around_center(pos_half.astype('float64'), values_half, center, mode)
+
+    return p
+
+
+def mirror_values(s, cells, testing_value, right_to_left=True):
+    half_values, mode = get_plotting_mode_and_array(s, cells, testing_value)
+    if right_to_left:
+        half_values = np.concatenate((half_values[::-1], half_values))
+    else:
+        half_values = np.concatenate((half_values, half_values[::-1]))
+
+    return half_values, mode
+
+
+def get_left_cells(s, cell_indices, center, motion_axis):
+    left_cells = np.where(s.pos[:, motion_axis] < center[motion_axis])
+    left_cells = np.intersect1d(left_cells, cell_indices)
+    return left_cells
+
+
+def get_right_cells(s, cell_indices, center, motion_axis):
+    right_cells = np.where(s.pos[:, motion_axis] > center[motion_axis])
+    right_cells = np.intersect1d(right_cells, cell_indices)
+    return right_cells
+
+
+def get_plotting_mode_and_array(s, cells_idx, testing_value):
     if testing_value == 'rho':
+        values = s.data['mass'].astype('float64')[cells_idx]
         mode = 1
-        value = 'mass'
-    p = calcGrid.calcRadialProfile(s.data['pos'].astype('float64')[cell_indices],
-                                   s.data[value].astype('float64')[cell_indices], mode, nshells, dr,
+    else:
+        values = s.data[testing_value].astype('float64')[cells_idx]
+        mode = 2
+
+    return values, mode
+
+def miror_positions(s, cells, center, motion_axis, right_to_left=True):
+    mirror_axis = np.array([1, 1, 1])
+    mirror_axis[motion_axis] = -1
+    positions = s.pos[cells] - center[motion_axis]
+    if right_to_left:
+        positions = np.concatenate((positions * mirror_axis, positions))
+    else:
+        positions = np.concatenate((positions, positions * mirror_axis))
+    positions += center[motion_axis]
+
+    return positions
+
+
+def plot_profile_arrays_around_center(distances, values, center, mode):
+    nshells = 200
+    dr = 0
+    if type(center) == list:
+        center = pylab.array(center)
+    p = calcGrid.calcRadialProfile(distances,
+                                   values, mode, nshells, dr,
                                    center[0],
                                    center[1], center[2])
     return p
+
+def plot_snapshot_cells_around_center(cell_indices, center, s, testing_value):
+    values, mode = get_plotting_mode_and_array(s, cell_indices, testing_value)
+
+    return plot_profile_arrays_around_center(s.data['pos'].astype('float64')[cell_indices],
+                                   values, center, mode)
 
 
 def get_line_profile_for_snapshot(around_density_peak, around_objects, center, motion_axis, object_num, output_dir,
