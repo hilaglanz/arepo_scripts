@@ -143,8 +143,10 @@ def get_radial_profile_for_snapshot(around_density_peak, around_objects, center,
     center = get_center_array(s, center)
 
     if relative_to_sink:
-        p_right = plot_one_side(s, cell_indices, center, motion_axis, testing_value, right=True)
-        p_left = plot_one_side(s, cell_indices, center, motion_axis, testing_value, right=False)
+        p_right = plot_one_side(s, cell_indices, center, motion_axis, testing_value, right=True,
+                                sink_size=s.parameters["SinkFormationRadius"])
+        p_left = plot_one_side(s, cell_indices, center, motion_axis, testing_value, right=False,
+                               sink_size=s.parameters["SinkFormationRadius"])
         p_left[1] *= -1.0
         p = np.concatenate((p_left, p_right), axis=1)
     else:
@@ -161,7 +163,8 @@ def get_center_array(s, center):
     return center
 
 
-def plot_one_side(s, cell_indices, center, motion_axis, testing_value, right=True, default_mode=-1):
+def plot_one_side(s, cell_indices, center, motion_axis, testing_value, right=True, default_mode=-1,
+                  sink_size=0):
     if right:
         half_cells = get_right_cells(s, cell_indices, center, motion_axis)
     else:
@@ -170,10 +173,14 @@ def plot_one_side(s, cell_indices, center, motion_axis, testing_value, right=Tru
     #pos_half = miror_positions(s, half_cells, center, motion_axis)
     #values_half, mode = mirror_values(s, half_cells, testing_value)
     distances = ((s.pos[half_cells] - center)**2).sum(axis=1)**0.5
-
-    distance, values = get_averaged_data(distances, s.data[testing_value][half_cells], distances.max())
-
-    return [values, distances]
+    nshells = 200
+    if sink_size > 0:
+        nshells = max([nshells, ceil(distances.max()/sink_size)])
+    distance, values = get_averaged_data(distances, s.data[testing_value][half_cells], distances.max(), nshells)
+    p = np.array(2)
+    p[1] = distances
+    p[0] = values
+    return p
     #if default_mode != -1:
     #    mode = default_mode
     #p = plot_profile_arrays_around_center(pos_half.astype('float64'), values_half, center, mode)
