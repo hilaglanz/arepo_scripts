@@ -143,12 +143,15 @@ def get_radial_profile_for_snapshot(around_density_peak, around_objects, center,
     center = get_center_array(s, center)
 
     if relative_to_sink:
-        p_right = plot_one_side(s, cell_indices, center, motion_axis, testing_value, right=True,
+        distance_right, val_right = plot_one_side(s, cell_indices, center, motion_axis, testing_value, right=True,
                                 sink_size=s.parameters["SinkFormationRadius"])
-        p_left = plot_one_side(s, cell_indices, center, motion_axis, testing_value, right=False,
+        distance_left, val_left  = plot_one_side(s, cell_indices, center, motion_axis, testing_value, right=False,
                                sink_size=s.parameters["SinkFormationRadius"])
-        p_left[1] *= -1.0
-        p = np.concatenate((p_left, p_right), axis=1)
+        distance_left *= -1.0
+        distances = np.concatenate((distance_left, distance_right))
+        values = np.concatenate((val_left, val_right))
+        sorted_ind = np.argsort(distances)
+        p = np.row_stack((values[sorted_ind], distances[sorted_ind]))
     else:
         p = plot_snapshot_cells_around_center(cell_indices, center, s, testing_value)
 
@@ -176,11 +179,9 @@ def plot_one_side(s, cell_indices, center, motion_axis, testing_value, right=Tru
     nshells = 200
     if sink_size > 0:
         nshells = max([nshells, ceil(distances.max()/sink_size)])
-    distance, values = get_averaged_data(distances, s.data[testing_value][half_cells], distances.max(), nshells)
-    p = np.array(2)
-    p[1] = distances
-    p[0] = values
-    return p
+
+    return get_averaged_data(distances, s.data[testing_value][half_cells], distances.max(), nshells)
+
     #if default_mode != -1:
     #    mode = default_mode
     #p = plot_profile_arrays_around_center(pos_half.astype('float64'), values_half, center, mode)
