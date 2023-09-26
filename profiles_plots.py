@@ -269,15 +269,15 @@ def get_line_profile_for_snapshot(around_density_peak, around_objects, center, m
 
     cell_indices = np.intersect1d(cell_indices, relevant_cells)
     if relative_to_sink:
-        p_left = plot_one_side(s, cell_indices, center, motion_axis, testing_value, right=False, default_mode=2)
-        p_right = plot_one_side(s, cell_indices, center, motion_axis, testing_value, right=True, default_mode=2)
+        p_left = plot_one_side(s, cell_indices, center, motion_axis, testing_value, right=False)
+        p_right = plot_one_side(s, cell_indices, center, motion_axis, testing_value, right=True)
         p_left[1] *= -1
         p = np.concatenate((p_left, p_right), axis=1)
-    #else:
-    distances = (s.data["pos"][cell_indices, motion_axis] - center[motion_axis])
-    values = s.data[testing_value][cell_indices]
-    sorted_ind = np.argsort(distances)
-    p = np.row_stack((values[sorted_ind], distances[sorted_ind]))
+    else:
+        distances = (s.data["pos"][cell_indices, motion_axis] - center[motion_axis])
+        values = s.data[testing_value][cell_indices]
+        sorted_ind = np.argsort(distances)
+        p = np.row_stack((values[sorted_ind], distances[sorted_ind]))
     print(p.shape)
 
     return p, s, suffix, testing_value
