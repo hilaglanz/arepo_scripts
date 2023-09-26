@@ -161,7 +161,7 @@ def get_center_array(s, center):
     return center
 
 
-def plot_one_side(s, cell_indices, center, motion_axis, testing_value, right=True):
+def plot_one_side(s, cell_indices, center, motion_axis, testing_value, right=True, default_mode=-1):
     if right:
         half_cells = get_right_cells(s, cell_indices, center, motion_axis)
     else:
@@ -169,6 +169,8 @@ def plot_one_side(s, cell_indices, center, motion_axis, testing_value, right=Tru
     print("Duplicating ", len(half_cells), " positions and values")
     pos_half = miror_positions(s, half_cells, center, motion_axis)
     values_half, mode = mirror_values(s, half_cells, testing_value)
+    if default_mode != -1:
+        mode = default_mode
     p = plot_profile_arrays_around_center(pos_half.astype('float64'), values_half, center, mode)
 
     return p
@@ -260,8 +262,8 @@ def get_line_profile_for_snapshot(around_density_peak, around_objects, center, m
 
     cell_indices = np.intersect1d(cell_indices, relevant_cells)
     if relative_to_sink:
-        p_left = plot_one_side(s, cell_indices, center, motion_axis, testing_value, right=False)
-        p_right = plot_one_side(s, cell_indices, center, motion_axis, testing_value, right=True)
+        p_left = plot_one_side(s, cell_indices, center, motion_axis, testing_value, right=False, default_mode=2)
+        p_right = plot_one_side(s, cell_indices, center, motion_axis, testing_value, right=True, default_mode=2)
         p_left[1] *= -1
         p = np.concatenate((p_left, p_right), axis=1)
     else:
