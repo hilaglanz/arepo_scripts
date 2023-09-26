@@ -166,14 +166,19 @@ def plot_one_side(s, cell_indices, center, motion_axis, testing_value, right=Tru
         half_cells = get_right_cells(s, cell_indices, center, motion_axis)
     else:
         half_cells = get_left_cells(s, cell_indices, center, motion_axis)
-    print("Duplicating ", len(half_cells), " positions and values")
-    pos_half = miror_positions(s, half_cells, center, motion_axis)
-    values_half, mode = mirror_values(s, half_cells, testing_value)
-    if default_mode != -1:
-        mode = default_mode
-    p = plot_profile_arrays_around_center(pos_half.astype('float64'), values_half, center, mode)
+    #print("Duplicating ", len(half_cells), " positions and values")
+    #pos_half = miror_positions(s, half_cells, center, motion_axis)
+    #values_half, mode = mirror_values(s, half_cells, testing_value)
+    distances = ((s.pos[half_cells] - center)**2).sum(axis=1)**0.5
 
-    return p
+    distance, values = get_averaged_data(distances, s.data[testing_value][half_cells], distances.max())
+
+    return [values, distances]
+    #if default_mode != -1:
+    #    mode = default_mode
+    #p = plot_profile_arrays_around_center(pos_half.astype('float64'), values_half, center, mode)
+
+    #return p
 
 
 
@@ -273,7 +278,8 @@ def get_line_profile_for_snapshot(around_density_peak, around_objects, center, m
 
     smoothed_pos = np.concatenate((smoothed_pos_left, smoothed_pos_right))
     smoothed_val = np.concatenate((smoothed_val_left, smoothed_val_right))
-    p = np.row_stack((smoothed_val, smoothed_pos))
+    sorted_ind = np.argsort(smoothed_pos)
+    p = np.row_stack((smoothed_val[sorted_ind], smoothed_pos[sorted_ind]))
     print(p.shape)
 
     return p, s, suffix, testing_value
@@ -287,7 +293,6 @@ def get_averaged_for_half_line(s, cell_indices, center, motion_axis, testing_val
         half_cells = get_left_cells(s, cell_indices, center, motion_axis)
     distances = absolute(s.data["pos"][half_cells, motion_axis] - center[motion_axis])
     values = s.data[testing_value][half_cells]
-    sorted_ind = np.argsort(distances)
     if max_size_shell > 0:
         nshells = max([ceil(distances.max() / max_size_shell), 200])
     else:
