@@ -311,8 +311,9 @@ def get_averaged_data(distances, values, size):
         if count_shells[shell] > 0:
             smoothed_val[shell] /= count_shells[shell]
         smoothed_pos[shell] = (shell + 0.5) * dr
-
-    return smoothed_pos, smoothed_val
+    relevant_i = np.where(smoothed_val != 0)
+    
+    return smoothed_pos[relevant_i], smoothed_val[relevant_i]
 
 
 def plot_to_figure(index, line_colors, log, p, s):
