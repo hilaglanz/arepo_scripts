@@ -136,14 +136,14 @@ def get_radial_profile_for_snapshot(around_density_peak, around_objects, center,
         testing_value = compute_value(s, testing_value, center)
 
     else:
-        s = gadget_readsnap(snapshot_number, output_dir, snapshot_name)
+        s = gadget_readsnap(snapshot_number, output_dir, snapshot_name, loadonlytype=[0])
         testing_value = compute_value(s, testing_value, center)
         cell_indices = np.where(s.data['type'] == 0)
 
     center = get_center_array(s, center)
 
     if relative_to_sink:
-        relevant_cells , sink_radius = get_cells_out_of_sink(s)
+        relevant_cells, sink_radius = get_cells_out_of_sink(s)
         cell_indices = np.intersect1d(cell_indices, relevant_cells)
         distance_right, val_right = plot_one_side(s, cell_indices, center, motion_axis, testing_value, right=True,
                                 sink_size=s.parameters["SinkFormationRadius"])
