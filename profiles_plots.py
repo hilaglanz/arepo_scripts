@@ -298,7 +298,7 @@ def get_averaged_data(distances, values, size):
     dr = size / 200
     smoothed_val = np.zeros(200)
     count_shells = np.zeros(200)
-    smoothed_pos = np.zeros((3, 200))
+    smoothed_pos = np.zeros((200,3))
     for i in range(len(distances)):
         distance = distances[i]
         shell = floor(distance / dr)
