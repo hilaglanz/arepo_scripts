@@ -143,6 +143,8 @@ def get_radial_profile_for_snapshot(around_density_peak, around_objects, center,
     center = get_center_array(s, center)
 
     if relative_to_sink:
+        relevant_cells , sink_radius = get_cells_out_of_sink(s)
+        cell_indices = np.intersect1d(cell_indices, relevant_cells)
         distance_right, val_right = plot_one_side(s, cell_indices, center, motion_axis, testing_value, right=True,
                                 sink_size=s.parameters["SinkFormationRadius"])
         distance_left, val_left  = plot_one_side(s, cell_indices, center, motion_axis, testing_value, right=False,
@@ -262,14 +264,7 @@ def get_line_profile_for_snapshot(around_density_peak, around_objects, center, m
         center = get_center_array(s, center)
         cell_indices = np.where(s.data['mass'] != 0)
         if relative_to_sink:
-            distance_from_sink = np.sqrt(((s.pos - s.center)**2).sum(axis=1))
-            reference_r = s.parameters["SinkFormationRadius"]
-            print("sink radius= ", s.parameters["SinkFormationRadius"])
-            print("largest distance from sink: ", distance_from_sink.max())
-            cell_indices = np.where((distance_from_sink > (s.parameters["SinkFormationRadius"] + s.vol ** (1.0 / 3)))
-                                    & (s.mass !=0))
-            print("largest x-distance from sink: ", (s.pos[cell_indices,0] - s.center[0]).max())
-            print("minimum x-distance from sink: ", (s.pos[cell_indices,0] - s.center[0]).min())
+            cell_indices, reference_r = get_cells_out_of_sink(s)
 
     relevant_cells = np.where(
         (absolute(s.pos[:,(motion_axis + 1) % 3] - center[(motion_axis + 1) % 3]) < reference_r + 2 * s.data["vol"] ** (1.0 / 3)) &
@@ -291,6 +286,18 @@ def get_line_profile_for_snapshot(around_density_peak, around_objects, center, m
     print(p.shape)
 
     return p, s, suffix, testing_value
+
+
+def get_cells_out_of_sink(s):
+    distance_from_sink = np.sqrt(((s.pos - s.center) ** 2).sum(axis=1))
+    reference_r = s.parameters["SinkFormationRadius"]
+    print("sink radius= ", s.parameters["SinkFormationRadius"])
+    print("largest distance from sink: ", distance_from_sink.max())
+    cell_indices = np.where((distance_from_sink > (s.parameters["SinkFormationRadius"] + s.vol ** (1.0 / 3)))
+                            & (s.mass != 0))
+    print("largest x-distance from sink: ", (s.pos[cell_indices, 0] - s.center[0]).max())
+    print("minimum x-distance from sink: ", (s.pos[cell_indices, 0] - s.center[0]).min())
+    return cell_indices, reference_r
 
 
 def get_averaged_for_half_line(s, cell_indices, center, motion_axis, testing_value, right=True,
