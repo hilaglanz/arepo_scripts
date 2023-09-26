@@ -145,10 +145,8 @@ def get_radial_profile_for_snapshot(around_density_peak, around_objects, center,
     if relative_to_sink:
         p_right = plot_one_side(s, cell_indices, center, motion_axis, testing_value, right=True)
         p_left = plot_one_side(s, cell_indices, center, motion_axis, testing_value, right=False)
-
-        p_0 = np.concatenate(p_left[0], p_right[0])
-        p_1 = np.concatenate(p_left[1]*-1.0, p_right[1])
-        p = np.row_stack((p_0, p_1))
+        p_left[1] *= -1.0
+        p = np.concatenate(p_left, p_right, axis=1)
     else:
         p = plot_snapshot_cells_around_center(cell_indices, center, s, testing_value)
 
@@ -168,21 +166,13 @@ def plot_one_side(s, cell_indices, center, motion_axis, testing_value, right=Tru
         half_cells = get_right_cells(s, cell_indices, center, motion_axis)
     else:
         half_cells = get_left_cells(s, cell_indices, center, motion_axis)
-    pos_half = miror_positions(s, half_cells, center, motion_axis, right_to_left=right)
-    values_half, mode = mirror_values(s, half_cells, testing_value, right_to_left=right)
+    print("Duplicating ", len(half_cells), " positions and values")
+    pos_half = miror_positions(s, half_cells, center, motion_axis)
+    values_half, mode = mirror_values(s, half_cells, testing_value)
     p = plot_profile_arrays_around_center(pos_half.astype('float64'), values_half, center, mode)
 
     return p
 
-
-def mirror_values(s, cells, testing_value, right_to_left=True):
-    half_values, mode = get_plotting_mode_and_array(s, cells, testing_value)
-    if right_to_left:
-        half_values = np.concatenate((half_values[::-1], half_values))
-    else:
-        half_values = np.concatenate((half_values, half_values[::-1]))
-
-    return half_values, mode
 
 
 def get_left_cells(s, cell_indices, center, motion_axis):
@@ -207,18 +197,20 @@ def get_plotting_mode_and_array(s, cells_idx, testing_value):
 
     return values, mode
 
-def miror_positions(s, cells, center, motion_axis, right_to_left=True):
+def miror_positions(s, cells, center, motion_axis):
     mirror_axis = np.array([1, 1, 1])
     mirror_axis[motion_axis] = -1
     positions = s.pos[cells] - center[motion_axis]
-    if right_to_left:
-        positions = np.concatenate((positions * mirror_axis, positions))
-    else:
-        positions = np.concatenate((positions, positions * mirror_axis))
+    positions = np.concatenate((positions[::-1] * mirror_axis, positions))
     positions += center[motion_axis]
 
     return positions
 
+def mirror_values(s, cells, testing_value, right_to_left=True):
+    half_values, mode = get_plotting_mode_and_array(s, cells, testing_value)
+    half_values = np.concatenate((half_values[::-1], half_values))
+
+    return half_values, mode
 
 def plot_profile_arrays_around_center(distances, values, center, mode):
     nshells = 200
