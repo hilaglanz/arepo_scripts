@@ -146,7 +146,7 @@ def get_radial_profile_for_snapshot(around_density_peak, around_objects, center,
         p_right = plot_one_side(s, cell_indices, center, motion_axis, testing_value, right=True)
         p_left = plot_one_side(s, cell_indices, center, motion_axis, testing_value, right=False)
         p_left[1] *= -1.0
-        p = np.concatenate(p_left, p_right, axis=1)
+        p = np.concatenate((p_left, p_right), axis=1)
     else:
         p = plot_snapshot_cells_around_center(cell_indices, center, s, testing_value)
 
