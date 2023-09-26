@@ -138,7 +138,7 @@ def get_radial_profile_for_snapshot(around_density_peak, around_objects, center,
     else:
         s = gadget_readsnap(snapshot_number, output_dir, snapshot_name)
         testing_value = compute_value(s, testing_value, center)
-        cell_indices = s.data['type'] == 0
+        cell_indices = np.where(s.data['type'] == 0)
 
     center = get_center_array(s, center)
 
