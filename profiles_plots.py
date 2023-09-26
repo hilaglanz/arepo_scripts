@@ -235,6 +235,7 @@ def plot_snapshot_cells_around_center(cell_indices, center, s, testing_value):
 def get_line_profile_for_snapshot(around_density_peak, around_objects, center, motion_axis, object_num, output_dir,
                                     snapshot_name, snapshot_number, testing_value, relative_to_sink=False):
     suffix = ""
+    reference_r = 0
     if around_objects:
         s, cell_indices, center, suffix = get_relevant_plotting_parameters_around_object(around_density_peak,
                                                                                          motion_axis,
@@ -249,6 +250,7 @@ def get_line_profile_for_snapshot(around_density_peak, around_objects, center, m
         cell_indices = np.where(s.data['mass'] != 0)
         if relative_to_sink:
             distance_from_sink = np.sqrt(((s.pos - s.center)**2).sum(axis=1))
+            reference_r = s.parameters["SinkFormationRadius"]
             print("sink radius= ", s.parameters["SinkFormationRadius"])
             print("largest distance from sink: ", distance_from_sink.max())
             cell_indices = np.where((distance_from_sink > (s.parameters["SinkFormationRadius"] + s.vol ** (1.0 / 3)))
@@ -256,25 +258,18 @@ def get_line_profile_for_snapshot(around_density_peak, around_objects, center, m
             print("largest x-distance from sink: ", (s.pos[cell_indices,0] - s.center[0]).max())
             print("minimum x-distance from sink: ", (s.pos[cell_indices,0] - s.center[0]).min())
 
-    if relative_to_sink:
-        relevant_cells = np.where(
-            (absolute(s.pos[:, (motion_axis + 1) % 3] - center[(motion_axis + 1) % 3]) <
-             s.parameters["SinkFormationRadius"] + 2 * s.data["vol"] ** (1.0 / 3)) &
-            (absolute(s.pos[:, (motion_axis + 2) % 3] - center[(motion_axis + 2) % 3]) <
-             s.parameters["SinkFormationRadius"] + 2 * s.data["vol"] ** (1.0 / 3)))
-    else:
-        relevant_cells = np.where(
-            (absolute(s.pos[:,(motion_axis + 1) % 3] - center[(motion_axis + 1) % 3]) < 2 * s.data["vol"] ** (1.0 / 3)) &
-            (absolute(s.pos[:,(motion_axis + 2) % 3] - center[(motion_axis + 2) % 3]) < 2 * s.data["vol"] ** (1.0 / 3)))
+    relevant_cells = np.where(
+        (absolute(s.pos[:,(motion_axis + 1) % 3] - center[(motion_axis + 1) % 3]) < reference_r + 2 * s.data["vol"] ** (1.0 / 3)) &
+        (absolute(s.pos[:,(motion_axis + 2) % 3] - center[(motion_axis + 2) % 3]) < reference_r + 2 * s.data["vol"] ** (1.0 / 3)))
 
     cell_indices = np.intersect1d(cell_indices, relevant_cells)
     smoothed_pos_left, smoothed_val_left = \
         get_averaged_for_half_line(s, cell_indices, center, motion_axis, testing_value, right=False,
-                                   max_size_shell=0.1*s.parameters["SinkFormationRadius"])
+                                   max_size_shell=0.1*reference_r)
     smoothed_pos_left *= -1.0
     smoothed_pos_right, smoothed_val_right = \
         get_averaged_for_half_line(s, cell_indices, center, motion_axis, testing_value, right=True,
-                                   max_size_shell=0.1*s.parameters["SinkFormationRadius"])
+                                   max_size_shell=0.1*reference_r)
 
     smoothed_pos = np.concatenate((smoothed_pos_left, smoothed_pos_right))
     smoothed_val = np.concatenate((smoothed_val_left, smoothed_val_right))
