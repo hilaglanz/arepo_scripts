@@ -268,14 +268,49 @@ def get_line_profile_for_snapshot(around_density_peak, around_objects, center, m
             (absolute(s.pos[:,(motion_axis + 2) % 3] - center[(motion_axis + 2) % 3]) < 2 * s.data["vol"] ** (1.0 / 3)))
 
     cell_indices = np.intersect1d(cell_indices, relevant_cells)
+    smoothed_pos_left, smoothed_val_left = \
+        get_averaged_for_half_line(s, cell_indices, center, motion_axis, testing_value, right=False)
+    smoothed_pos_left *= -1.0
+    smoothed_pos_right, smoothed_val_right = \
+        get_averaged_for_half_line(s, cell_indices, center, motion_axis, testing_value, right=True)
 
-    distances = (s.data["pos"][cell_indices, motion_axis] - center[motion_axis])
-    values = s.data[testing_value][cell_indices]
-    sorted_ind = np.argsort(distances)
-    p = np.row_stack((values[sorted_ind], distances[sorted_ind]))
+    smoothed_pos = np.concatenate((smoothed_pos_left, smoothed_pos_right))
+    smoothed_val = np.concatenate((smoothed_val_left, smoothed_val_right))
+    p = np.row_stack(smoothed_pos, smoothed_val)
     print(p.shape)
 
     return p, s, suffix, testing_value
+
+
+def get_averaged_for_half_line(s, cell_indices, center, motion_axis, testing_value, right=True):
+    if right:
+        half_cells = get_right_cells(s, cell_indices, center, motion_axis)
+    else:
+        half_cells = get_left_cells(s, cell_indices, center, motion_axis)
+    distances = absolute(s.data["pos"][half_cells, motion_axis] - center[motion_axis])
+    values = s.data[testing_value][half_cells]
+    sorted_ind = np.argsort(distances)
+
+    return get_averaged_data(distances, values, distances.max())
+
+
+def get_averaged_data(distances, values, size):
+    dr = size / 200
+    smoothed_val = np.zeros(200)
+    count_shells = np.zeros(200)
+    smoothed_pos = np.zeros((3, 200))
+    for i in range(len(distances)):
+        distance = distances[i]
+        shell = floor(distance / dr)
+        if shell < 200:
+            smoothed_val[shell] += values[i]
+            count_shells[shell] += 1
+    for shell in range(200):
+        smoothed_val[shell] /= count_shells[shell]
+        smoothed_pos[shell] = (shell + 0.5) * dr
+
+    return smoothed_pos, smoothed_val
+
 
 def plot_to_figure(index, line_colors, log, p, s):
     print("plotting")
