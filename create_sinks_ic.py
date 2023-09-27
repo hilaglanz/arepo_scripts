@@ -28,7 +28,7 @@ def get_smoothed_sub_grid_sizes(boxsize, finest_grid_size):
     num_sub_grids = np.log2(boxsize / finest_grid_size)
     sub_grid_indices = np.array(range(1, int(num_sub_grids) + 1))
     sub_grid_sizes = finest_grid_size * 2. ** sub_grid_indices
-    if boxsize > 1.4 * sub_grid_sizes[-1]:
+    if len(sub_grid_sizes) > 1 and boxsize > 1.4 * sub_grid_sizes[-1]:
         sub_grid_sizes = np.append(sub_grid_sizes, boxsize)
     else:
         sub_grid_sizes[-1] = boxsize
