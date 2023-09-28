@@ -79,6 +79,11 @@ def compute_value(s, testing_value, center=None):
         if "sound" not in s.data.keys():
             print("adding mach and cs")
             s.computeMach()
+
+    if testing_value == "entr":
+        if "GAMMA" in s.config.keys():
+            s.data["entr"] = s.data["pres"] / s.data["rho"] ** s.config["GAMMA"]
+
     if testing_value not in s.data.keys():
         s.computeValueGas(testing_value)
         
@@ -147,7 +152,7 @@ def get_radial_profile_for_snapshot(around_density_peak, around_objects, center,
         cell_indices = np.intersect1d(cell_indices, relevant_cells)
         distance_right, val_right = plot_one_side(s, cell_indices, center, motion_axis, testing_value, right=True,
                                 sink_size=s.parameters["SinkFormationRadius"])
-        distance_left, val_left  = plot_one_side(s, cell_indices, center, motion_axis, testing_value, right=False,
+        distance_left, val_left = plot_one_side(s, cell_indices, center, motion_axis, testing_value, right=False,
                                sink_size=s.parameters["SinkFormationRadius"])
         distance_left *= -1.0
         distances = np.concatenate((distance_left, distance_right))
