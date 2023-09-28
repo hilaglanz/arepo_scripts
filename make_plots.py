@@ -139,7 +139,7 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
 
     if box == False:
         box = [loaded_snap.boxsize, loaded_snap.boxsize]
-    regularize_length_units(maximum(box))
+    regularize_length_units(max(box))
     change_value_units(value, units_value, factor_value)
     change_snap_units(loaded_snap)
 
