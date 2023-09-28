@@ -155,7 +155,7 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
     xlab = chr(ord('x') + axes[0])
     ylab = chr(ord('x') + axes[1])
 
-    loaded_snap.plot_Aslice(value, logplot=logplot, colorbar=colorbar, cblabel=label, cmap=cmap, center=center, vrange=vrange,
+    pc = loaded_snap.plot_Aslice(value, logplot=logplot, colorbar=colorbar, cblabel=label, cmap=cmap, center=center, vrange=vrange,
                                   box=box, res=res, numthreads=numthreads, newfig=newfig, axes=axes,
                             minimum=min(1e-8, 0.1*vrange[0]))
 
@@ -183,12 +183,34 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
     elif plot_bfld:
         plot_stream(loaded_snap, value='bfld', xlab=xlab, ylab=ylab, axes=axes, box=box, res=res, numthreads=numthreads)
 
-    #regularize_length_units(max(box))
+    regularize_length_units(max(box))
+    change_ticks(pc, xaxis=True)
+    change_ticks(pc, xaxis=False)
 
     if plot_xlabel:
         xlabel(xlab + ' [' + basic_units["length"].unit + ']', loc="left")
     if plot_ylabel:
         ylabel(ylab + ' [' + basic_units["length"].unit + ']')
+
+
+def change_ticks(pc, xaxis=True):
+    ticklabels = []
+    if xaxis:
+        ticks = pc.axes.get_xticks()
+    else:
+        ticks = pc.axes.get_yticks()
+
+    for tick in ticks:
+        if (tick == 0):
+            ticklabels += [r'$0.0$']
+        else:
+            ticklabels += [r'$%.2f \cdot 10^{%d}$' % (tick * basic_units["length"].factor /
+                                                       10 ** (ceil(log10(abs(tick * basic_units["length"].factor)))),
+                                                       ceil(log10(abs(tick * basic_units["length"].factor))))]
+    if xaxis:
+        pc.axes.set_xticklabels(ticklabels, size=24, y=-0.1, va='baseline')
+    else:
+        pc.axes.set_yticklabels(ticklabels, size=24, ha='right')
 
 
 def extract_label(value):
