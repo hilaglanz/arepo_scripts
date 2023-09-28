@@ -65,22 +65,22 @@ def restore_basic_units(old_basic_units):
     copy_basic_units(old_basic_units, new_dictionary=basic_units)
 
 
-def regularize_length_units():
+def regularize_length_units(boxsize):
     if basic_units["length"].unit != "cm":
         return
 
     au = 1.495978707*10**13
-    if basic_units["length"].factor <= 1.0/parsec:
+    if basic_units["length"].factor <= 1.0/parsec or boxsize > 2 * parsec:
         basic_units["length"].factor /= parsec
         basic_units["length"].unit = r'$pc'
         print("changed length units to pc")
 
-    elif basic_units["length"].factor <= 1.0/au:
+    elif basic_units["length"].factor <= 1.0/au or boxsize > 2 * au:
         basic_units["length"].factor /= au
         basic_units["length"].unit = r'$AU$'
         print("changed length units to AU")
 
-    elif basic_units["length"].factor <= 1.0/rsol:
+    elif basic_units["length"].factor <= 1.0/rsol or boxsize > 2 * rsol:
         basic_units["length"].factor /= rsol
         basic_units["length"].unit = r'$R_\odot$'
         print("changed length units to Rsun")
@@ -137,7 +137,9 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
                       newfig=True, axes=[0,1], modified_units = False, ignore_types=[], colorbar=True,
                       plot_xlabel=True, plot_ylabel=True, factor_value=1.0, units_value=None):
 
-    regularize_length_units()
+    if box == False:
+        box = [loaded_snap.boxsize, loaded_snap.boxsize]
+    regularize_length_units(maximum(box))
     change_value_units(value, units_value, factor_value)
     change_snap_units(loaded_snap)
 
@@ -155,8 +157,7 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
     loaded_snap.plot_Aslice(value, logplot=logplot, colorbar=colorbar, cblabel=label, cmap=cmap, center=center, vrange=vrange,
                                   box=box, res=res, numthreads=numthreads, newfig=newfig, axes=axes,
                             minimum=min(1e-8, 0.1*vrange[0]))
-    if box == False:
-        box = [loaded_snap.boxsize, loaded_snap.boxsize]
+
     if plot_points:
         points = [idx for idx in range(loaded_snap.npart) if (loaded_snap.type[idx] not in ignore_types) and
                   (loaded_snap.type[idx] > 0)]
