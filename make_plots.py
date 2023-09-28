@@ -184,9 +184,9 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
     elif plot_bfld:
         plot_stream(loaded_snap, value='bfld', xlab=xlab, ylab=ylab, axes=axes, box=box, res=res, numthreads=numthreads)
     if plot_xlabel:
-        xlabel(xlab + ' [' + unit_length + ']', loc="left")
+        xlabel(xlab + ' [' + basic_units["length"].unit + ']', loc="left")
     if plot_ylabel:
-        ylabel(ylab + ' [' + unit_length + ']')
+        ylabel(ylab + ' [' + basic_units["length"].unit + ']')
 
 
 def extract_label(value):
