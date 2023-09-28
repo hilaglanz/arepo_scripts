@@ -139,6 +139,8 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
 
     if box == False:
         box = [loaded_snap.boxsize, loaded_snap.boxsize]
+
+    change_basic_units(loaded_snap, unit_density, unit_length, unit_velocity)
     regularize_length_units(max(box))
     change_value_units(value, units_value, factor_value)
     change_snap_units(loaded_snap)
@@ -507,7 +509,6 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
                                           loadonlytype=[t for t in range(6) if t not in ignore_types])
 
             old_basic_units = copy_current_units()
-            change_basic_units(loaded_snap, units_density, units_length, units_velocity)
             print("curr snapshot: ", snap_i + 1)
             plot_single_value(loaded_snap,  value=val, cmap=curr_cmap, box=get_single_value(box,index),
                                   vrange=get_single_value(vrange,index), logplot=get_single_value(logplot,index),
@@ -585,7 +586,6 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
             val = value[0]
             print(val)
             old_basic_units = copy_current_units()
-            change_basic_units(loaded_snap, units_density, units_length, units_velocity)
             plot_single_value(loaded_snap, value=val, cmap=curr_cmap, box=get_single_value(box),
                               vrange=get_single_value(vrange), logplot=get_single_value(logplot), res=res,
                               numthreads=numthreads, center=center, relative_to_sink_id=relative_to_sink_id,
@@ -611,7 +611,6 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
             rcParams['text.usetex'] = True
             num_figures = int(ceil(len(value)/2))
             old_basic_units = copy_current_units()
-            change_basic_units(loaded_snap, units_density, units_length, units_velocity)
             for index,val in enumerate(value):
                 if num_figures >= 1:
                     curr_subplot = int(num_figures*100 + 21 + index)
