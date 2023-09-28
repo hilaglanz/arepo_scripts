@@ -193,7 +193,7 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
         ylabel(ylab + ' [' + basic_units["length"].unit + ']')
 
 
-def change_ticks(pc, xaxis=True):
+def change_ticks(xaxis=True):
     ticklabels = []
     if xaxis:
         ticks = xticks()
