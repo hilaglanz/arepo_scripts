@@ -630,7 +630,7 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
                                   axes=get_single_value(axes_array, index), ignore_types=ignore_types,
                                   factor_value=factor_value[index % len(units_value)],
                                   units_value=units_value[index % len(units_value)])
-                if index < num_figures - 1:
+                if index < len(value) - 1:
                     restore_basic_units(old_basic_units)
                 rcParams.update({'font.size': 40, 'font.family': 'Serif'})
                 rcParams['text.usetex'] = True
