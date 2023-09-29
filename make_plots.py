@@ -621,6 +621,8 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
                               plot_velocities=plot_velocities, plot_bfld= plot_bfld, axes=get_single_value(axes_array),
                               modified_units=modified_units, ignore_types=ignore_types,
                               factor_value=factor_value[0], units_value=units_value[0])
+
+            regularize_time_units(loaded_snap)
             title('time : {:.2g}'.format(loaded_snap.time * basic_units["time"].factor) +
                   " [" + basic_units["time"].unit + "]")
             restore_basic_units(old_basic_units)
