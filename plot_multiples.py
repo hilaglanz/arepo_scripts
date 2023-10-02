@@ -14,7 +14,7 @@ def get_separation(snapshot, obj_id, center, take_inner_mass=False):
         inner_pos = (snapshot.pos[inner_cells] * snapshot.mass[inner_cells][:,None]).sum(axis=0)/inner_mass
         center = inner_pos
 
-    return ((snapshot.pos[obj_index] - center)**2).sum()**0.5
+    return ((snapshot.pos[obj_index] - center)**2).sum()**0.5 / rsol
 
 def get_velocity(snapshot, obj_id, center, center_obj_id, take_inner_mass=False):
     obj_index = get_obj_index(snapshot, obj_id)
@@ -32,24 +32,30 @@ def plot_value_range(snapshot_list, snapshot_dir, plotting_dir, value, core_id=1
                      tertiary_id=1e9+1, take_inner_mass=True):
     times = []
     values = []
-
+    ylab = value
     for snapshot_num in snapshot_list:
         snapshot = gadget_readsnap(snapshot_num, snapshot_dir)
-        times.append(snapshot.time)
+        times.append(snapshot.time / day)
         if value == "inner_separation":
             values.append(get_separation(snapshot, secondary_id, snapshot.pos[get_obj_index(snapshot, core_id)],
                                          take_inner_mass=take_inner_mass))
+            ylab += " [Rsun]"
         elif value == "outer_separation":
             values.append(get_separation(snapshot, tertiary_id, snapshot.pos[get_obj_index(snapshot, core_id)],
                                          take_inner_mass=take_inner_mass))
+            ylab += " [Rsun]"
         elif value == "inner_velocity":
             values.append(get_velocity(snapshot, secondary_id, snapshot.pos[get_obj_index(snapshot, core_id)], core_id,
                                          take_inner_mass=take_inner_mass))
+            ylab += " [cm/s]"
         elif value == "outer_velocity":
             values.append(get_velocity(snapshot, tertiary_id, snapshot.pos[get_obj_index(snapshot, core_id)], core_id,
                                          take_inner_mass=take_inner_mass))
+            ylab += " [cm/s]"
     plot_vs_time(value, values, times, False)
     filename = get_times_filename(snapshot_list, plotting_dir, value)
+    xlabel("Time [days]")
+    ylabel(ylab)
     savefig(filename)
     save_txt_value_vs_time(filename, values, times)
 
