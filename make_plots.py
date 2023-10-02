@@ -182,11 +182,11 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
         plot_stream(loaded_snap, value='vel', xlab=xlab, ylab=ylab, axes=axes, box=box, res=res, numthreads=numthreads)
     elif plot_bfld:
         plot_stream(loaded_snap, value='bfld', xlab=xlab, ylab=ylab, axes=axes, box=box, res=res, numthreads=numthreads)
-
+    '''
     regularize_length_units(max(box))
     change_ticks(xaxis=True)
     change_ticks(xaxis=False)
-
+    '''
     if plot_xlabel:
         xlabel(xlab + ' [' + basic_units["length"].unit + ']', loc="left")
     if plot_ylabel:
