@@ -85,6 +85,6 @@ if __name__ == "__main__":
     if not os.path.exists(args.plotting_dir):
         os.mkdir(args.plotting_dir)
 
-    plot_value_range(snapshot_number_list, args.output_dir, args.plottion_dir, args.value, args.core_id,
+    plot_value_range(snapshot_number_list, args.output_dir, args.plotting_dir, args.value, args.core_id,
                      args.secondary_id, args.tertiary_id, args.take_inner_mass)
 
