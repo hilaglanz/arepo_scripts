@@ -48,10 +48,10 @@ def plot_value_range(snapshot_list, snapshot_dir, plotting_dir, value, core_id=1
         elif value == "outer_velocity":
             values.append(get_velocity(snapshot, tertiary_id, snapshot.pos[get_obj_index(snapshot, core_id)], core_id,
                                          take_inner_mass=take_inner_mass))
-        plot_vs_time(value, values, times, False)
-        filename = get_times_filename(snapshot_list, plotting_dir, value)
-        savefig(filename)
-        save_txt_value_vs_time(filename, values, times)
+    plot_vs_time(value, values, times, False)
+    filename = get_times_filename(snapshot_list, plotting_dir, value)
+    savefig(filename)
+    save_txt_value_vs_time(filename, values, times)
 
 def InitParser():
     parser = argparse.ArgumentParser(description='')
@@ -64,9 +64,9 @@ def InitParser():
     parser.add_argument('--value', type=str, help='value to plot and compare profile', default="inner_separation")
     parser.add_argument('--logplot', type=lambda x: (str(x).lower() in ['true', '1', 'yes']), help='logplot',
                         default=True)
-    parser.add_argument('--core_id', type=int, help='', default=1e9+2)
+    parser.add_argument('--core_id', type=int, help='', default=1e9+1)
     parser.add_argument('--secondary_id', type=int, help='', default=1e9)
-    parser.add_argument('--tertiary_id', type=int, help='', default=1e9+1)
+    parser.add_argument('--tertiary_id', type=int, help='', default=1e9+2)
     parser.add_argument('--take_inner_mass', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
                         help='should plot according to all inner mass or just the core?',
                         default=False)
