@@ -51,14 +51,21 @@ def get_surrounding_value(snapshot, obj_id, size, value):
     return com_value
 
 def plot_value_range(snapshot_list, snapshot_dir, plotting_dir, value, core_id=1e9+1, secondary_id=1e9,
-                     tertiary_id=1e9+2, take_inner_mass=True, surrounding_radius=10*rsol, arround_object_id=1e9+2):
+                     tertiary_id=1e9+2, take_inner_mass=True, surrounding_radius=10*rsol, around_object_id=1e9 + 2):
     times = []
     values = []
     ylab = value
+    suffix = ""
+    if "surrounding" in value:
+        suffix += "_id" + str(around_object_id - 1e9) + "_" + str(surrounding_radius/rsol) + "rsol"
+    elif take_inner_mass:
+        suffix += "_inner_cells"
+
     if "separation" in value:
         ylab += " [" + r'$R_\odot$' + "]"
     elif "vel" in value:
         ylab += " [cm/s]"
+
 
     for snapshot_num in snapshot_list:
         snapshot = gadget_readsnap(snapshot_num, snapshot_dir)
@@ -76,10 +83,10 @@ def plot_value_range(snapshot_list, snapshot_dir, plotting_dir, value, core_id=1
             values.append(get_velocity(snapshot, tertiary_id, snapshot.pos[get_obj_index(snapshot, core_id)], core_id,
                                          take_inner_mass=take_inner_mass))
         elif "surrounding" in value:
-            values.append(get_surrounding_value(snapshot, arround_object_id, surrounding_radius, value.split('_')[-1]))
+            values.append(get_surrounding_value(snapshot, around_object_id, surrounding_radius, value.split('_')[-1]))
 
     plot_vs_time(value, values, times, False)
-    filename = get_times_filename(snapshot_list, plotting_dir, value)
+    filename = get_times_filename(snapshot_list, plotting_dir, value, suffix)
     xlabel("Time [days]")
     ylabel(ylab)
     savefig(filename)
