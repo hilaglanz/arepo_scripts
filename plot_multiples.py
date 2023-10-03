@@ -30,7 +30,8 @@ def get_velocity(snapshot, obj_id, center, center_obj_id, take_inner_mass=False)
 
 def get_surrounding_rho(snapshot, obj_id, size):
     obj_index = get_obj_index(snapshot, obj_id)
-    surrounding_cells = np.where(((snapshot.pos - snapshot.pos[obj_index]) ** 2).sum(axis=1)**0.5 < size)
+    surrounding_cells = np.where((snapshot.type == 0 ) &
+                                 (((snapshot.pos - snapshot.pos[obj_index]) ** 2).sum(axis=1)**0.5 < size))
 
     return snapshot.rho[surrounding_cells].mean()
 
@@ -39,7 +40,8 @@ def get_surrounding_value(snapshot, obj_id, size, value):
         return get_surrounding_rho(snapshot, obj_id, size)
 
     obj_index = get_obj_index(snapshot, obj_id)
-    surrounding_cells = np.where(((snapshot.pos - snapshot.pos[obj_index]) ** 2).sum(axis=1)**0.5 < size)
+    surrounding_cells = np.where((snapshot.type == 0 ) &
+                                 (((snapshot.pos - snapshot.pos[obj_index]) ** 2).sum(axis=1)**0.5 < size))
 
     com_value = (snapshot.data[value][surrounding_cells] * snapshot.mass[surrounding_cells][:,None]).sum(axis=0) / \
                 snapshot.mass[surrounding_cells].sum()
@@ -74,7 +76,7 @@ def plot_value_range(snapshot_list, snapshot_dir, plotting_dir, value, core_id=1
             values.append(get_velocity(snapshot, tertiary_id, snapshot.pos[get_obj_index(snapshot, core_id)], core_id,
                                          take_inner_mass=take_inner_mass))
         elif "surrounding" in value:
-            values.append(get_surrounding_value(snapshot, arround_object_id, surrounding_radius, value.split('_')[0]))
+            values.append(get_surrounding_value(snapshot, arround_object_id, surrounding_radius, value.split('_')[-1]))
 
     plot_vs_time(value, values, times, False)
     filename = get_times_filename(snapshot_list, plotting_dir, value)
