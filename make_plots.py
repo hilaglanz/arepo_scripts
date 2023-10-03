@@ -156,7 +156,7 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
     ylab = chr(ord('x') + axes[1])
 
     if central_id is not None:
-        center = loaded_snap.pos[np.where(loaded_snap.id == central_id)]
+        center = loaded_snap.pos[np.where(loaded_snap.id == central_id)][0]
         print("centralizing around id ", central_id, " at ", center)
 
     loaded_snap.plot_Aslice(value, logplot=logplot, colorbar=colorbar, cblabel=label, cmap=cmap, center=center, vrange=vrange,
