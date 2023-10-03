@@ -74,7 +74,7 @@ def plot_value_range(snapshot_list, snapshot_dir, plotting_dir, value, core_id=1
             values.append(get_velocity(snapshot, tertiary_id, snapshot.pos[get_obj_index(snapshot, core_id)], core_id,
                                          take_inner_mass=take_inner_mass))
         elif "surrounding" in value:
-            values.append(get_surrounding_value(snapshot, arround_object_id, surrounding_radius, value))
+            values.append(get_surrounding_value(snapshot, arround_object_id, surrounding_radius, value.split('_')[0]))
 
     plot_vs_time(value, values, times, False)
     filename = get_times_filename(snapshot_list, plotting_dir, value)
