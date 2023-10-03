@@ -73,6 +73,9 @@ def plot_value_range(snapshot_list, snapshot_dir, plotting_dir, value, core_id=1
     values = []
     ylab = value
     suffix = ""
+
+    if "drag" in value:
+        suffix += "_id" + str(around_object_id - 1e9)
     if "surrounding" in value:
         suffix += "_id" + str(around_object_id - 1e9) + "_" + str(surrounding_radius/rsol) + "rsol"
     elif take_inner_mass:
