@@ -66,7 +66,7 @@ def get_drag(snapshot, obj_id, center, center_obj_id, take_inner_mass=False):
     separation = calculate_separation_vector(snapshot, obj_id, center, center_obj_id, take_inner_mass)
     snapshot = calculate_value_relative_to_vector(snapshot, 'acce', separation)
 
-    return np.array([snapshot.data["acce_v"][obj_index], snapshot.data["acce_u"][obj_index]])
+    return snapshot.data["acce_u"][obj_index]  * snapshot.mass[obj_index]
 def plot_value_range(snapshot_list, snapshot_dir, plotting_dir, value, core_id=1e9+1, secondary_id=1e9,
                      tertiary_id=1e9+2, take_inner_mass=True, surrounding_radius=10*rsol, around_object_id=1e9 + 2):
     times = []
