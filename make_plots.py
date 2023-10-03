@@ -117,7 +117,10 @@ def project_vector(v,r):
     dist = np.sqrt((r*r).sum(axis=1))
     return ((r*v).sum(axis=1)) / dist
 
-def plot_stream(loaded_snap, value='vel', xlab='x', ylab='y', axes=[0,1], box=False, res=1024, numthreads=1):
+def plot_stream(loaded_snap, value='vel', xlab='x', ylab='y', axes=[0,1], box=False, res=1024, numthreads=1, center=None):
+    if center is None:
+        center = loaded_snap.center
+
     loaded_snap.data[value + xlab] = loaded_snap.data[value][:, axes[0]]
     loaded_snap.data[value + ylab] = loaded_snap.data[value][:, axes[1]]
     slice_velx = loaded_snap.get_Aslice(value + xlab, box=box, res=res, center=center, numthreads=numthreads)
@@ -183,9 +186,11 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
                     print(circ)
                     gca().add_patch(circ)
     if plot_velocities:
-        plot_stream(loaded_snap, value='vel', xlab=xlab, ylab=ylab, axes=axes, box=box, res=res, numthreads=numthreads)
+        plot_stream(loaded_snap, value='vel', xlab=xlab, ylab=ylab, axes=axes, box=box, res=res, numthreads=numthreads,
+                    center=center)
     elif plot_bfld:
-        plot_stream(loaded_snap, value='bfld', xlab=xlab, ylab=ylab, axes=axes, box=box, res=res, numthreads=numthreads)
+        plot_stream(loaded_snap, value='bfld', xlab=xlab, ylab=ylab, axes=axes, box=box, res=res, numthreads=numthreads,
+                    center=center)
     '''
     regularize_length_units(max(box))
     change_ticks(xaxis=True)
