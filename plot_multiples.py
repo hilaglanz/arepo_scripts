@@ -40,16 +40,33 @@ def get_surrounding_value(snapshot, obj_id, size, value):
         return get_surrounding_rho(snapshot, obj_id, size)
 
     obj_index = get_obj_index(snapshot, obj_id)
-    surrounding_cells = np.where((snapshot.type == 0 ) &
+    surrounding_cells = np.where((snapshot.type == 0) &
                                  (((snapshot.pos - snapshot.pos[obj_index]) ** 2).sum(axis=1)**0.5 < size))
 
-    com_value = (snapshot.data[value][surrounding_cells] * snapshot.mass[surrounding_cells][:,None]).sum(axis=0) / \
+    com_value = (snapshot.data[value][surrounding_cells] * snapshot.mass[surrounding_cells][:, None]).sum(axis=0) / \
                 snapshot.mass[surrounding_cells].sum()
     if len(com_value) > 1:
         return (com_value**2).sum()**0.5
 
     return com_value
 
+def calculate_separation_vector(snapshot, obj_id, center, center_obj_id, take_inner_mass=False):
+    obj_index = get_obj_index(snapshot, obj_id)
+    if take_inner_mass:
+        inner_cells = np.where(
+            ((snapshot.pos - center) ** 2).sum(axis=1) < ((snapshot.pos[obj_index] - center) ** 2).sum())
+        center = (snapshot.pos[inner_cells]**2).sum(axis=0)**0.5
+    else:
+        center = snapshot.pos[np.where(snapshot.id == center_obj_id)]
+
+    return snapshot.pos[obj_index] - center
+
+def get_drag(snapshot, obj_id, center, center_obj_id, take_inner_mass=False):
+    obj_index = get_obj_index(snapshot, obj_id)
+    separation = calculate_separation_vector(snapshot, obj_id, center, center_obj_id, take_inner_mass)
+    snapshot = calculate_value_relative_to_vector(snapshot, 'acce', separation)
+
+    return np.array([snapshot.data["acce_v"][obj_index], snapshot.data["acce_u"][obj_index]])
 def plot_value_range(snapshot_list, snapshot_dir, plotting_dir, value, core_id=1e9+1, secondary_id=1e9,
                      tertiary_id=1e9+2, take_inner_mass=True, surrounding_radius=10*rsol, around_object_id=1e9 + 2):
     times = []
@@ -84,6 +101,11 @@ def plot_value_range(snapshot_list, snapshot_dir, plotting_dir, value, core_id=1
                                          take_inner_mass=take_inner_mass))
         elif "surrounding" in value:
             values.append(get_surrounding_value(snapshot, around_object_id, surrounding_radius, value.split('_')[-1]))
+
+        elif value == "drag":
+            values.append(get_drag(snapshot, around_object_id, center=snapshot.pos[get_obj_index(snapshot, core_id)],
+                                  center_obj_id=core_id, take_inner_mass=take_inner_mass))
+            
 
     plot_vs_time(value, values, times, False)
     filename = get_times_filename(snapshot_list, plotting_dir, value, suffix)
