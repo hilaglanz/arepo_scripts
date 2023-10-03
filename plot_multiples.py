@@ -45,7 +45,7 @@ def get_surrounding_value(snapshot, obj_id, size, value):
 
     com_value = (snapshot.data[value][surrounding_cells] * snapshot.mass[surrounding_cells][:,None]).sum(axis=0) / \
                 snapshot.mass[surrounding_cells].sum()
-    if len(com_value.shape) > 1:
+    if len(com_value) > 1:
         return (com_value**2).sum()**0.5
 
     return com_value
