@@ -57,9 +57,9 @@ def calculate_separation_vector(snapshot, obj_id, center, center_obj_id, take_in
             ((snapshot.pos - center) ** 2).sum(axis=1) < ((snapshot.pos[obj_index] - center) ** 2).sum())
         center = (snapshot.pos[inner_cells]**2).sum(axis=0)**0.5
     else:
-        center = snapshot.pos[np.where(snapshot.id == center_obj_id)]
+        center = snapshot.pos[np.where(snapshot.id == center_obj_id)][0]
 
-    return snapshot.pos[obj_index] - center
+    return snapshot.pos[obj_index][0] - center
 
 def get_drag(snapshot, obj_id, center, center_obj_id, take_inner_mass=False):
     obj_index = get_obj_index(snapshot, obj_id)
@@ -105,7 +105,7 @@ def plot_value_range(snapshot_list, snapshot_dir, plotting_dir, value, core_id=1
         elif value == "drag":
             values.append(get_drag(snapshot, around_object_id, center=snapshot.pos[get_obj_index(snapshot, core_id)],
                                   center_obj_id=core_id, take_inner_mass=take_inner_mass))
-            
+
 
     plot_vs_time(value, values, times, False)
     filename = get_times_filename(snapshot_list, plotting_dir, value, suffix)
