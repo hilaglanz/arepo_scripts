@@ -85,8 +85,11 @@ def plot_value_range(snapshot_list, snapshot_dir, plotting_dir, value, core_id=1
         ylab += " [" + r'$R_\odot$' + "]"
     elif "vel" in value:
         ylab += " [cm/s]"
-
-
+    if "mass" in value:
+        ylab += " [" + r'$M_\odot$' + "]"
+    
+    unbounded_mass_prev = 0
+    time_prev = 0
     for snapshot_num in snapshot_list:
         snapshot = gadget_readsnap(snapshot_num, snapshot_dir)
         times.append(snapshot.time / day)
@@ -108,6 +111,19 @@ def plot_value_range(snapshot_list, snapshot_dir, plotting_dir, value, core_id=1
         elif value == "drag":
             values.append(get_drag(snapshot, around_object_id, center=snapshot.pos[get_obj_index(snapshot, core_id)],
                                   center_obj_id=core_id, take_inner_mass=take_inner_mass))
+        elif "unbounded_mass" in value:
+            unbounded_mass = snapshot.computeUnboundMass()
+            if "dot" in value:
+                if time_prev == 0:
+                    time_prev = float(snapshot.parameters['TimeBegin'])
+                values.append((unbounded_mass - unbounded_mass_prev) / (snapshot.time - time_prev) / msol)
+                time_prev = snapshot.time
+                unbounded_mass_prev = unbounded_mass
+            else:
+                values.append(unbounded_mass / msol)
+
+
+
 
 
     plot_vs_time(value, values, times, False)
