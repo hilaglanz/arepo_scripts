@@ -131,7 +131,7 @@ def plot_stream(loaded_snap, value='vel', xlab='x', ylab='y', axes=[0,1], box=Fa
     # scale=50)#*loaded_snap.parameters['BoxSize']/box[0])
 
 def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=False,logplot=True, res=1024, numthreads=1,
-                      relative_to_sink_id=None, center=True,plot_points=True, additional_points_size=30,
+                      relative_to_sink_id=None, central_id=None, center=True,plot_points=True, additional_points_size=30,
                       additional_points_shape='X', additional_points_color='w', unit_length='cm', unit_velocity="$cm/s$",
                       unit_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
                       newfig=True, axes=[0,1], modified_units = False, ignore_types=[], colorbar=True,
@@ -147,13 +147,17 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
     print("units: ")
     for val in name_and_units.values():
         print(val.name, basic_units[val.unit_name].factor)
-    loaded_snap, value = calculate_label_and_value(loaded_snap, value, relative_to_sink_id)
+    loaded_snap, value = calculate_label_and_value(loaded_snap, value, relative_to_sink_id, central_id=central_id,)
 
     print(value)
 
     label = extract_label(value)
     xlab = chr(ord('x') + axes[0])
     ylab = chr(ord('x') + axes[1])
+
+    if central_id is not None:
+        center = loaded_snap.pos[np.where(loaded_snap.id == central_id)]
+        print("centralizing around id ", central_id, " at ", center)
 
     loaded_snap.plot_Aslice(value, logplot=logplot, colorbar=colorbar, cblabel=label, cmap=cmap, center=center, vrange=vrange,
                                   box=box, res=res, numthreads=numthreads, newfig=newfig, axes=axes,
@@ -281,7 +285,7 @@ def get_value_at_inf(value, data):
 
     return val_inf
 
-def calculate_label_and_value(loaded_snap, value, relative_to_sink_id):
+def calculate_label_and_value(loaded_snap, value, relative_to_sink_id, central_id=None):
     if "xnuc" in value:
         loaded_snap.data["rho" + value] = loaded_snap.rho * loaded_snap.data[value]
         value = "rho" + value
@@ -499,7 +503,7 @@ def get_snapshot_number_list(snapshotDir="outupt", snapshotName="snapshot_", fir
 
 def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingDir="plots", firstSnap=0,lastSnap=-1,skipSteps=1,box=False,
                vrange=False, cmap=["hot"], logplot=True, res=1024, numthreads=1, center=True, relative_to_sink_id=None,
-               plot_points=True,
+               central_id=None, plot_points=True,
                additional_points_size=30,additional_points_shape='X', additional_points_color='w', units_length = 'cm',
                units_velocity="$cm/s$", units_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
                axes_array=[[0,1]], ignore_types=[], horizontal=True, relative_to_motion=False):
@@ -538,7 +542,7 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
                                   vrange=get_single_value(vrange,index), logplot=get_single_value(logplot,index),
                                   res=res,
                                   numthreads=numthreads, center=center, relative_to_sink_id=relative_to_sink_id,
-                                  plot_points=plot_points,
+                                  central_id=central_id, plot_points=plot_points,
                                   additional_points_size=additional_points_size,
                                   additional_points_shape=additional_points_shape,
                                   additional_points_color=additional_points_color, unit_length=units_length,
@@ -581,7 +585,7 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
 
 def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstSnap=0,lastSnap=-1,skipSteps=1,box=False,
                vrange=False, cmap=["hot"], logplot=True, res=1024, numthreads=1, center=True, relative_to_sink_id=None,
-               plot_points=True,
+               central_id=None, plot_points=True,
                additional_points_size=30,additional_points_shape='X', additional_points_color='w', units_length = 'cm',
                units_velocity="$cm/s$", units_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
                axes_array=[[0,1]], ignore_types=[], per_value_evolution=False, relative_to_motion=False,
@@ -589,7 +593,7 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
 
     if per_value_evolution:
         return plot_single_value_evolutions(value, snapshotDir, plottingDir, firstSnap, lastSnap, skipSteps, box,
-               vrange, cmap, logplot, res, numthreads, center, relative_to_sink_id,
+               vrange, cmap, logplot, res, numthreads, center, relative_to_sink_id, central_id,
                plot_points,
                additional_points_size,additional_points_shape, additional_points_color, units_length,
                units_velocity, units_density, plot_velocities, plot_bfld,
@@ -613,7 +617,7 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
             plot_single_value(loaded_snap, value=val, cmap=curr_cmap, box=get_single_value(box),
                               vrange=get_single_value(vrange), logplot=get_single_value(logplot), res=res,
                               numthreads=numthreads, center=center, relative_to_sink_id=relative_to_sink_id,
-                              plot_points=plot_points,
+                              central_id=central_id, plot_points=plot_points,
                               additional_points_size=additional_points_size,
                               additional_points_shape=additional_points_shape,
                               additional_points_color=additional_points_color, unit_length=units_length,
@@ -647,7 +651,7 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
                                   vrange=get_single_value(vrange,index), logplot=get_single_value(logplot,index),
                                   res=res,
                                   numthreads=numthreads, center=center, relative_to_sink_id=relative_to_sink_id,
-                                  plot_points=plot_points,
+                                  central_id=central_id, plot_points=plot_points,
                                   additional_points_size=additional_points_size,
                                   additional_points_shape=additional_points_shape,
                                   additional_points_color=additional_points_color, unit_length=units_length,
@@ -697,7 +701,8 @@ def InitParser():
     parser.add_argument('--center_x', type=float, help='point on x axis to be the center of the plot', default=None)
     parser.add_argument('--center_y', type=float, help='point on y axis to be the center of the plot', default=None)
     parser.add_argument('--center_z', type=float, help='point on z axis to be the center of the plot', default=0)
-    parser.add_argument('--relative_to_sink_id', nargs='+', type=int,  help='id of sink particle ro use as a reference point', default= None)
+    parser.add_argument('--relative_to_sink_id', nargs='+', type=int,  help='id of sink particle to use as a reference point', default= None)
+    parser.add_argument('--relative_to_id', nargs='+', type=int,  help='id of centeral particle', default= None)
     parser.add_argument('--plot_per_value_evolution', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
                         help='should plot value evolution figure from the different snapshot of each value?',
                         default=False)
@@ -750,7 +755,7 @@ if __name__ == "__main__":
 
     plot_range(args.value, args.source_dir, args.saving_dir, args.beginStep, args.lastStep, args.skipStep, box=box,
                vrange=vrange, logplot=args.logplot, cmap=args.cmap, res=args.res, numthreads= args.numthreads, center=center,
-               relative_to_sink_id=args.relative_to_sink_id,
+               relative_to_sink_id=args.relative_to_sink_id, central_id=args.relative_to_id,
                plot_points=args.plot_points, additional_points_size=args.additional_points_size,
                additional_points_shape=args.additional_points_shape,
                additional_points_color=args.additional_points_color,
