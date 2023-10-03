@@ -48,8 +48,8 @@ def get_surrounding_value(snapshot, obj_id, size, value):
 
     return com_value
 
-def plot_value_range(snapshot_list, snapshot_dir, plotting_dir, value, core_id=1e9+2, secondary_id=1e9,
-                     tertiary_id=1e9+1, take_inner_mass=True, surrounding_radius=10*rsol):
+def plot_value_range(snapshot_list, snapshot_dir, plotting_dir, value, core_id=1e9+1, secondary_id=1e9,
+                     tertiary_id=1e9+2, take_inner_mass=True, surrounding_radius=10*rsol, arround_object_id=1e9+2):
     times = []
     values = []
     ylab = value
@@ -74,15 +74,7 @@ def plot_value_range(snapshot_list, snapshot_dir, plotting_dir, value, core_id=1
             values.append(get_velocity(snapshot, tertiary_id, snapshot.pos[get_obj_index(snapshot, core_id)], core_id,
                                          take_inner_mass=take_inner_mass))
         elif "surrounding" in value:
-            obj_id = tertiary_id
-            if "core" in value:
-                obj_id = core_id
-            if "secondary" in value:
-                obj_id = secondary_id
-            if "tertiary" in value:
-                obj_id = tertiary_id
-
-            values.append(get_surrounding_value(snapshot, obj_id, surrounding_radius, value))
+            values.append(get_surrounding_value(snapshot, arround_object_id, surrounding_radius, value))
 
     plot_vs_time(value, values, times, False)
     filename = get_times_filename(snapshot_list, plotting_dir, value)
@@ -108,6 +100,9 @@ def InitParser():
     parser.add_argument('--take_inner_mass', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
                         help='should plot according to all inner mass or just the core?',
                         default=False)
+    parser.add_argument('--surrounding_radius', type=float,  help='radius around the object of interest to calculate for',
+                        default=10*rsol)
+    parser.add_argument('--around_object_id', type=int, help='id of the object to plot surrounding of', default=1e9+2)
 
     return parser
 
@@ -124,5 +119,6 @@ if __name__ == "__main__":
         os.mkdir(args.plotting_dir)
 
     plot_value_range(snapshot_number_list, args.output_dir, args.plotting_dir, args.value, args.core_id,
-                     args.secondary_id, args.tertiary_id, args.take_inner_mass)
+                     args.secondary_id, args.tertiary_id, args.take_inner_mass, args.surrounding_radius,
+                     args.around_object_id)
 
