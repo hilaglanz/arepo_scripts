@@ -28,14 +28,34 @@ def get_velocity(snapshot, obj_id, center, center_obj_id, take_inner_mass=False)
 
     return ((snapshot.vel[obj_index] - inner_vel) ** 2).sum() ** 0.5
 
+def get_surrounding_rho(snapshot, obj_id, size):
+    obj_index = get_obj_index(snapshot, obj_id)
+    surrounding_cells = np.where(((snapshot.pos - snapshot.pos[obj_index]) ** 2).sum(axis=1)**0.5 < size)
+
+    return snapshot.rho[surrounding_cells].mean()
+
+def get_surrounding_value(snapshot, obj_id, size, value):
+    if value == "rho":
+        return get_surrounding_rho(snapshot, obj_id, size)
+
+    obj_index = get_obj_index(snapshot, obj_id)
+    surrounding_cells = np.where(((snapshot.pos - snapshot.pos[obj_index]) ** 2).sum(axis=1)**0.5 < size)
+
+    com_value = (snapshot.data[value][surrounding_cells] * snapshot.mass[surrounding_cells][:,None]).sum(axis=0) / \
+                snapshot.mass[surrounding_cells].sum()
+    if len(com_value.shape) > 1:
+        return (com_value**2).sum()**0.5
+
+    return com_value
+
 def plot_value_range(snapshot_list, snapshot_dir, plotting_dir, value, core_id=1e9+2, secondary_id=1e9,
-                     tertiary_id=1e9+1, take_inner_mass=True):
+                     tertiary_id=1e9+1, take_inner_mass=True, surrounding_radius=10*rsol):
     times = []
     values = []
     ylab = value
     if "separation" in value:
         ylab += " [" + r'$R_\odot$' + "]"
-    elif "velocity" in value:
+    elif "vel" in value:
         ylab += " [cm/s]"
 
     for snapshot_num in snapshot_list:
@@ -53,6 +73,17 @@ def plot_value_range(snapshot_list, snapshot_dir, plotting_dir, value, core_id=1
         elif value == "outer_velocity":
             values.append(get_velocity(snapshot, tertiary_id, snapshot.pos[get_obj_index(snapshot, core_id)], core_id,
                                          take_inner_mass=take_inner_mass))
+        elif "surrounding" in value:
+            obj_id = tertiary_id
+            if "core" in value:
+                obj_id = core_id
+            if "secondary" in value:
+                obj_id = secondary_id
+            if "tertiary" in value:
+                obj_id = tertiary_id
+
+            values.append(get_surrounding_value(snapshot, obj_id, surrounding_radius, value))
+
     plot_vs_time(value, values, times, False)
     filename = get_times_filename(snapshot_list, plotting_dir, value)
     xlabel("Time [days]")
