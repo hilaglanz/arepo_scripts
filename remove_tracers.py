@@ -3,7 +3,7 @@ import argparse
 
 def remove_tracers(snapshot_name, new_snapshot_name):
     snap = gadget_readsnapname(snapshot_name, loadonlytype=[0,1,3,4,5])
-    gadget_write_ics(new_snapshot_name, snap.data)
+    gadget_write_ics(new_snapshot_name, snap.data, double=True, format="hdf5")
 
 def InitParser():
     parser = argparse.ArgumentParser(description='')
