@@ -67,6 +67,29 @@ def get_drag(snapshot, obj_id, center, center_obj_id, take_inner_mass=False):
     snapshot = calculate_value_relative_to_vector(snapshot, 'acce', separation)
 
     return snapshot.data["acce_u"][obj_index]  * snapshot.mass[obj_index]
+
+def get_enclosed_mass(snapshot, obj_id, center, center_obj_id=None):
+    obj_index = get_obj_index(snapshot, obj_id)
+    if center_obj_id is not None:
+        central_index = get_obj_index(snapshot, center_obj_id)
+        center = snapshot.pos[central_index]
+    inner_cells = np.where(
+        ((snapshot.pos - center) ** 2).sum(axis=1) < ((snapshot.pos[obj_index] - center) ** 2).sum())
+
+    return snapshot.mass[inner_cells].sum()
+
+
+def get_out_mass(snapshot, obj_id, center, center_obj_id=None):
+    obj_index = get_obj_index(snapshot, obj_id)
+    if center_obj_id is not None:
+        central_index = get_obj_index(snapshot, center_obj_id)
+        center = snapshot.pos[central_index]
+    inner_cells = np.where(
+        ((snapshot.pos - center) ** 2).sum(axis=1) > ((snapshot.pos[obj_index] - center) ** 2).sum())
+
+    return snapshot.mass[inner_cells].sum()
+
+
 def plot_value_range(snapshot_list, snapshot_dir, plotting_dir, value, core_id=1e9+1, secondary_id=1e9,
                      tertiary_id=1e9+2, take_inner_mass=True, surrounding_radius=10*rsol, around_object_id=1e9 + 2):
     times = []
@@ -87,7 +110,7 @@ def plot_value_range(snapshot_list, snapshot_dir, plotting_dir, value, core_id=1
         ylab += " [cm/s]"
     if "mass" in value:
         ylab += " [" + r'$M_\odot$' + "]"
-    
+
     unbounded_mass_prev = 0
     time_prev = 0
     for snapshot_num in snapshot_list:
@@ -121,8 +144,13 @@ def plot_value_range(snapshot_list, snapshot_dir, plotting_dir, value, core_id=1
                 unbounded_mass_prev = unbounded_mass
             else:
                 values.append(unbounded_mass / msol)
-
-
+        elif "eclosed_mass" in value:
+            values.append(get_enclosed_mass(snapshot, around_object_id, center=snapshot.pos[get_obj_index(snapshot, core_id)],
+                                  center_obj_id=core_id))
+        elif "out_mass" in value:
+            values.append(get_out_mass(snapshot, around_object_id, center=snapshot.pos[get_obj_index(snapshot, core_id)],
+                                  center_obj_id=core_id))
+        
 
 
 
