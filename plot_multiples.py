@@ -144,7 +144,7 @@ def plot_value_range(snapshot_list, snapshot_dir, plotting_dir, value, core_id=1
                 unbounded_mass_prev = unbounded_mass
             else:
                 values.append(unbounded_mass / msol)
-        elif "eclosed_mass" in value:
+        elif "enclosed_mass" in value:
             values.append(get_enclosed_mass(snapshot, around_object_id, center=snapshot.pos[get_obj_index(snapshot, core_id)],
                                   center_obj_id=core_id) / msol)
         elif "out_mass" in value:
