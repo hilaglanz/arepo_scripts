@@ -97,7 +97,7 @@ def plot_value_range(snapshot_list, snapshot_dir, plotting_dir, value, core_id=1
     ylab = value
     suffix = ""
 
-    if "drag" in value:
+    if "drag" in value or "enclosed" in value or "out_mass" in value:
         suffix += "_id" + str(around_object_id - 1e9)
     if "surrounding" in value:
         suffix += "_id" + str(around_object_id - 1e9) + "_" + str(surrounding_radius/rsol) + "rsol"
@@ -146,11 +146,11 @@ def plot_value_range(snapshot_list, snapshot_dir, plotting_dir, value, core_id=1
                 values.append(unbounded_mass / msol)
         elif "eclosed_mass" in value:
             values.append(get_enclosed_mass(snapshot, around_object_id, center=snapshot.pos[get_obj_index(snapshot, core_id)],
-                                  center_obj_id=core_id))
+                                  center_obj_id=core_id) / msol)
         elif "out_mass" in value:
             values.append(get_out_mass(snapshot, around_object_id, center=snapshot.pos[get_obj_index(snapshot, core_id)],
-                                  center_obj_id=core_id))
-        
+                                  center_obj_id=core_id) / msol)
+
 
 
 
