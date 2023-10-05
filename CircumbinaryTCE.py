@@ -40,14 +40,15 @@ def ReplaceInnerBinaryWithPointMass(snapshot_file, new_file_name, obj1_id, obj2_
     num_gas_to_remove = 0
     inds_to_remove = np.array([])
     gas_inds_to_remove = np.array([])
-    new_pos = ((snapshot.pos[obj1_ind] * snapshot.mass[obj1_ind]).sum() +
-               (snapshot.pos[obj2_ind] * snapshot.mass[obj2_ind]).sum()) / \
+    new_pos = ((snapshot.pos[obj1_ind] * snapshot.mass[obj1_ind]).sum(axis=0) +
+               (snapshot.pos[obj2_ind] * snapshot.mass[obj2_ind]).sum(axis=0)) / \
               (snapshot.mass[obj1_ind] + snapshot.mass[obj2_ind])
 
     new_vel = ((snapshot.vel[obj1_ind] * snapshot.mass[obj1_ind]).sum() +
                (snapshot.vel[obj2_ind] * snapshot.mass[obj2_ind]).sum()) / \
               (snapshot.mass[obj1_ind] + snapshot.mass[obj2_ind])
     inds_to_remove = np.array([obj1_ind, obj2_ind])
+    print("placing new point mass at ", new_pos, " with velocity ", new_vel)
     if remove_to_radius is not None:
         gas_inds_to_remove = np.where((snapshot.type == 0) &
                                  (((snapshot.pos - new_pos)**2).sum(axis=1)**0.5 < remove_to_radius))
