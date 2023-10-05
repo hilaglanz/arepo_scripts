@@ -81,10 +81,13 @@ def ReplaceInnerBinaryWithPointMass(snapshot_file, new_file_name, obj1_id, obj2_
     new_data['vel'][-1] = new_vel
     new_data['mass'][-1] = snapshot.mass[obj1_ind] + snapshot.mass[obj2_ind]
     new_data['type'][-1] = snapshot.type[obj1_ind]
+    new_data['id'][-1] = obj1_id
+
     if 'soft' in new_data.keys():
         new_soft = snapshot.soft[obj1_ind] + (((snapshot.pos[obj1_ind] - snapshot.pos[obj2_ind])**2).sum()**0.5) / 2
         new_data['soft'][-1] = new_soft
-
+    print("removed ", num_gas_to_remove, " gas cells")
+    
     gadget_write_ics(new_file_name, new_data, format='hdf5', double=True)
 
 
