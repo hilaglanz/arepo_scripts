@@ -48,7 +48,7 @@ def ReplaceInnerBinaryWithPointMass(snapshot_file, new_file_name, obj1_id, obj2_
                (snapshot.vel[obj2_ind] * snapshot.mass[obj2_ind]).sum()) / \
               (snapshot.mass[obj1_ind] + snapshot.mass[obj2_ind])
     new_soft = snapshot.soft[obj1_ind] + (((snapshot.pos[obj1_ind] - snapshot.pos[obj2_ind])**2).sum()**0.5) / 2
-    inds_to_remove = np.arraya([obj1_ind, obj2_ind])
+    inds_to_remove = np.array([obj1_ind, obj2_ind])
     if remove_to_radius is not None:
         gas_inds_to_remove = np.where((snapshot.type == 0) &
                                  (((snapshot.pos - new_pos)**2).sum(axis=1)**0.5 < remove_to_radius))[0]
