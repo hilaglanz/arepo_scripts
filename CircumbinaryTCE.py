@@ -38,7 +38,8 @@ def ReplaceInnerBinaryWithPointMass(snapshot_file, new_file_name, obj1_id, obj2_
     obj1_ind = get_obj_index(snapshot, obj1_id)
     obj2_ind = get_obj_index(snapshot, obj2_id)
     num_gas_to_remove = 0
-    inds_to_remove = []
+    inds_to_remove = np.array([])
+    gas_inds_to_remove = np.array([])
     new_pos = ((snapshot.pos[obj1_ind] * snapshot.mass[obj1_ind]).sum() +
                (snapshot.pos[obj2_ind] * snapshot.mass[obj2_ind]).sum()) / \
               (snapshot.mass[obj1_ind] + snapshot.mass[obj2_ind])
@@ -47,11 +48,13 @@ def ReplaceInnerBinaryWithPointMass(snapshot_file, new_file_name, obj1_id, obj2_
                (snapshot.vel[obj2_ind] * snapshot.mass[obj2_ind]).sum()) / \
               (snapshot.mass[obj1_ind] + snapshot.mass[obj2_ind])
     new_soft = snapshot.soft[obj1_ind] + (((snapshot.pos[obj1_ind] - snapshot.pos[obj2_ind])**2).sum()**0.5) / 2
-
+    inds_to_remove = np.arraya([obj1_ind, obj2_ind])
     if remove_to_radius is not None:
-        inds_to_remove = np.where((snapshot.type == 0) &
+        gas_inds_to_remove = np.where((snapshot.type == 0) &
                                  (((snapshot.pos - new_pos)**2).sum(axis=1)**0.5 < remove_to_radius))[0]
         num_gas_to_remove = len(inds_to_remove)
+        if num_gas_to_remove > 0:
+            inds_to_remove = np.concatenate((inds_to_remove, gas_inds_to_remove))
 
     new_data = initialized_new_data(snapshot.npart - 1 - num_gas_to_remove, snapshot.npart - 3 - num_gas_to_remove)
     new_data['boxsize'] = snapshot.boxsize
@@ -63,15 +66,14 @@ def ReplaceInnerBinaryWithPointMass(snapshot_file, new_file_name, obj1_id, obj2_
             continue
         if value in ["u","temp","B","rho","cmce",'grar', 's', 'u', 'bfld', 'divb', 'dvba','pres', 'grap',
                      'csnd', 'temp', 'tstp','grav', 'vol'] or 'xnuc' in value:
-            new_data[value] = np.delete(snapshot.data[value], inds_to_remove, axis=0)
+            new_data[value] = np.delete(snapshot.data[value], gas_inds_to_remove, axis=0)
         else:
             if value not in new_data.keys():
                 if len(snapshot.data[value].shape) > 1:
                     new_data[value] = np.zeros((new_data['count'],3))
                 else:
                     new_data[value] = np.zeros(new_data['count'])
-            new_data[value][:-1] = np.delete(snapshot.data[value],
-                                             np.concatenate((obj1_ind, obj2_ind, inds_to_remove)), axis=0)
+            new_data[value][:-1] = np.delete(snapshot.data[value],inds_to_remove, axis=0)
 
     new_data['pos'][-1] = new_pos
     new_data['vel'][-1] = new_vel
