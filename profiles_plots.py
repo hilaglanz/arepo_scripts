@@ -152,10 +152,10 @@ def get_radial_profile_for_snapshot(around_density_peak, around_objects, center,
 
     center = get_center_array(s, center)
     if central_id is not None:
-        center = s.pos[get_obj_index(s, central_id)]
+        center = s.pos[get_obj_index(s, central_id)][0]
 
     if max_distance is not None:
-        relevant_cells = get_cells_inside_radius(s,center, max_distance)
+        relevant_cells = get_cells_inside_radius(s, center, max_distance)
         cell_indices = np.intersect1d(cell_indices, relevant_cells)
 
     if relative_to_sink:
@@ -284,7 +284,7 @@ def get_line_profile_for_snapshot(around_density_peak, around_objects, center, m
             cell_indices, reference_r = get_cells_out_of_sink(s)
 
     if central_id is not None:
-        center = s.pos[get_obj_index(s, central_id)]
+        center = s.pos[get_obj_index(s, central_id)][0]
 
     relevant_cells = np.where(
         (absolute(s.pos[:,(motion_axis + 1) % 3] - center[(motion_axis + 1) % 3]) < reference_r + 2 * s.data["vol"] ** (1.0 / 3)) &
