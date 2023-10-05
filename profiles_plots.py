@@ -484,4 +484,4 @@ if __name__ == "__main__":
                       around_objects=args.around_objects, motion_axis=args.motion_axis,
                       around_density_peak=args.around_density_peak,  line_profile=args.line_profile,
                       output_txt_files=args.output_txt_files, relative_to_sink=args.relative_to_sink,
-                      max_distance=args.max_distance central_id=args.central_id)
+                      max_distance=args.max_distance, central_id=args.central_id)
