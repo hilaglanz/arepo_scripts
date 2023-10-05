@@ -50,7 +50,7 @@ def ReplaceInnerBinaryWithPointMass(snapshot_file, new_file_name, obj1_id, obj2_
     for value in snapshot.data:
         if value in ["boxsize"]:
             continue
-        new_data[value][:-1] = np.delete(snapshot.data[value], [obj1_ind, obj2_id])
+        new_data[value][:-1] = np.delete(snapshot.data[value], [obj1_ind, obj2_ind])
 
     new_data['pos'][-1] = new_pos
     new_data['vel'][-1] = new_vel
