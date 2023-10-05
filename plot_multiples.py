@@ -2,14 +2,14 @@ from loadmodules import *
 from time_plots import *
 
 def get_obj_index(snapshot, obj_id):
-    obj_index, = np.where(snapshot.id == obj_id)
+    obj_index = np.where(snapshot.id == obj_id)
 
     return obj_index
 
 def get_separation(snapshot, obj_id, center, take_inner_mass=False):
     obj_index = get_obj_index(snapshot, obj_id)
     if take_inner_mass:
-        inner_cells, = np.where(((snapshot.pos-center)**2).sum(axis=1) < ((snapshot.pos[obj_index]-center)**2).sum())
+        inner_cells = np.where(((snapshot.pos-center)**2).sum(axis=1) < ((snapshot.pos[obj_index]-center)**2).sum())
         inner_mass = snapshot.mass[inner_cells].sum()
         inner_pos = (snapshot.pos[inner_cells] * snapshot.mass[inner_cells][:,None]).sum(axis=0)/inner_mass
         center = inner_pos
@@ -53,13 +53,13 @@ def get_surrounding_value(snapshot, obj_id, size, value):
 def calculate_separation_vector(snapshot, obj_id, center, center_obj_id, take_inner_mass=False):
     obj_index = get_obj_index(snapshot, obj_id)
     if take_inner_mass:
-        inner_cells, = np.where(
+        inner_cells = np.where(
             ((snapshot.pos - center) ** 2).sum(axis=1) < ((snapshot.pos[obj_index] - center) ** 2).sum())
         center = (snapshot.pos[inner_cells]**2).sum(axis=0)**0.5
     else:
-        center = snapshot.pos[np.where(snapshot.id == center_obj_id)]
+        center = snapshot.pos[np.where(snapshot.id == center_obj_id)][0]
 
-    return snapshot.pos[obj_index] - center
+    return snapshot.pos[obj_index][0] - center
 
 def get_drag(snapshot, obj_id, center, center_obj_id, take_inner_mass=False):
     obj_index = get_obj_index(snapshot, obj_id)
