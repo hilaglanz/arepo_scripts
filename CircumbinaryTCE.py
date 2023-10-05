@@ -84,7 +84,7 @@ def ReplaceInnerBinaryWithPointMass(snapshot_file, new_file_name, obj1_id, obj2_
     new_data['type'][-1] = snapshot.type[obj1_ind]
     new_data['soft'][-1] = new_soft
 
-    gadget_write_ics(new_file_name, new_data, format='hdf5', double='double')
+    gadget_write_ics(new_file_name, new_data, format='hdf5', double=True)
 
 
 
