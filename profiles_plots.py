@@ -5,6 +5,7 @@ import numpy as np
 import pylab
 from loadmodules import *
 from BinariesICs import *
+from plot_multiples import *
 
 
 def set_new_fig_properties():
@@ -93,7 +94,7 @@ def compute_value(s, testing_value, center=None):
 def plot_profiles(output_dir, snapshot_name, plotting_dir, testing_value="rho", snapshot_number_array=[0, 8, 10],
                   center=False, log=True, new_fig=True, around_objects=False, around_density_peak=False,
                   line_profile=False, motion_axis=0, object_num=0, output_txt_files=False, relative_to_sink=False,
-                  max_distance=None):
+                  max_distance=None, central_id=None):
     if not os.path.exists(plotting_dir):
         os.mkdir(plotting_dir)
 
@@ -108,13 +109,15 @@ def plot_profiles(output_dir, snapshot_name, plotting_dir, testing_value="rho", 
             p, s, suffix, testing_value = get_line_profile_for_snapshot(around_density_peak, around_objects, center,
                                                                           motion_axis, object_num, output_dir,
                                                                           snapshot_name, snapshot_number, testing_value,
-                                                                        relative_to_sink, max_distance=max_distance)
+                                                                        relative_to_sink, max_distance=max_distance,
+                                                                        central_id=central_id)
             suffix += "_line_" + str(motion_axis)
         else:
             p, s, suffix, testing_value = get_radial_profile_for_snapshot(around_density_peak, around_objects, center,
                                                                       motion_axis, object_num, output_dir,
                                                                       snapshot_name, snapshot_number, testing_value,
-                                                                          relative_to_sink, max_distance=max_distance)
+                                                                          relative_to_sink, max_distance=max_distance,
+                                                                          central_id=central_id)
 
         if output_txt_files:
             write_txt_file(p, plotting_dir, snapshot_number, s.time, suffix, testing_value)
@@ -132,7 +135,7 @@ def plot_profiles(output_dir, snapshot_name, plotting_dir, testing_value="rho", 
 
 def get_radial_profile_for_snapshot(around_density_peak, around_objects, center, motion_axis, object_num, output_dir,
                                     snapshot_name, snapshot_number, testing_value, relative_to_sink=False,
-                                    max_distance=None):
+                                    max_distance=None, central_id=None):
     suffix = ""
     if around_objects:
         s, cell_indices, center, suffix = get_relevant_plotting_parameters_around_object(around_density_peak,
@@ -148,7 +151,9 @@ def get_radial_profile_for_snapshot(around_density_peak, around_objects, center,
         cell_indices = np.where(s.data['type'] == 0)
 
     center = get_center_array(s, center)
-    
+    if central_id is not None:
+        center = s.pos[get_obj_index(s, central_id)]
+
     if max_distance is not None:
         relevant_cells = get_cells_inside_radius(s,center, max_distance)
         cell_indices = np.intersect1d(cell_indices, relevant_cells)
@@ -260,7 +265,7 @@ def plot_snapshot_cells_around_center(cell_indices, center, s, testing_value):
 
 def get_line_profile_for_snapshot(around_density_peak, around_objects, center, motion_axis, object_num, output_dir,
                                     snapshot_name, snapshot_number, testing_value, relative_to_sink=False,
-                                  max_distance=None):
+                                  max_distance=None, central_id=None):
     suffix = ""
     reference_r = 0
     if around_objects:
@@ -277,6 +282,9 @@ def get_line_profile_for_snapshot(around_density_peak, around_objects, center, m
         cell_indices = np.where(s.data['mass'] != 0)
         if relative_to_sink:
             cell_indices, reference_r = get_cells_out_of_sink(s)
+
+    if central_id is not None:
+        center = s.pos[get_obj_index(s, central_id)]
 
     relevant_cells = np.where(
         (absolute(s.pos[:,(motion_axis + 1) % 3] - center[(motion_axis + 1) % 3]) < reference_r + 2 * s.data["vol"] ** (1.0 / 3)) &
@@ -374,7 +382,7 @@ def get_relevant_plotting_parameters_around_object(around_density_peak, motion_a
     return s, i, center, suffix
 
 
-def get_relevant_plotting_parameters_for_single(around_density_peak, output_dir, snapshot_name, snapshot_number):
+def get_relevant_plotting_parameters_for_single(around_density_peak, output_dir, snapshot_name, snapshot_number, rho_cut=100):
     print("doing single object")
     s = gadget_readsnap(snapshot_number, output_dir, snapshot_name)
     if around_density_peak:
@@ -383,7 +391,7 @@ def get_relevant_plotting_parameters_for_single(around_density_peak, output_dir,
     else:
         center = s.centerofmass()
     print("around center: ", center)
-    i = np.where(s.rho > 100)
+    i = np.where(s.rho > rho_cut)
     return s, i, center
 
 
@@ -446,6 +454,7 @@ def InitParser():
                         default=False)
     parser.add_argument('--max_distance', type=float,  help='radius around the object of interest to calculate for',
                         default=None)
+    parser.add_argument('--central_id', type=int, help='id of the cell to centeralize around', default=None)
 
     return parser
 
@@ -462,17 +471,17 @@ if __name__ == "__main__":
                       around_objects=args.around_objects, motion_axis=args.motion_axis,
                       around_density_peak=args.around_density_peak, line_profile=args.line_profile, object_num=1,
                       output_txt_files=args.output_txt_files, relative_to_sink=args.relative_to_sink,
-                      max_distance=args.max_distance)
+                      max_distance=args.max_distance, central_id=args.central_id)
         plot_profiles(output_dir=args.output_dir, snapshot_name=args.snapshot_name, plotting_dir=args.plotting_dir,
                       testing_value=args.value, snapshot_number_array=args.snapshot_nums, log=args.logplot,
                       around_objects=args.around_objects, motion_axis=args.motion_axis,
                       around_density_peak=args.around_density_peak, line_profile=args.line_profile, object_num=2,
                       output_txt_files=args.output_txt_files, new_fig=True,relative_to_sink=args.relative_to_sink,
-                      max_distance=args.max_distance)
+                      max_distance=args.max_distance, central_id=args.central_id)
     else:
         plot_profiles(output_dir=args.output_dir, snapshot_name=args.snapshot_name, plotting_dir=args.plotting_dir,
                       testing_value=args.value, snapshot_number_array=args.snapshot_nums, log=args.logplot,
                       around_objects=args.around_objects, motion_axis=args.motion_axis,
                       around_density_peak=args.around_density_peak,  line_profile=args.line_profile,
                       output_txt_files=args.output_txt_files, relative_to_sink=args.relative_to_sink,
-                      max_distance=args.max_distance)
+                      max_distance=args.max_distance central_id=args.central_id)
