@@ -119,8 +119,7 @@ if __name__ == "__main__":
         ReplaceInnerBinaryWithPointMass(snapshot_file=args.giant_snapshot_file, new_file_name=args.ic_file_name,
                                         obj1_id=args.replace_id1, obj2_id=args.replace_id2)
         print("replaced 2 point masses with 1")
-        return
-
-    AddPointMassToFile(args.giant_snapshot_file, new_file_name=args.ic_file_name,
-                       separation=args.outer_separation, point_mass=args.outer_mass * msol,
-                       initial_inner_separation=args.initial_inner_separation)
+    else:
+        AddPointMassToFile(args.giant_snapshot_file, new_file_name=args.ic_file_name,
+                           separation=args.outer_separation, point_mass=args.outer_mass * msol,
+                           initial_inner_separation=args.initial_inner_separation)
