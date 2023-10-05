@@ -35,8 +35,8 @@ def copy_old_data(snapshot):
 
 def ReplaceInnerBinaryWithPointMass(snapshot_file, new_file_name, obj1_id, obj2_id, remove_to_radius=None):
     snapshot = gadget_readsnapname(snapshot_file)
-    obj1_ind = get_obj_index(snapshot, obj1_id)[0]
-    obj2_ind = get_obj_index(snapshot, obj2_id)[0]
+    obj1_ind = get_obj_index(snapshot, obj1_id)[0][0]
+    obj2_ind = get_obj_index(snapshot, obj2_id)[0][0]
     num_gas_to_remove = 0
     gas_inds_to_remove = np.array([])
     new_pos = ((snapshot.pos[obj1_ind] * snapshot.mass[obj1_ind]).sum(axis=0) +
