@@ -152,6 +152,7 @@ def get_radial_profile_for_snapshot(around_density_peak, around_objects, center,
 
     center = get_center_array(s, center)
     if central_id is not None:
+        s = gadget_readsnap(snapshot_number, output_dir, snapshot_name, loadonlytype=[0,1])
         center = s.pos[get_obj_index(s, central_id)][0]
 
     if max_distance is not None:
