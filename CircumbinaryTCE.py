@@ -32,10 +32,13 @@ def copy_old_data(snapshot):
 
     return data
 
-def ReplaceInnerBinaryWithPointMass(snapshot_file, new_file_name, obj1_id, obj2_id):
+
+def ReplaceInnerBinaryWithPointMass(snapshot_file, new_file_name, obj1_id, obj2_id, remove_to_radius=None):
     snapshot = gadget_readsnapname(snapshot_file)
     obj1_ind = get_obj_index(snapshot, obj1_id)
     obj2_ind = get_obj_index(snapshot, obj2_id)
+    num_gas_to_remove = 0
+    inds_to_remove = []
     new_pos = ((snapshot.pos[obj1_ind] * snapshot.mass[obj1_ind]).sum() +
                (snapshot.pos[obj2_ind] * snapshot.mass[obj2_ind]).sum()) / \
               (snapshot.mass[obj1_ind] + snapshot.mass[obj2_ind])
@@ -45,24 +48,30 @@ def ReplaceInnerBinaryWithPointMass(snapshot_file, new_file_name, obj1_id, obj2_
               (snapshot.mass[obj1_ind] + snapshot.mass[obj2_ind])
     new_soft = snapshot.soft[obj1_ind] + (((snapshot.pos[obj1_ind] - snapshot.pos[obj2_ind])**2).sum()**0.5) / 2
 
-    new_data = initialized_new_data(snapshot.npart - 1, snapshot.npart - 3)
+    if remove_to_radius is not None:
+        inds_to_remove = np.where((snapshot.type == 0) &
+                                 (((snapshot.pos - new_pos)**2).sum(axis=1)**0.5 < remove_to_radius))[0]
+        num_gas_to_remove = len(inds_to_remove)
+
+    new_data = initialized_new_data(snapshot.npart - 1 - num_gas_to_remove, snapshot.npart - 3 - num_gas_to_remove)
     new_data['boxsize'] = snapshot.boxsize
-    new_data['count'] = snapshot.npart - 1
+    new_data['count'] = snapshot.npart - 1 - num_gas_to_remove
 
     for value in snapshot.data:
         print("updating value: ",value)
         if value in ["boxsize","count"]:
             continue
-        if value not in new_data.keys():
-            if len(snapshot.data[value].shape) > 1:
-                new_data[value] = np.zeros((snapshot.npart - 1,3))
-            else:
-                new_data[value] = np.zeros(snapshot.npart - 1)
         if value in ["u","temp","B","rho","cmce",'grar', 's', 'u', 'bfld', 'divb', 'dvba','pres', 'grap',
                      'csnd', 'temp', 'tstp','grav', 'vol'] or 'xnuc' in value:
-            new_data[value] = snapshot.data[value]
+            new_data[value] = np.delete(snapshot.data[value], inds_to_remove, axis=0)
         else:
-            new_data[value][:-1] = np.delete(snapshot.data[value], [obj1_ind, obj2_ind], axis=0)
+            if value not in new_data.keys():
+                if len(snapshot.data[value].shape) > 1:
+                    new_data[value] = np.zeros((new_data['count'],3))
+                else:
+                    new_data[value] = np.zeros(new_data['count'])
+            new_data[value][:-1] = np.delete(snapshot.data[value],
+                                             np.concatenate((obj1_ind, obj2_ind, inds_to_remove)), axis=0)
 
     new_data['pos'][-1] = new_pos
     new_data['vel'][-1] = new_vel
@@ -118,6 +127,8 @@ def InitParser():
     parser.add_argument('--ic_file_name', type=str, help='path to save the ic file', default="tce.ic.dat")
     parser.add_argument('--replace_id1', type=int, help='id of the first obj to remove and replace', default=None)
     parser.add_argument('--replace_id2', type=int, help='id of the second obj to remove and replace', default=None)
+    parser.add_argument('--remove_to_radius', type=float, help='radius around the com of the merging point mass to '
+                                                               'remove all gas cells', default=None)
     return parser
 
 
@@ -130,7 +141,8 @@ if __name__ == "__main__":
 
     if args.replace_id1 is not None and args.replace_id2 is not None:
         ReplaceInnerBinaryWithPointMass(snapshot_file=args.giant_snapshot_file, new_file_name=args.ic_file_name,
-                                        obj1_id=args.replace_id1, obj2_id=args.replace_id2)
+                                        obj1_id=args.replace_id1, obj2_id=args.replace_id2,
+                                        remove_to_radius=args.remove_to_radius)
         print("replaced 2 point masses with 1")
     else:
         AddPointMassToFile(args.giant_snapshot_file, new_file_name=args.ic_file_name,
