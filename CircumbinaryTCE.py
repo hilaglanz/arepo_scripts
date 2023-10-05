@@ -50,9 +50,10 @@ def ReplaceInnerBinaryWithPointMass(snapshot_file, new_file_name, obj1_id, obj2_
     inds_to_remove = np.array([obj1_ind, obj2_ind])
     if remove_to_radius is not None:
         gas_inds_to_remove = np.where((snapshot.type == 0) &
-                                 (((snapshot.pos - new_pos)**2).sum(axis=1)**0.5 < remove_to_radius))[0]
+                                 (((snapshot.pos - new_pos)**2).sum(axis=1)**0.5 < remove_to_radius))
         num_gas_to_remove = len(inds_to_remove)
         if num_gas_to_remove > 0:
+            print("removing ", num_gas_to_remove, " gas cells")
             inds_to_remove = np.concatenate((inds_to_remove, gas_inds_to_remove))
 
     new_data = initialized_new_data(snapshot.npart - 1 - num_gas_to_remove, snapshot.npart - 3 - num_gas_to_remove)
@@ -87,7 +88,7 @@ def ReplaceInnerBinaryWithPointMass(snapshot_file, new_file_name, obj1_id, obj2_
         new_soft = snapshot.soft[obj1_ind] + (((snapshot.pos[obj1_ind] - snapshot.pos[obj2_ind])**2).sum()**0.5) / 2
         new_data['soft'][-1] = new_soft
     print("removed ", num_gas_to_remove, " gas cells")
-    
+
     gadget_write_ics(new_file_name, new_data, format='hdf5', double=True)
 
 
