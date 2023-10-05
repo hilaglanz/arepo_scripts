@@ -57,7 +57,8 @@ def ReplaceInnerBinaryWithPointMass(snapshot_file, new_file_name, obj1_id, obj2_
                 new_data[value] = np.zeros((snapshot.npart - 1,3))
             else:
                 new_data[value] = np.zeros(snapshot.npart - 1)
-        if value in ["u","temp","B","rho","cmce"]:
+        if value in ["u","temp","B","rho","cmce",'grar', 's', 'u', 'bfld', 'divb', 'dvba','pres', 'grap',
+                     'csnd', 'temp', 'tstp','grav', 'vol'] or 'xnuc' in value:
             new_data[value] = snapshot.data[value]
         else:
             new_data[value][:-1] = np.delete(snapshot.data[value], [obj1_ind, obj2_ind], axis=0)
