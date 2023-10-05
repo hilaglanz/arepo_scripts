@@ -146,13 +146,12 @@ def get_radial_profile_for_snapshot(around_density_peak, around_objects, center,
         testing_value = compute_value(s, testing_value, center)
 
     else:
-        s = gadget_readsnap(snapshot_number, output_dir, snapshot_name, loadonlytype=[0])
+        s = gadget_readsnap(snapshot_number, output_dir, snapshot_name, loadonlytype=[0,1])
         testing_value = compute_value(s, testing_value, center)
         cell_indices = np.where(s.data['type'] == 0)
 
     center = get_center_array(s, center)
     if central_id is not None:
-        s = gadget_readsnap(snapshot_number, output_dir, snapshot_name, loadonlytype=[0,1])
         center = s.pos[get_obj_index(s, central_id)][0]
 
     if max_distance is not None:
