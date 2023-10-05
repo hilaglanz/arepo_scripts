@@ -44,8 +44,8 @@ def ReplaceInnerBinaryWithPointMass(snapshot_file, new_file_name, obj1_id, obj2_
                (snapshot.pos[obj2_ind] * snapshot.mass[obj2_ind]).sum(axis=0)) / \
               (snapshot.mass[obj1_ind] + snapshot.mass[obj2_ind])
 
-    new_vel = ((snapshot.vel[obj1_ind] * snapshot.mass[obj1_ind]).sum() +
-               (snapshot.vel[obj2_ind] * snapshot.mass[obj2_ind]).sum()) / \
+    new_vel = ((snapshot.vel[obj1_ind] * snapshot.mass[obj1_ind]).sum(axis=0) +
+               (snapshot.vel[obj2_ind] * snapshot.mass[obj2_ind]).sum(axis=0)) / \
               (snapshot.mass[obj1_ind] + snapshot.mass[obj2_ind])
     inds_to_remove = np.array([obj1_ind, obj2_ind])
     print("placing new point mass at ", new_pos, " with velocity ", new_vel)
