@@ -66,14 +66,17 @@ def ReplaceInnerBinaryWithPointMass(snapshot_file, new_file_name, obj1_id, obj2_
             continue
         if value in ["u","temp","B","rho","cmce",'grar', 's', 'u', 'bfld', 'divb', 'dvba','pres', 'grap',
                      'csnd', 'temp', 'tstp','grav', 'vol'] or 'xnuc' in value:
-            new_data[value] = np.delete(snapshot.data[value], gas_inds_to_remove, axis=0)
+            if num_gas_to_remove > 0:
+                new_data[value] = np.delete(snapshot.data[value], gas_inds_to_remove, axis=0)
+            else:
+                new_data[value] = snapshot.data[value]
         else:
             if value not in new_data.keys():
                 if len(snapshot.data[value].shape) > 1:
                     new_data[value] = np.zeros((new_data['count'],3))
                 else:
                     new_data[value] = np.zeros(new_data['count'])
-            new_data[value][:-1] = np.delete(snapshot.data[value],inds_to_remove, axis=0)
+            new_data[value][:-1] = np.delete(snapshot.data[value], inds_to_remove, axis=0)
 
     new_data['pos'][-1] = new_pos
     new_data['vel'][-1] = new_vel
