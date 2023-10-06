@@ -32,6 +32,20 @@ def copy_old_data(snapshot):
 
     return data
 
+def get_mean_value_of_deleted(snapshot, gas_inds_to_remove, value):
+    if len(snapshot.data[value].shape) > 1:
+        mean = np.zeros((1,3))
+        for axis in range(3):
+            mean[axis] = (snapshot.data[value][gas_inds_to_remove,axis] *
+                          snapshot.mass[gas_inds_to_remove]).sum(axis=0) / \
+                         snapshot.mass[gas_inds_to_remove].sum()
+    else:
+        mean = (snapshot.data[value][gas_inds_to_remove] *
+                          snapshot.mass[gas_inds_to_remove]).sum(axis=0) / \
+                         snapshot.mass[gas_inds_to_remove].sum()
+
+    return mean
+
 
 def ReplaceInnerBinaryWithPointMass(snapshot_file, new_file_name, obj1_id, obj2_id, remove_to_radius=None):
     snapshot = gadget_readsnapname(snapshot_file)
@@ -50,14 +64,17 @@ def ReplaceInnerBinaryWithPointMass(snapshot_file, new_file_name, obj1_id, obj2_
     print("placing new point mass at ", new_pos, " with velocity ", new_vel)
     if remove_to_radius is not None:
         gas_inds_to_remove = np.where((snapshot.type == 0) & (((snapshot.pos - new_pos)**2).sum(axis=1)**0.5 < remove_to_radius))[0]
+        gas_id_to_replace = snapshot.id[gas_inds_to_remove[-1]]
+        gas_inds_to_remove = gas_inds_to_remove[:-1]
         num_gas_to_remove = len(gas_inds_to_remove)
-        if num_gas_to_remove > 0:
-            print("removing ", num_gas_to_remove, " gas cells, to radius ", remove_to_radius)
+
+        if num_gas_to_remove > 1:
+            print("removing ", num_gas_to_remove , " gas cells, to radius ", remove_to_radius)
             inds_to_remove = np.concatenate((inds_to_remove, gas_inds_to_remove))
 
-    new_data = initialized_new_data(snapshot.npart - 1 - num_gas_to_remove, snapshot.npart - 3 - num_gas_to_remove)
+    new_data = initialized_new_data(snapshot.npart - num_gas_to_remove - 1, snapshot.npart - 3 - num_gas_to_remove)
     new_data['boxsize'] = snapshot.boxsize
-    new_data['count'] = snapshot.npart - 1 - num_gas_to_remove
+    new_data['count'] = snapshot.npart - num_gas_to_remove - 1
 
     for value in snapshot.data:
         print("updating value: ",value)
@@ -65,7 +82,7 @@ def ReplaceInnerBinaryWithPointMass(snapshot_file, new_file_name, obj1_id, obj2_
             continue
         if value in ["u","temp","B","rho","cmce",'grar', 's', 'u', 'bfld', 'divb', 'dvba','pres', 'grap',
                      'csnd', 'temp', 'tstp','grav', 'vol'] or 'xnuc' in value:
-            if num_gas_to_remove > 0:
+            if num_gas_to_remove > 1:
                 new_data[value] = np.delete(snapshot.data[value], gas_inds_to_remove, axis=0)
             else:
                 new_data[value] = snapshot.data[value]
@@ -75,7 +92,17 @@ def ReplaceInnerBinaryWithPointMass(snapshot_file, new_file_name, obj1_id, obj2_
                     new_data[value] = np.zeros((new_data['count'],3))
                 else:
                     new_data[value] = np.zeros(new_data['count'])
+
             new_data[value][:-1] = np.delete(snapshot.data[value], inds_to_remove, axis=0)
+
+    if num_gas_to_remove > 1:
+        print("changing properties of gas with id ", gas_id_to_replace, " to the mean of all deleted gas cells")
+        replace_ind, = np.where(new_data['id'] == gas_id_to_replace)
+        for value in new_data.keys():
+            if value in ["boxsize", "count"]:
+                continue
+            new_data[value][replace_ind[0]] = get_mean_value_of_deleted(snapshot, gas_inds_to_remove, value)
+            print("new ", value, " = ", new_data[value][replace_ind[0]] )
 
     new_data['pos'][-1] = new_pos
     new_data['vel'][-1] = new_vel
