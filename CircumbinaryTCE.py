@@ -37,7 +37,7 @@ def get_mean_value_of_deleted(snapshot, gas_inds_to_remove, value):
         mean = np.zeros((1,3))
         for axis in range(3):
             mean[axis] = (snapshot.data[value][gas_inds_to_remove,axis] *
-                          snapshot.mass[gas_inds_to_remove]).sum(axis=0) / \
+                          snapshot.mass[gas_inds_to_remove,None]).sum(axis=0) / \
                          snapshot.mass[gas_inds_to_remove].sum()
     else:
         mean = (snapshot.data[value][gas_inds_to_remove] *
