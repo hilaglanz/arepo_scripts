@@ -38,6 +38,11 @@ def get_surrounding_rho(snapshot, obj_id, size):
 def get_surrounding_value(snapshot, obj_id, size, value):
     if value == "rho":
         return get_surrounding_rho(snapshot, obj_id, size)
+
+    if value == "unbounded_mass_frac":
+        indgas = snapshot.data['type'] == 0
+        snapshot.data["unbounded_mass"] = snapshot.data['pot'][indgas] + 0.5 * ((snapshot.data['vel'][indgas] ** 2).sum(axis=1))
+
     if value not in snapshot.data.keys():
         if snapshot.computeValueGas(value) != 0:
             print("could not add ", value, " for gas properties")
@@ -46,6 +51,8 @@ def get_surrounding_value(snapshot, obj_id, size, value):
     obj_index = get_obj_index(snapshot, obj_id)
     surrounding_cells = np.where((snapshot.type == 0) &
                                  (((snapshot.pos - snapshot.pos[obj_index]) ** 2).sum(axis=1)**0.5 < size))
+    if value == "unbounded_mass_frac":
+        return snapshot.data["unbounded_mass"][surrounding_cells].sum()
 
     com_value = (snapshot.data[value][surrounding_cells] * snapshot.mass[surrounding_cells][:, None]).sum(axis=0) / \
                 snapshot.mass[surrounding_cells].sum()
@@ -138,7 +145,7 @@ def plot_value_range(snapshot_list, snapshot_dir, plotting_dir, value, core_id=1
         elif value == "drag":
             values.append(get_drag(snapshot, around_object_id, center=snapshot.pos[get_obj_index(snapshot, core_id)],
                                   center_obj_id=core_id, take_inner_mass=take_inner_mass))
-        elif "unbounded_mass" in value:
+        elif "unbounded_mass" in value and not "surrounding" in value:
             unbounded_mass = snapshot.computeUnboundMass()
             if "dot" in value:
                 if time_prev == 0:
