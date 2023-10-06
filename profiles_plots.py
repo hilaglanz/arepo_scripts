@@ -85,6 +85,10 @@ def compute_value(s, testing_value, center=None):
         if "GAMMA" in s.config.keys():
             s.data["entr"] = s.data["pres"] / s.data["rho"] ** s.config["GAMMA"]
 
+    if testing_value == "unbounded_mass":
+        indgas = s.data['type'] == 0
+        s.data[testing_value] = s.data['pot'][indgas] + 0.5 * ((s.data['vel'][indgas] ** 2).sum(axis=1))
+
     if testing_value not in s.data.keys():
         s.computeValueGas(testing_value)
         
