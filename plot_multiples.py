@@ -54,7 +54,7 @@ def get_surrounding_value(snapshot, obj_id, size, value):
     surrounding_cells = np.where((snapshot.type == 0) &
                                  (((snapshot.pos - snapshot.pos[obj_index]) ** 2).sum(axis=1)**0.5 < size))
     if value == "unbounded_mass_frac":
-        return snapshot.data["unbounded_mass"][surrounding_cells].sum()
+        return snapshot.data["unbounded_mass"].sum()
 
     com_value = (snapshot.data[value][surrounding_cells] * snapshot.mass[surrounding_cells][:, None]).sum(axis=0) / \
                 snapshot.mass[surrounding_cells].sum()
