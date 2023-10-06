@@ -145,7 +145,8 @@ def plot_value_range(snapshot_list, snapshot_dir, plotting_dir, value, core_id=1
             if len(testing_value_splitted) > 2:
                 testing_value = "_".join(testing_value_splitted[1:])
             else:
-                testing_value = testing_value_splitted[-2]
+                testing_value = testing_value_splitted[-1]
+            print("calculating surrounding of ", testing_value)
             values.append(get_surrounding_value(snapshot, around_object_id, surrounding_radius, testing_value))
 
         elif value == "drag":
