@@ -88,7 +88,9 @@ def compute_value(s, testing_value, center=None):
     if testing_value == "unbounded_mass":
         indgas = s.data['type'] == 0
         s.data['e'] = s.data['pot'][indgas] + 0.5 * ((s.data['vel'][indgas] ** 2).sum(axis=1))
-        s.data[testing_value] = s.mass[np.where(s.data['e'] > 0)]
+        s.data[testing_value] = s.mass
+        for i in np.where(s.data["e"] < 0)[0]:
+            s.data[testing_value][i] = 0.0
 
     if testing_value not in s.data.keys():
         s.computeValueGas(testing_value)
