@@ -25,6 +25,18 @@ def compute_cumulative_mass(snapshot, center):
     snapshot.data['cum_mass'] = mcum / msol
     return
 
+def compute_cumulative_unbounded_mass(snapshot, center):
+    if "unbounded_mass" not in snapshot.data:
+        compute_unbounded_mass(snapshot)
+
+    rsort = snapshot.r(center=center).argsort()
+
+    mcum = np.zeros(snapshot.npart)
+    mcum[0] = snapshot.data["unbounded_mass"][rsort[0]]
+    for i in range(1, snapshot.npart):
+        mcum[rsort[i]] = mcum[rsort[i - 1]] + snapshot.data["unbounded_mass"][rsort[i]]
+    snapshot.data['cum_unbounded_mass'] = mcum / msol
+    return
 
 def compute_gas_to_magnetic_pressure(snapshot):
     if "B" not in snapshot.data.keys():
@@ -86,16 +98,24 @@ def compute_value(s, testing_value, center=None):
             s.data["entr"] = s.data["pres"] / s.data["rho"] ** s.config["GAMMA"]
 
     if testing_value == "unbounded_mass":
-        indgas = s.data['type'] == 0
-        s.data['e'] = s.data['pot'][indgas] + 0.5 * ((s.data['vel'][indgas] ** 2).sum(axis=1))
-        s.data[testing_value] = s.mass
-        for i in np.where(s.data["e"] < 0)[0]:
-            s.data[testing_value][i] = 0.0
+        compute_unbounded_mass(s)
+
+    if testing_value == "cum_unbounded_mass":
+        print("adding cummulative unbounded nass")
+        compute_cumulative_unbounded_mass(s, center)
 
     if testing_value not in s.data.keys():
         s.computeValueGas(testing_value)
         
     return testing_value
+
+
+def compute_unbounded_mass(s):
+    indgas = s.data['type'] == 0
+    s.data['e'] = s.data['pot'][indgas] + 0.5 * ((s.data['vel'][indgas] ** 2).sum(axis=1))
+    s.data["unbounded_mass"] = s.mass
+    for i in np.where(s.data["e"] < 0)[0]:
+        s.data["unbounded_mass"][i] = 0.0
 
 
 def plot_profiles(output_dir, snapshot_name, plotting_dir, testing_value="rho", snapshot_number_array=[0, 8, 10],
