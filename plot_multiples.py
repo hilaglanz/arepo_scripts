@@ -41,7 +41,8 @@ def get_surrounding_value(snapshot, obj_id, size, value):
 
     if value == "unbounded_mass_frac":
         indgas = snapshot.data['type'] == 0
-        snapshot.data["unbounded_mass"] = snapshot.data['pot'][indgas] + 0.5 * ((snapshot.data['vel'][indgas] ** 2).sum(axis=1))
+        snapshot.data["e"] = snapshot.data['pot'][indgas] + 0.5 * ((snapshot.data['vel'][indgas] ** 2).sum(axis=1))
+        snapshot.data["unbounded_mass"] = snapshot.mass[np.where(snapshot.data["e"] > 0)]
 
     if value not in snapshot.data.keys():
         if snapshot.computeValueGas(value) != 0:
