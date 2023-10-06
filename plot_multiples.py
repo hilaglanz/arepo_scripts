@@ -38,6 +38,10 @@ def get_surrounding_rho(snapshot, obj_id, size):
 def get_surrounding_value(snapshot, obj_id, size, value):
     if value == "rho":
         return get_surrounding_rho(snapshot, obj_id, size)
+    if value not in snapshot.data.keys():
+        if snapshot.computeValueGas(value) != 0:
+            print("could not add ", value, " for gas properties")
+            return
 
     obj_index = get_obj_index(snapshot, obj_id)
     surrounding_cells = np.where((snapshot.type == 0) &
