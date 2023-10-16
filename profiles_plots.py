@@ -116,6 +116,8 @@ def compute_unbounded_mass(s):
     s.data["unbounded_mass"] = s.mass
     for i in np.where(s.data["e"] < 0)[0]:
         s.data["unbounded_mass"][i] = 0.0
+    for i in np.where(s.type != 0):
+        s.data["unbounded_mass"][i] = 0.0
 
 
 def plot_profiles(output_dir, snapshot_name, plotting_dir, testing_value="rho", snapshot_number_array=[0, 8, 10],
