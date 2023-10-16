@@ -202,7 +202,7 @@ def get_radial_profile_for_snapshot(around_density_peak, around_objects, center,
     else:
         shells = 200
         if "cum_" in testing_value:
-            shells = s.nparticlesall[0]/100
+            shells = ceil(s.nparticlesall[0]/100)
         p = plot_snapshot_cells_around_center(cell_indices, center, s, testing_value,shells=shells)
 
     return p, s, suffix, testing_value
