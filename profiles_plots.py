@@ -198,7 +198,10 @@ def get_radial_profile_for_snapshot(around_density_peak, around_objects, center,
         sorted_ind = np.argsort(distances)
         p = np.row_stack((values[sorted_ind], distances[sorted_ind]))
     else:
-        p = plot_snapshot_cells_around_center(cell_indices, center, s, testing_value)
+        shells = 200
+        if "cumulative" in testing_value:
+            shells = s.nparticlesall[0]/100
+        p = plot_snapshot_cells_around_center(cell_indices, center, s, testing_value,shells=shells)
 
     return p, s, suffix, testing_value
 
@@ -272,8 +275,11 @@ def mirror_values(s, cells, testing_value, right_to_left=True):
 
     return half_values, mode
 
-def plot_profile_arrays_around_center(distances, values, center, mode):
-    nshells = 200
+def plot_profile_arrays_around_center(distances, values, center, mode, shells=None):
+    if shells is None:
+        nshells = 200
+    else:
+        nshells = shells
     dr = 0
     if type(center) == list:
         center = pylab.array(center)
@@ -283,11 +289,12 @@ def plot_profile_arrays_around_center(distances, values, center, mode):
                                    center[1], center[2])
     return p
 
-def plot_snapshot_cells_around_center(cell_indices, center, s, testing_value):
+def plot_snapshot_cells_around_center(cell_indices, center, s, testing_value, shells=None):
     values, mode = get_plotting_mode_and_array(s, cell_indices, testing_value)
-
+    if shells is None:
+        shells = 200
     return plot_profile_arrays_around_center(s.data['pos'].astype('float64')[cell_indices],
-                                   values, center, mode)
+                                   values, center, mode, shells=shells)
 
 
 def get_line_profile_for_snapshot(around_density_peak, around_objects, center, motion_axis, object_num, output_dir,
