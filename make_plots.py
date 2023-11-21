@@ -51,25 +51,76 @@ def change_snap_units(loaded_snap):
         print("changing units of ", key, " by a factor of ", basic_units[name_and_units[key].unit_name].factor)
         loaded_snap.data[key] *= basic_units[name_and_units[key].unit_name].factor
 
+def copy_basic_units(old_dictionary, new_dictionary=None):
+    if new_dictionary is None:
+        new_dictionary = {}
+    print("replacing existing dictionary")
+    for key in basic_units.keys():
+        new_dictionary[key] = old_dictionary[key]
+
+    return new_dictionary
+def copy_current_units():
+    return copy_basic_units(basic_units)
+def restore_basic_units(old_basic_units):
+    copy_basic_units(old_basic_units, new_dictionary=basic_units)
+
+
+def regularize_length_units(boxsize):
+    if basic_units["length"].unit != "cm":
+        return
+
+    au = 1.495978707*10**13
+    if basic_units["length"].factor <= 1.0/parsec or boxsize > 2 * parsec:
+        basic_units["length"].factor /= parsec
+        basic_units["length"].unit = r'$pc'
+        print("changed length units to pc")
+
+    elif basic_units["length"].factor <= 1.0/au or boxsize > 2 * au:
+        basic_units["length"].factor /= au
+        basic_units["length"].unit = r'$AU$'
+        print("changed length units to AU")
+
+    elif basic_units["length"].factor <= 1.0/rsol or boxsize > 2 * rsol:
+        basic_units["length"].factor /= rsol
+        basic_units["length"].unit = r'$R_\odot$'
+        print("changed length units to Rsun")
+def regularize_time_units(snapshot):
+    if basic_units["time"].unit != "s":
+        return
+
+    if basic_units["time"].factor <= 1/yr or snapshot.time * basic_units["time"].factor > yr:
+        basic_units["time"].factor /= yr
+        basic_units["time"].unit = "years"
+    elif basic_units["time"].factor <= 1/day or snapshot.time * basic_units["time"].factor > day:
+        basic_units["time"].factor /= day
+        basic_units["time"].unit = "day"
+    elif basic_units["time"].factor <= 1/hour or snapshot.time * basic_units["time"].factor > hour:
+        basic_units["time"].factor /= hour
+        basic_units["time"].unit = "hours"
+
+
 def change_unit_conversion(factor_length, factor_velocity, factor_mass):
-    basic_units["rho"].factor = factor_mass / (factor_length ** 3)
-    basic_units["length"].factor = factor_length
-    basic_units["vol"].factor = factor_length ** 3
-    basic_units["vel"].factor= factor_velocity
-    basic_units["ang_mom"].factor= factor_velocity * factor_length
-    basic_units["acce"].factor= (factor_velocity ** 2) / factor_length
-    basic_units["mass"].factor = factor_mass
-    basic_units["time"].factor = (factor_length/factor_velocity)
-    basic_units["pres"].factor = (factor_mass * factor_velocity ** 2) / (factor_length ** 3) # mass*acc/area
-    basic_units["force"].factor = (factor_mass * factor_velocity ** 2) / factor_length # mass*acc
-    #basic_units["entr"].factor = basic_units["pres"].factor / (basic_units["rho"].factor ** (5.0 / 3))
-    basic_units["u"].factor = factor_mass * (factor_velocity ** 2)
+    basic_units["rho"].factor *= (factor_mass / (factor_length ** 3))
+    basic_units["length"].factor *= factor_length
+    basic_units["vol"].factor *= factor_length ** 3
+    basic_units["vel"].factor *= factor_velocity
+    basic_units["ang_mom"].factor *= factor_velocity * factor_length
+    basic_units["acce"].factor *= ((factor_velocity ** 2) / factor_length)
+    basic_units["mass"].factor *= factor_mass
+    basic_units["time"].factor *= (factor_length/factor_velocity)
+    basic_units["pres"].factor *= ((factor_mass * factor_velocity ** 2) / (factor_length ** 3)) # mass*acc/area
+    basic_units["force"].factor *= ((factor_mass * factor_velocity ** 2) / factor_length) # mass*acc
+    #basic_units["entr"].factor = (basic_units["pres"].factor / (basic_units["rho"].factor ** (5.0 / 3)))
+    basic_units["u"].factor *= (factor_mass * (factor_velocity ** 2))
     # TODO: convert also temperature?
 def project_vector(v,r):
     dist = np.sqrt((r*r).sum(axis=1))
     return ((r*v).sum(axis=1)) / dist
 
-def plot_stream(loaded_snap, value='vel', xlab='x', ylab='y', axes=[0,1], box=False, res=1024, numthreads=1):
+def plot_stream(loaded_snap, value='vel', xlab='x', ylab='y', axes=[0,1], box=False, res=1024, numthreads=1, center=None):
+    if center is None:
+        center = loaded_snap.center
+
     loaded_snap.data[value + xlab] = loaded_snap.data[value][:, axes[0]]
     loaded_snap.data[value + ylab] = loaded_snap.data[value][:, axes[1]]
     slice_velx = loaded_snap.get_Aslice(value + xlab, box=box, res=res, center=center, numthreads=numthreads)
@@ -83,64 +134,41 @@ def plot_stream(loaded_snap, value='vel', xlab='x', ylab='y', axes=[0,1], box=Fa
     # scale=50)#*loaded_snap.parameters['BoxSize']/box[0])
 
 def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=False,logplot=True, res=1024, numthreads=1,
-                      relative_to_sink_id=None, center=True,plot_points=True, additional_points_size=30,
+                      relative_to_sink_id=None, central_id=None, center=True,plot_points=True, additional_points_size=30,
                       additional_points_shape='X', additional_points_color='w', unit_length='cm', unit_velocity="$cm/s$",
                       unit_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
                       newfig=True, axes=[0,1], modified_units = False, ignore_types=[], colorbar=True,
-                      plot_xlabel=True, plot_ylabel=True):
-    label = value
-    convert_to_cgs = True
+                      plot_xlabel=True, plot_ylabel=True, factor_value=1.0, units_value=None):
 
-    if unit_velocity is not None:
-        basic_units["vel"].unit = unit_velocity
-        basic_units["acce"].unit = r'$' + unit_velocity + '^2 /' + unit_length + '$'
-        basic_units["time"].unit = r'$' + unit_length + "/" + unit_velocity + '$'
-        basic_units["ang_mom"].unit = r'$' + unit_length + "\cdot " + unit_velocity + '$'
-        basic_units["vol"].unit = r'$' + unit_length + '^3$'
-        basic_units["length"].unit = r'$' + unit_length + '$'
+    if box == False:
+        box = [loaded_snap.boxsize, loaded_snap.boxsize]
 
-        if unit_density is not None:
-            basic_units["pres"].unit = r'$' + unit_density + '\cdot' + unit_velocity + '^2$'
-        else:
-            basic_units["pres"].unit = r'$\rho_\infty \cdot ' + unit_velocity + '^2$'
-
-        convert_to_cgs = False
-
-    if unit_density is not None:
-        basic_units["rho"].unit = unit_density
-        convert_to_cgs = False
-
-    if not modified_units:
-        if convert_to_cgs:
-            change_unit_conversion(factor_length= float(loaded_snap.parameters["UnitLength_in_cm"]),
-                                   factor_velocity=float(loaded_snap.parameters["UnitVelocity_in_cm_per_s"]),
-                                   factor_mass= float(loaded_snap.parameters["UnitMass_in_g"]))
-            print("converting to cgs units")
-
+    change_basic_units(loaded_snap, unit_density, unit_length, unit_velocity)
+    change_value_units(value, units_value, factor_value)
     change_snap_units(loaded_snap)
-    modified_units = True
 
     print("units: ")
     for val in name_and_units.values():
         print(val.name, basic_units[val.unit_name].factor)
-    loaded_snap, value = calculate_label_and_value(loaded_snap, value, relative_to_sink_id)
-
-    if value in name_and_units.keys():
-        label = name_and_units[value].name
-        if name_and_units[value].unit_name != "none":
-            label += " [" + basic_units[name_and_units[value].unit_name].unit + "]"
+    loaded_snap, value = calculate_label_and_value(loaded_snap, value, relative_to_sink_id, central_id=central_id,)
 
     print(value)
+
+    label = extract_label(value)
     xlab = chr(ord('x') + axes[0])
     ylab = chr(ord('x') + axes[1])
+
+    if central_id is not None:
+        center = loaded_snap.pos[np.where(loaded_snap.id == central_id)][0]
+        print("centralizing around id ", central_id, " at ", center)
 
     loaded_snap.plot_Aslice(value, logplot=logplot, colorbar=colorbar, cblabel=label, cmap=cmap, center=center, vrange=vrange,
                                   box=box, res=res, numthreads=numthreads, newfig=newfig, axes=axes,
                             minimum=min(1e-8, 0.1*vrange[0]))
-    if box == False:
-        box = [loaded_snap.boxsize, loaded_snap.boxsize]
+
     if plot_points:
-        points, = np.where((loaded_snap.type > 0) & (loaded_snap.type not in ignore_types))
+        points = [idx for idx in range(loaded_snap.npart) if (loaded_snap.type[idx] not in ignore_types) and
+                  (loaded_snap.type[idx] > 0)]
         if len(points) > 0:
             print("plotting points")
             for point in points:
@@ -158,13 +186,94 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
                     print(circ)
                     gca().add_patch(circ)
     if plot_velocities:
-        plot_stream(loaded_snap, value='vel', xlab=xlab, ylab=ylab, axes=axes, box=box, res=res, numthreads=numthreads)
+        plot_stream(loaded_snap, value='vel', xlab=xlab, ylab=ylab, axes=axes, box=box, res=res, numthreads=numthreads,
+                    center=center)
     elif plot_bfld:
-        plot_stream(loaded_snap, value='bfld', xlab=xlab, ylab=ylab, axes=axes, box=box, res=res, numthreads=numthreads)
+        plot_stream(loaded_snap, value='bfld', xlab=xlab, ylab=ylab, axes=axes, box=box, res=res, numthreads=numthreads,
+                    center=center)
+    '''
+    regularize_length_units(max(box))
+    change_ticks(xaxis=True)
+    change_ticks(xaxis=False)
+    '''
     if plot_xlabel:
-        xlabel(xlab + ' [' + unit_length + ']', loc="left")
+        xlabel(xlab + ' [' + basic_units["length"].unit + ']', loc="left")
     if plot_ylabel:
-        ylabel(ylab + ' [' + unit_length + ']')
+        ylabel(ylab + ' [' + basic_units["length"].unit + ']')
+
+
+def change_ticks(xaxis=True):
+    ticklabels = []
+    if xaxis:
+        ticks = xticks()
+    else:
+        ticks = yticks()
+
+    for tick in ticks:
+        if (tick == 0):
+            ticklabels += [r'$0.0$']
+        else:
+            ticklabels += [r'$%.2f \cdot 10^{%d}$' % (tick * basic_units["length"].factor /
+                                                       10 ** (ceil(log10(abs(tick * basic_units["length"].factor)))),
+                                                       ceil(log10(abs(tick * basic_units["length"].factor))))]
+    if xaxis:
+        xticks(ticks, ticklabels, size=24, y=-0.1, va='baseline')
+    else:
+        yticks(ticks, ticklabels, size=24, ha='right')
+
+
+def extract_label(value):
+    label = value
+    if value in name_and_units.keys():
+        label = name_and_units[value].name
+        if name_and_units[value].unit_name != "none":
+            label += " [" + basic_units[name_and_units[value].unit_name].unit + "]"
+    return label
+
+
+def change_basic_units(loaded_snap, unit_density, unit_length, unit_velocity):
+    convert_to_cgs = True
+    if unit_velocity is not None:
+        basic_units["vel"].unit = unit_velocity
+        basic_units["acce"].unit = r'$' + unit_velocity + '^2 /' + unit_length + '$'
+        basic_units["time"].unit = r'$' + unit_length + "/" + unit_velocity + '$'
+        basic_units["ang_mom"].unit = r'$' + unit_length + "\cdot " + unit_velocity + '$'
+        basic_units["vol"].unit = r'$' + unit_length + '^3$'
+        basic_units["length"].unit = r'$' + unit_length + '$'
+
+        if unit_density is not None:
+            basic_units["pres"].unit = r'$' + unit_density + '\cdot' + unit_velocity + '^2$'
+        else:
+            basic_units["pres"].unit = r'$\rho_\infty \cdot ' + unit_velocity + '^2$'
+
+        convert_to_cgs = False
+    if unit_density is not None:
+        basic_units["rho"].unit = unit_density
+        convert_to_cgs = False
+    if convert_to_cgs:
+        change_unit_conversion(factor_length=float(loaded_snap.parameters["UnitLength_in_cm"]),
+                               factor_velocity=float(loaded_snap.parameters["UnitVelocity_in_cm_per_s"]),
+                               factor_mass=float(loaded_snap.parameters["UnitMass_in_g"]))
+        print("converting to cgs units")
+
+
+def change_value_units(value, units_value, factor_value):
+    if factor_value is None:
+        return
+
+    if value in basic_units.keys():
+        basic_units[value].factor = factor_value
+        print("changing ", value, " factor to ", factor_value)
+        if units_value is not None and units_value != "None":
+            basic_units[value].unit = units_value
+            print("changing ", value, " units to ", units_value)
+    elif "size" in value and value.split("_size")[0] in basic_units.keys():
+        basic_units[value.split("_size")[0]].factor = factor_value
+        print("changing ", value.split("_size")[0], " factor to ", factor_value)
+        if units_value is not None and units_value != "None":
+            basic_units[value.split("_size")[0]].unit = units_value
+            print("changing ", value.split("_size")[0], " units to ", units_value)
+
 
 def get_value_at_inf(value, data):
     if value not in data:
@@ -181,7 +290,7 @@ def get_value_at_inf(value, data):
 
     return val_inf
 
-def calculate_label_and_value(loaded_snap, value, relative_to_sink_id):
+def calculate_label_and_value(loaded_snap, value, relative_to_sink_id, central_id=None):
     if "xnuc" in value:
         loaded_snap.data["rho" + value] = loaded_snap.rho * loaded_snap.data[value]
         value = "rho" + value
@@ -221,7 +330,7 @@ def calculate_label_and_value(loaded_snap, value, relative_to_sink_id):
         add_name_and_unit(value, "Drag Force" + value.split('_')[-1], "force")
 
     if "_size" in value:
-        loaded_snap.data[value] = np.sqrt((loaded_snap.data[value] ** 2).sum(axis=1))
+        loaded_snap.data[value] = np.sqrt((loaded_snap.data[value.split('_size')[0]] ** 2).sum(axis=1))
 
     if "vort" in value:
         loaded_snap.data['vort_x'] = loaded_snap.data["vort"][:, 0]
@@ -380,7 +489,7 @@ def get_single_value(value,index=0):
     return value[0]
 
 def get_snapshot_number_list(snapshotDir="outupt", snapshotName="snapshot_", firstSnap=0, lastSnap=-1, skipSteps=1):
-    snapshots = glob.glob(snapshotDir + '/./' + snapshotName + '*')
+    snapshots = glob.glob(snapshotDir + '/./' + snapshotName + '*.hdf5')
     snapshots.sort(key=lambda st: int(st.split(snapshotName)[1].split(".")[0]))
     sorted(snapshots)
     print("found snapshots: ", snapshots[0], " to ", snapshots[-1])
@@ -399,7 +508,7 @@ def get_snapshot_number_list(snapshotDir="outupt", snapshotName="snapshot_", fir
 
 def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingDir="plots", firstSnap=0,lastSnap=-1,skipSteps=1,box=False,
                vrange=False, cmap=["hot"], logplot=True, res=1024, numthreads=1, center=True, relative_to_sink_id=None,
-               plot_points=True,
+               central_id=None, plot_points=True,
                additional_points_size=30,additional_points_shape='X', additional_points_color='w', units_length = 'cm',
                units_velocity="$cm/s$", units_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
                axes_array=[[0,1]], ignore_types=[], horizontal=True, relative_to_motion=False):
@@ -429,13 +538,16 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
                 curr_subplot = int(num_figures * 100 + 10 + (snap_i + 1))
                 ax = subplot(num_figures, 1, 1)
                 curr_ax = subplot(curr_subplot, sharex=ax)
-            loaded_snap = gadget_readsnap(snap, snapshotDir)
+            loaded_snap = gadget_readsnap(snap, snapshotDir,
+                                          loadonlytype=[t for t in range(6) if t not in ignore_types])
+
+            old_basic_units = copy_current_units()
             print("curr snapshot: ", snap_i + 1)
             plot_single_value(loaded_snap,  value=val, cmap=curr_cmap, box=get_single_value(box,index),
                                   vrange=get_single_value(vrange,index), logplot=get_single_value(logplot,index),
                                   res=res,
-                                  numthreads=numthreads, center=center, relative_to_sink_id=relative_to_sink_id,
-                                  plot_points=plot_points,
+                                  numthreads=numthreads, center=center,  relative_to_sink_id=get_single_value(relative_to_sink_id,index),
+                                  central_id=get_single_value(central_id, index), plot_points=plot_points,
                                   additional_points_size=additional_points_size,
                                   additional_points_shape=additional_points_shape,
                                   additional_points_color=additional_points_color, unit_length=units_length,
@@ -445,7 +557,11 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
                               plot_xlabel=(horizontal is True or ((not horizontal) and (snap_i == num_figures))),
                               plot_ylabel=(not horizontal or ((horizontal) and (snap_i == 0))))
             #subplot(curr_subplot)
-            curr_ax.set_title('time : {:.2g}'.format(loaded_snap.time) + " [" + basic_units["time"].unit + "]", fontsize='x-large')
+            regularize_time_units(loaded_snap)
+            curr_ax.set_title('time : {:.2g}'.format(loaded_snap.time * basic_units["time"].factor) +
+                              " [" + basic_units["time"].unit + "]", fontsize='x-large')
+            restore_basic_units(old_basic_units)
+
             rcParams.update({'font.size': 40, 'font.family': 'Serif'})
             rcParams['text.usetex'] = True
             if horizontal is True and snap_i!=0:
@@ -474,14 +590,15 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
 
 def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstSnap=0,lastSnap=-1,skipSteps=1,box=False,
                vrange=False, cmap=["hot"], logplot=True, res=1024, numthreads=1, center=True, relative_to_sink_id=None,
-               plot_points=True,
+               central_id=None, plot_points=True,
                additional_points_size=30,additional_points_shape='X', additional_points_color='w', units_length = 'cm',
                units_velocity="$cm/s$", units_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
-               axes_array=[[0,1]], ignore_types=[], per_value_evolution=False, relative_to_motion=False):
+               axes_array=[[0,1]], ignore_types=[], per_value_evolution=False, relative_to_motion=False,
+               factor_value=[1.0], units_value=[None]):
 
     if per_value_evolution:
         return plot_single_value_evolutions(value, snapshotDir, plottingDir, firstSnap, lastSnap, skipSteps, box,
-               vrange, cmap, logplot, res, numthreads, center, relative_to_sink_id,
+               vrange, cmap, logplot, res, numthreads, center, relative_to_sink_id, central_id,
                plot_points,
                additional_points_size,additional_points_shape, additional_points_color, units_length,
                units_velocity, units_density, plot_velocities, plot_bfld,
@@ -493,6 +610,7 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
     if units_velocity is None and units_density is None:
         convert_to_cgs = True
     modified_units = False
+
     curr_cmap = cmap[0]
     for snap in get_snapshot_number_list(snapshotDir, "snapshot_", firstSnap, lastSnap, skipSteps):
         print("doing snapshot ",snap)
@@ -500,17 +618,24 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
         if len(value) == 1:
             val = value[0]
             print(val)
+            old_basic_units = copy_current_units()
             plot_single_value(loaded_snap, value=val, cmap=curr_cmap, box=get_single_value(box),
                               vrange=get_single_value(vrange), logplot=get_single_value(logplot), res=res,
-                              numthreads=numthreads, center=center, relative_to_sink_id=relative_to_sink_id,
-                              plot_points=plot_points,
+                              numthreads=numthreads, center=center,
+                              relative_to_sink_id=get_single_value(relative_to_sink_id),
+                              central_id=get_single_value(central_id), plot_points=plot_points,
                               additional_points_size=additional_points_size,
                               additional_points_shape=additional_points_shape,
                               additional_points_color=additional_points_color, unit_length=units_length,
                               unit_velocity= units_velocity, unit_density= units_density,
                               plot_velocities=plot_velocities, plot_bfld= plot_bfld, axes=get_single_value(axes_array),
-                              modified_units=modified_units, ignore_types=ignore_types)
-            title('time : {:.2g}'.format(loaded_snap.time) + " [" + basic_units["time"].unit + "]")
+                              modified_units=modified_units, ignore_types=ignore_types,
+                              factor_value=factor_value[0], units_value=units_value[0])
+
+            regularize_time_units(loaded_snap)
+            title('time : {:.2g}'.format(loaded_snap.time * basic_units["time"].factor) +
+                  " [" + basic_units["time"].unit + "]")
+            restore_basic_units(old_basic_units)
             filename = plottingDir + "/Aslice_" + val + "_{0}.png".format(snap)
             print("saving to: ", filename)
             savefig(filename)
@@ -521,6 +646,7 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
             rcParams.update({'font.size': 40, 'font.family': 'Serif'})
             rcParams['text.usetex'] = True
             num_figures = int(ceil(len(value)/2))
+            old_basic_units = copy_current_units()
             for index,val in enumerate(value):
                 if num_figures >= 1:
                     curr_subplot = int(num_figures*100 + 21 + index)
@@ -530,19 +656,27 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
                 plot_single_value(loaded_snap,  value=val, cmap=curr_cmap, box=get_single_value(box,index),
                                   vrange=get_single_value(vrange,index), logplot=get_single_value(logplot,index),
                                   res=res,
-                                  numthreads=numthreads, center=center, relative_to_sink_id=relative_to_sink_id,
-                                  plot_points=plot_points,
+                                  numthreads=numthreads, center=center,
+                                  relative_to_sink_id=get_single_value(relative_to_sink_id, index),
+                                  central_id=get_single_value(central_id, index), plot_points=plot_points,
                                   additional_points_size=additional_points_size,
                                   additional_points_shape=additional_points_shape,
                                   additional_points_color=additional_points_color, unit_length=units_length,
                                   unit_velocity= units_velocity, unit_density= units_density,
                                   plot_velocities=plot_velocities, plot_bfld= plot_bfld, newfig=False,
-                                  axes=get_single_value(axes_array, index), ignore_types=ignore_types)
+                                  axes=get_single_value(axes_array, index), ignore_types=ignore_types,
+                                  factor_value=factor_value[index % len(units_value)],
+                                  units_value=units_value[index % len(units_value)])
+                if index < len(value) - 1:
+                    restore_basic_units(old_basic_units)
                 rcParams.update({'font.size': 40, 'font.family': 'Serif'})
                 rcParams['text.usetex'] = True
 
             #title('time : {:.2f} [s]'.format(loaded_snap.time))
-            suptitle('time : {:.2g}'.format(loaded_snap.time) + " [" + basic_units["time"].unit + "]", fontsize='x-large')
+            regularize_time_units(loaded_snap)
+            suptitle('time : {:.2g}'.format(loaded_snap.time * basic_units["time"].factor) +
+                     " [" + basic_units["time"].unit + "]", fontsize='x-large')
+            restore_basic_units(old_basic_units)
             rcParams.update({'font.size': 40, 'font.family': 'Serif'})
             rcParams['text.usetex'] = True
             filename = plottingDir + "/Aslice_" + "_".join(value) + "_{0}.png".format(snap)
@@ -574,7 +708,8 @@ def InitParser():
     parser.add_argument('--center_x', type=float, help='point on x axis to be the center of the plot', default=None)
     parser.add_argument('--center_y', type=float, help='point on y axis to be the center of the plot', default=None)
     parser.add_argument('--center_z', type=float, help='point on z axis to be the center of the plot', default=0)
-    parser.add_argument('--relative_to_sink_id', nargs='+', type=int,  help='id of sink particle ro use as a reference point', default= None)
+    parser.add_argument('--relative_to_sink_id', nargs='+', type=int,  help='id of sink particle to use as a reference point', default= None)
+    parser.add_argument('--relative_to_id', nargs='+', type=int,  help='id of centeral particle', default= None)
     parser.add_argument('--plot_per_value_evolution', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
                         help='should plot value evolution figure from the different snapshot of each value?',
                         default=False)
@@ -594,6 +729,8 @@ def InitParser():
     parser.add_argument('--factor_mass', type=float,  help='multiply mass unit by this factor', default=1.0)
     parser.add_argument('--factor_length', type=float,  help='multiply length unit by this factor', default=1.0)
     parser.add_argument('--factor_velocity', type=float,  help='multiply velocity unit by this factor', default=1.0)
+    parser.add_argument('--factor_value', nargs='+', type=float,  help='multiply value unit by this factor', default=[None])
+    parser.add_argument('--units_value', nargs='+', type=str,  help='name of the value units', default=[None])
 
     return parser
 
@@ -625,10 +762,11 @@ if __name__ == "__main__":
 
     plot_range(args.value, args.source_dir, args.saving_dir, args.beginStep, args.lastStep, args.skipStep, box=box,
                vrange=vrange, logplot=args.logplot, cmap=args.cmap, res=args.res, numthreads= args.numthreads, center=center,
-               relative_to_sink_id=args.relative_to_sink_id,
+               relative_to_sink_id=args.relative_to_sink_id, central_id=args.relative_to_id,
                plot_points=args.plot_points, additional_points_size=args.additional_points_size,
                additional_points_shape=args.additional_points_shape,
                additional_points_color=args.additional_points_color,
                units_length=args.units_length, units_velocity=args.units_velocity, units_density= args.units_density,
                plot_velocities=args.plot_velocities, plot_bfld= args.plot_bfld, axes_array=axes_array,
-               ignore_types=args.ignore_types, per_value_evolution=args.plot_per_value_evolution)
+               ignore_types=args.ignore_types, per_value_evolution=args.plot_per_value_evolution,
+               factor_value=args.factor_value, units_value=args.units_value)

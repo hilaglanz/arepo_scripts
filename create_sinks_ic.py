@@ -28,7 +28,7 @@ def get_smoothed_sub_grid_sizes(boxsize, finest_grid_size):
     num_sub_grids = np.log2(boxsize / finest_grid_size)
     sub_grid_indices = np.array(range(1, int(num_sub_grids) + 1))
     sub_grid_sizes = finest_grid_size * 2. ** sub_grid_indices
-    if boxsize > 1.4 * sub_grid_sizes[-1]:
+    if len(sub_grid_sizes) > 1 and boxsize > 1.4 * sub_grid_sizes[-1]:
         sub_grid_sizes = np.append(sub_grid_sizes, boxsize)
     else:
         sub_grid_sizes[-1] = boxsize
@@ -46,6 +46,7 @@ def create_hard_sphere_boundary(mass, radius, background_data, point_mass_id=0, 
     background_data['u'][sphere_cells] *= factor_u
     background_data['vel'][sphere_cells,:] *= factor_u
     background_data['bflg'][sphere_cells] = 1
+    background_data['id'][sphere_cells] += 10**9
 
     return background_data
 def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho=1, gamma=5.0/3, Ra=1, Rs=0.02, res=100,

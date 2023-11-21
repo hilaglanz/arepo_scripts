@@ -5,6 +5,7 @@ import numpy as np
 import pylab
 from loadmodules import *
 from BinariesICs import *
+from plot_multiples import *
 
 
 def set_new_fig_properties():
@@ -24,6 +25,18 @@ def compute_cumulative_mass(snapshot, center):
     snapshot.data['cum_mass'] = mcum / msol
     return
 
+def compute_cumulative_unbounded_mass(snapshot, center):
+    if "unbounded_mass" not in snapshot.data:
+        compute_unbounded_mass(snapshot)
+
+    rsort = snapshot.r(center=center).argsort()
+
+    mcum = np.zeros(snapshot.npart)
+    mcum[0] = snapshot.data["unbounded_mass"][rsort[0]]
+    for i in range(1, snapshot.npart):
+        mcum[rsort[i]] = mcum[rsort[i - 1]] + snapshot.data["unbounded_mass"][rsort[i]]
+    snapshot.data['cum_unbounded_mass'] = mcum / msol
+    return
 
 def compute_gas_to_magnetic_pressure(snapshot):
     if "B" not in snapshot.data.keys():
@@ -79,15 +92,38 @@ def compute_value(s, testing_value, center=None):
         if "sound" not in s.data.keys():
             print("adding mach and cs")
             s.computeMach()
+
+    if testing_value == "entr":
+        if "GAMMA" in s.config.keys():
+            s.data["entr"] = s.data["pres"] / s.data["rho"] ** s.config["GAMMA"]
+
+    if testing_value == "unbounded_mass":
+        compute_unbounded_mass(s)
+
+    if testing_value == "cum_unbounded_mass":
+        print("adding cummulative unbounded nass")
+        compute_cumulative_unbounded_mass(s, center)
+
     if testing_value not in s.data.keys():
         s.computeValueGas(testing_value)
         
     return testing_value
 
 
+def compute_unbounded_mass(s):
+    indgas = s.data['type'] == 0
+    s.data['e'] = s.data['pot'][indgas] + 0.5 * ((s.data['vel'][indgas] ** 2).sum(axis=1))
+    s.data["unbounded_mass"] = s.mass
+    for i in np.where(s.data["e"] < 0)[0]:
+        s.data["unbounded_mass"][i] = 0.0
+    for i in np.where(s.type != 0):
+        s.data["unbounded_mass"][i] = 0.0
+
+
 def plot_profiles(output_dir, snapshot_name, plotting_dir, testing_value="rho", snapshot_number_array=[0, 8, 10],
                   center=False, log=True, new_fig=True, around_objects=False, around_density_peak=False,
-                  line_profile=False, motion_axis=0, object_num=0, output_txt_files=False, relative_to_sink=False):
+                  line_profile=False, motion_axis=0, object_num=0, output_txt_files=False, relative_to_sink=False,
+                  max_distance=None, central_id=None):
     if not os.path.exists(plotting_dir):
         os.mkdir(plotting_dir)
 
@@ -102,12 +138,15 @@ def plot_profiles(output_dir, snapshot_name, plotting_dir, testing_value="rho", 
             p, s, suffix, testing_value = get_line_profile_for_snapshot(around_density_peak, around_objects, center,
                                                                           motion_axis, object_num, output_dir,
                                                                           snapshot_name, snapshot_number, testing_value,
-                                                                        relative_to_sink)
+                                                                        relative_to_sink, max_distance=max_distance,
+                                                                        central_id=central_id)
             suffix += "_line_" + str(motion_axis)
         else:
             p, s, suffix, testing_value = get_radial_profile_for_snapshot(around_density_peak, around_objects, center,
                                                                       motion_axis, object_num, output_dir,
-                                                                      snapshot_name, snapshot_number, testing_value)
+                                                                      snapshot_name, snapshot_number, testing_value,
+                                                                          relative_to_sink, max_distance=max_distance,
+                                                                          central_id=central_id)
 
         if output_txt_files:
             write_txt_file(p, plotting_dir, snapshot_number, s.time, suffix, testing_value)
@@ -124,7 +163,8 @@ def plot_profiles(output_dir, snapshot_name, plotting_dir, testing_value="rho", 
 
 
 def get_radial_profile_for_snapshot(around_density_peak, around_objects, center, motion_axis, object_num, output_dir,
-                                    snapshot_name, snapshot_number, testing_value):
+                                    snapshot_name, snapshot_number, testing_value, relative_to_sink=False,
+                                    max_distance=None, central_id=None):
     suffix = ""
     if around_objects:
         s, cell_indices, center, suffix = get_relevant_plotting_parameters_around_object(around_density_peak,
@@ -135,37 +175,135 @@ def get_radial_profile_for_snapshot(around_density_peak, around_objects, center,
         testing_value = compute_value(s, testing_value, center)
 
     else:
-        s = gadget_readsnap(snapshot_number, output_dir, snapshot_name)
+        s = gadget_readsnap(snapshot_number, output_dir, snapshot_name, loadonlytype=[0,1])
         testing_value = compute_value(s, testing_value, center)
-        cell_indices = s.data['type'] == 0
+        cell_indices = np.where(s.data['type'] == 0)
 
-    p = plot_cells_around_center(cell_indices, center, s, testing_value)
+    center = get_center_array(s, center)
+    if central_id is not None:
+        center = s.pos[get_obj_index(s, central_id)][0]
+
+    if max_distance is not None:
+        relevant_cells = get_cells_inside_radius(s, center, max_distance)
+        cell_indices = np.intersect1d(cell_indices, relevant_cells)
+
+    if relative_to_sink:
+        relevant_cells, sink_radius = get_cells_out_of_sink(s)
+        cell_indices = np.intersect1d(cell_indices, relevant_cells)
+        distance_right, val_right = plot_one_side(s, cell_indices, center, motion_axis, testing_value, right=True,
+                                sink_size=s.parameters["SinkFormationRadius"])
+        distance_left, val_left = plot_one_side(s, cell_indices, center, motion_axis, testing_value, right=False,
+                               sink_size=s.parameters["SinkFormationRadius"])
+        distance_left *= -1.0
+        distances = np.concatenate((distance_left, distance_right))
+        values = np.concatenate((val_left, val_right))
+        sorted_ind = np.argsort(distances)
+        p = np.row_stack((values[sorted_ind], distances[sorted_ind]))
+    else:
+        shells = 200
+        if "cum_" in testing_value:
+            shells = ceil(s.nparticlesall[0]/100)
+        p = plot_snapshot_cells_around_center(cell_indices, center, s, testing_value,shells=shells)
 
     return p, s, suffix, testing_value
 
 
-def plot_cells_around_center(cell_indices, center, s, testing_value):
-    nshells = 200
-    dr = 0
+def get_center_array(s, center):
     if type(center) == list:
         center = pylab.array(center)
     elif type(center) != np.ndarray:
         center = s.center
-    mode = 2
-    value = testing_value
+    return center
+
+
+def plot_one_side(s, cell_indices, center, motion_axis, testing_value, right=True, default_mode=-1,
+                  sink_size=0):
+    if right:
+        half_cells = get_right_cells(s, cell_indices, center, motion_axis)
+    else:
+        half_cells = get_left_cells(s, cell_indices, center, motion_axis)
+    #print("Duplicating ", len(half_cells), " positions and values")
+    #pos_half = miror_positions(s, half_cells, center, motion_axis)
+    #values_half, mode = mirror_values(s, half_cells, testing_value)
+    distances = ((s.pos[half_cells] - center)**2).sum(axis=1)**0.5
+    nshells = 200
+    if sink_size > 0:
+        nshells = max([nshells, ceil(distances.max()/(0.1*sink_size))])
+
+    return get_averaged_data(distances, s.data[testing_value][half_cells], distances.max(), nshells)
+
+    #if default_mode != -1:
+    #    mode = default_mode
+    #p = plot_profile_arrays_around_center(pos_half.astype('float64'), values_half, center, mode)
+
+    #return p
+
+
+
+def get_left_cells(s, cell_indices, center, motion_axis):
+    left_cells = np.where(s.pos[:, motion_axis] < center[motion_axis])
+    left_cells = np.intersect1d(left_cells, cell_indices)
+    return left_cells
+
+
+def get_right_cells(s, cell_indices, center, motion_axis):
+    right_cells = np.where(s.pos[:, motion_axis] > center[motion_axis])
+    right_cells = np.intersect1d(right_cells, cell_indices)
+    return right_cells
+
+
+def get_plotting_mode_and_array(s, cells_idx, testing_value):
     if testing_value == 'rho':
+        values = s.data['mass'].astype('float64')[cells_idx]
         mode = 1
-        value = 'mass'
-    p = calcGrid.calcRadialProfile(s.data['pos'].astype('float64')[cell_indices],
-                                   s.data[value].astype('float64')[cell_indices], mode, nshells, dr,
+    else:
+        values = s.data[testing_value].astype('float64')[cells_idx]
+        mode = 2
+
+    return values, mode
+
+def miror_positions(s, cells, center, motion_axis):
+    mirror_axis = np.array([1, 1, 1])
+    mirror_axis[motion_axis] = -1
+    positions = s.pos[cells] - center[motion_axis]
+    positions = np.concatenate((positions[::-1] * mirror_axis, positions))
+    positions += center[motion_axis]
+
+    return positions
+
+def mirror_values(s, cells, testing_value, right_to_left=True):
+    half_values, mode = get_plotting_mode_and_array(s, cells, testing_value)
+    half_values = np.concatenate((half_values[::-1], half_values))
+
+    return half_values, mode
+
+def plot_profile_arrays_around_center(distances, values, center, mode, shells=None):
+    if shells is None:
+        nshells = 200
+    else:
+        nshells = shells
+    dr = 0
+    if type(center) == list:
+        center = pylab.array(center)
+    p = calcGrid.calcRadialProfile(distances,
+                                   values, mode, nshells, dr,
                                    center[0],
                                    center[1], center[2])
     return p
 
+def plot_snapshot_cells_around_center(cell_indices, center, s, testing_value, shells=None):
+    values, mode = get_plotting_mode_and_array(s, cell_indices, testing_value)
+    if shells is None:
+        shells = 200
+    return plot_profile_arrays_around_center(s.data['pos'].astype('float64')[cell_indices],
+                                   values, center, mode, shells=shells)
+
 
 def get_line_profile_for_snapshot(around_density_peak, around_objects, center, motion_axis, object_num, output_dir,
-                                    snapshot_name, snapshot_number, testing_value, relative_to_sink=False):
+                                    snapshot_name, snapshot_number, testing_value, relative_to_sink=False,
+                                  max_distance=None, central_id=None):
     suffix = ""
+    reference_r = 0
     if around_objects:
         s, cell_indices, center, suffix = get_relevant_plotting_parameters_around_object(around_density_peak,
                                                                                          motion_axis,
@@ -176,33 +314,87 @@ def get_line_profile_for_snapshot(around_density_peak, around_objects, center, m
     else:
         s = gadget_readsnap(snapshot_number, output_dir, snapshot_name, loadonlytype=[0])
         testing_value = compute_value(s, testing_value, center)
-        if type(center) == list:
-            center = pylab.array(center)
-        elif type(center) != np.ndarray:
-            center = s.center
+        center = get_center_array(s, center)
         cell_indices = np.where(s.data['mass'] != 0)
         if relative_to_sink:
-            distance_from_sink = np.sqrt(((s.pos - s.center)**2).sum(axis=1))
-            print("sink radius= ", s.parameters["SinkFormationRadius"])
-            print("largest distance from sink: ", distance_from_sink.max())
-            cell_indices = np.where((distance_from_sink > (s.parameters["SinkFormationRadius"] + s.vol ** (1.0 / 3)))
-                                    & (s.mass !=0))
-            print("largest x-distance from sink: ", (s.pos[cell_indices,0] - s.center[0]).max())
-            print("minimum x-distance from sink: ", (s.pos[cell_indices,0] - s.center[0]).min())
+            cell_indices, reference_r = get_cells_out_of_sink(s)
+
+    if central_id is not None:
+        center = s.pos[get_obj_index(s, central_id)][0]
 
     relevant_cells = np.where(
-        (absolute(s.pos[:,(motion_axis + 1) % 3] - center[(motion_axis + 1) % 3]) < 2 * s.data["vol"] ** (1.0 / 3)) &
-        (absolute(s.pos[:,(motion_axis + 2) % 3] - center[(motion_axis + 2) % 3]) < 2 * s.data["vol"] ** (1.0 / 3)))
+        (absolute(s.pos[:,(motion_axis + 1) % 3] - center[(motion_axis + 1) % 3]) < reference_r + 2 * s.data["vol"] ** (1.0 / 3)) &
+        (absolute(s.pos[:,(motion_axis + 2) % 3] - center[(motion_axis + 2) % 3]) < reference_r + 2 * s.data["vol"] ** (1.0 / 3)))
 
     cell_indices = np.intersect1d(cell_indices, relevant_cells)
+    if max_distance is not None:
+        relevant_cells = get_cells_inside_radius(s, center, max_distance)
+        cell_indices = np.intersect1d(cell_indices, relevant_cells)
+    smoothed_pos_left, smoothed_val_left = \
+        get_averaged_for_half_line(s, cell_indices, center, motion_axis, testing_value, right=False,
+                                   max_size_shell=0.1*reference_r)
+    smoothed_pos_left *= -1.0
+    smoothed_pos_right, smoothed_val_right = \
+        get_averaged_for_half_line(s, cell_indices, center, motion_axis, testing_value, right=True,
+                                   max_size_shell=0.1*reference_r)
 
-    distances = (s.data["pos"][cell_indices, motion_axis] - center[motion_axis])
-    values = s.data[testing_value][cell_indices]
-    sorted_ind = np.argsort(distances)
-    p = np.row_stack((values[sorted_ind], distances[sorted_ind]))
+    smoothed_pos = np.concatenate((smoothed_pos_left, smoothed_pos_right))
+    smoothed_val = np.concatenate((smoothed_val_left, smoothed_val_right))
+    sorted_ind = np.argsort(smoothed_pos)
+    p = np.row_stack((smoothed_val[sorted_ind], smoothed_pos[sorted_ind]))
     print(p.shape)
 
     return p, s, suffix, testing_value
+
+
+def get_cells_out_of_sink(s):
+    distance_from_sink = np.sqrt(((s.pos - s.center) ** 2).sum(axis=1))
+    reference_r = s.parameters["SinkFormationRadius"]
+    print("sink radius= ", s.parameters["SinkFormationRadius"])
+    print("largest distance from sink: ", distance_from_sink.max())
+    cell_indices = np.where((s.type ==0) & (distance_from_sink > (s.parameters["SinkFormationRadius"] + s.vol ** (1.0 / 3)))
+                            & (s.mass != 0))
+    print("largest x-distance from sink: ", (s.pos[cell_indices, 0] - s.center[0]).max())
+    print("minimum x-distance from sink: ", (s.pos[cell_indices, 0] - s.center[0]).min())
+    return cell_indices, reference_r
+
+def get_cells_inside_radius(s, center, max_r):
+    return np.where(((s.pos - center)**2).sum(axis=1)**0.5 < max_r)
+def get_averaged_for_half_line(s, cell_indices, center, motion_axis, testing_value, right=True,
+                               max_size_shell=0):
+    if right:
+        half_cells = get_right_cells(s, cell_indices, center, motion_axis)
+    else:
+        half_cells = get_left_cells(s, cell_indices, center, motion_axis)
+    distances = absolute(s.data["pos"][half_cells, motion_axis] - center[motion_axis])
+    values = s.data[testing_value][half_cells]
+    if max_size_shell > 0:
+        nshells = max([ceil(distances.max() / max_size_shell), 200])
+    else:
+        nshells = 200
+    return get_averaged_data(distances, values, distances.max(), nshells=nshells)
+
+
+def get_averaged_data(distances, values, size, nshells=200):
+    dr = size / nshells
+    print ("using dr= ", dr)
+    smoothed_val = np.zeros(nshells)
+    count_shells = np.zeros(nshells)
+    smoothed_pos = np.zeros(nshells)
+    for i in range(len(distances)):
+        distance = distances[i]
+        shell = floor(distance / dr)
+        if shell < nshells:
+            smoothed_val[shell] += values[i]
+            count_shells[shell] += 1
+    for shell in range(nshells):
+        if count_shells[shell] > 0:
+            smoothed_val[shell] /= count_shells[shell]
+        smoothed_pos[shell] = (shell + 0.5) * dr
+    relevant_i = np.where(smoothed_val != 0)
+
+    return smoothed_pos[relevant_i], smoothed_val[relevant_i]
+
 
 def plot_to_figure(index, line_colors, log, p, s):
     print("plotting")
@@ -226,7 +418,7 @@ def get_relevant_plotting_parameters_around_object(around_density_peak, motion_a
     return s, i, center, suffix
 
 
-def get_relevant_plotting_parameters_for_single(around_density_peak, output_dir, snapshot_name, snapshot_number):
+def get_relevant_plotting_parameters_for_single(around_density_peak, output_dir, snapshot_name, snapshot_number, rho_cut=100):
     print("doing single object")
     s = gadget_readsnap(snapshot_number, output_dir, snapshot_name)
     if around_density_peak:
@@ -235,7 +427,7 @@ def get_relevant_plotting_parameters_for_single(around_density_peak, output_dir,
     else:
         center = s.centerofmass()
     print("around center: ", center)
-    i = np.where(s.rho > 100)
+    i = np.where(s.rho > rho_cut)
     return s, i, center
 
 
@@ -296,6 +488,9 @@ def InitParser():
     parser.add_argument('--output_txt_files', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
                         help='should also make txt files with plotting values?',
                         default=False)
+    parser.add_argument('--max_distance', type=float,  help='radius around the object of interest to calculate for',
+                        default=None)
+    parser.add_argument('--central_id', type=int, help='id of the cell to centeralize around', default=None)
 
     return parser
 
@@ -311,15 +506,18 @@ if __name__ == "__main__":
                       testing_value=args.value, snapshot_number_array=args.snapshot_nums, log=args.logplot,
                       around_objects=args.around_objects, motion_axis=args.motion_axis,
                       around_density_peak=args.around_density_peak, line_profile=args.line_profile, object_num=1,
-                      output_txt_files=args.output_txt_files, relative_to_sink=args.relative_to_sink)
+                      output_txt_files=args.output_txt_files, relative_to_sink=args.relative_to_sink,
+                      max_distance=args.max_distance, central_id=args.central_id)
         plot_profiles(output_dir=args.output_dir, snapshot_name=args.snapshot_name, plotting_dir=args.plotting_dir,
                       testing_value=args.value, snapshot_number_array=args.snapshot_nums, log=args.logplot,
                       around_objects=args.around_objects, motion_axis=args.motion_axis,
                       around_density_peak=args.around_density_peak, line_profile=args.line_profile, object_num=2,
-                      output_txt_files=args.output_txt_files, new_fig=True,relative_to_sink=args.relative_to_sink)
+                      output_txt_files=args.output_txt_files, new_fig=True,relative_to_sink=args.relative_to_sink,
+                      max_distance=args.max_distance, central_id=args.central_id)
     else:
         plot_profiles(output_dir=args.output_dir, snapshot_name=args.snapshot_name, plotting_dir=args.plotting_dir,
                       testing_value=args.value, snapshot_number_array=args.snapshot_nums, log=args.logplot,
                       around_objects=args.around_objects, motion_axis=args.motion_axis,
                       around_density_peak=args.around_density_peak,  line_profile=args.line_profile,
-                      output_txt_files=args.output_txt_files, relative_to_sink=args.relative_to_sink)
+                      output_txt_files=args.output_txt_files, relative_to_sink=args.relative_to_sink,
+                      max_distance=args.max_distance, central_id=args.central_id)

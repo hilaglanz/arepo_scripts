@@ -180,14 +180,7 @@ def make_time_plots(snapshots_number_list, snapshot_dir="output", plotting_dir="
                                                        object_num=object_num, motion_axis=motion_axis,
                                                        along_axis_line=along_axis_line,
                                                        relative_to_motion=relative_to_motion, loadonlytype=loadonlytypes)
-    set_new_fig_properties()
-    if log:
-        pylab.semilogy(times, value_over_time)
-    else:
-        pylab.plot(times, value_over_time)
-    suptitle(value + " time evolution", fontsize='x-large')
-    rcParams.update({'font.size': 40, 'font.family': 'Serif'})
-    rcParams['text.usetex'] = True
+    plot_vs_time(value, value_over_time, times, log)
     if object_num != 0:
         suffix = str(object_num)
     else:
@@ -200,22 +193,37 @@ def make_time_plots(snapshots_number_list, snapshot_dir="output", plotting_dir="
     if along_axis_line:
         suffix += "_along_" + chr(ord('x') + motion_axis)
 
+    filename = get_times_filename(snapshots_number_list, plotting_dir, value, suffix)
+    savefig(filename)
+    print("saved fig")
+    save_txt_value_vs_time(filename, value_over_time, times)
+
+
+def get_times_filename(snapshots_number_list, plotting_dir, value, suffix=""):
     filename = plotting_dir + "/" + value + suffix + "_over_time_" + \
                str(snapshots_number_list[0]) + "_to_" + str(snapshots_number_list[-1]) + ".png"
     print("saving to: ", filename)
-    savefig(filename)
-    print("saved fig")
+    return filename
+
+
+def save_txt_value_vs_time(filename, value_over_time, times):
     txt_file_name = filename.replace("png", "txt")
     print("saving txt file to: ", txt_file_name)
     with open(txt_file_name, "w") as opened_file:
         times_and_values = [str(times[i]) + "," + str(value_over_time[i]) + "\r\n" for i in range(len(value_over_time))]
         opened_file.writelines(times_and_values)
-
     print("saved txt")
 
 
-
-
+def plot_vs_time(value, value_over_time, times, log):
+    set_new_fig_properties()
+    if log:
+        pylab.semilogy(times, value_over_time)
+    else:
+        pylab.plot(times, value_over_time)
+    suptitle(value + " time evolution", fontsize='x-large')
+    rcParams.update({'font.size': 40, 'font.family': 'Serif'})
+    rcParams['text.usetex'] = True
 
 
 def InitParser():
