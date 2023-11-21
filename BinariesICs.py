@@ -208,9 +208,14 @@ class BinariesICs:
         print("changing relative velocities according to new positions")
         self.relative_vx = orbital_vel * self.data['pos'][:, 1]
         self.relative_vy = -orbital_vel * self.data['pos'][:, 0]
+
         self.create_new_velocity_array()
         self.change_objects_velocity()
 
+        self.data['vel'][:, 0] += self.relative_vx
+        self.data['vel'][:, 1] -= self.relative_vy
+
+        #TODO: should update new_v1, new_v2?
         self.add_magnetic_field()
 
         self.add_grids_and_save_ic(ic_file_name)
@@ -288,14 +293,19 @@ class BinariesICs:
         self.new_pos2 = np.array([self.new_x2, self.new_y2, self.pos2[2]])
 
     def create_new_velocity_array(self):
+        if len(self.relative_vx.shape) > 1:
+            self.new_v1 = np.array([0, 0, 0])
+            self.new_v2 = np.array([0, 0, 0])
+            return
+
         self.new_vx1 = self.m2 * self.relative_vx / self.total_mass
         self.new_vx2 = -self.m1 * self.relative_vx / self.total_mass
 
         self.new_vy1 = self.m2 * self.relative_vy / self.total_mass
         self.new_vy2 = -self.m1 * self.relative_vy / self.total_mass
 
-        self.new_v1 = np.stack((self.new_vx1, self.new_vy1, [self.v1[2] for _ in range(len(self.new_vx1))]), axis=1)
-        self.new_v2 = np.stack((self.new_vx2, self.new_vy2, [self.v2[2] for _ in range(len(self.new_vx1))]), axis=1)
+        self.new_v1 = np.array([self.new_vx1, self.new_vy1, self.v1[2]])
+        self.new_v2 = np.array([self.new_vx2, self.new_vy2, self.v2[2]])
 
     def change_com_vector(self, value, i_begin, i_end, new_vector, old_vector):
         return self.data[value][i_begin:i_end, :] + new_vector[None, :] - old_vector[None, :] #TODO: check this for mergers
@@ -305,10 +315,8 @@ class BinariesICs:
         self.data['pos'][self.npart1:, :] = self.change_com_vector('pos', self.npart1, None, self.new_pos2, self.pos2)
 
     def change_objects_velocity(self):
-        self.data['vel'][:self.npart1, :] = self.change_com_vector('vel', 0, self.npart1, self.new_v1,
-                                                                   self.obj1.snapshot.vel[self.obj1.i])
-        self.data['vel'][self.npart1:, :] = self.change_com_vector('vel', self.npart1, None, self.new_v2,
-                                                                   self.obj2.snapshot.vel[self.obj2.i])
+        self.data['vel'][:self.npart1, :] = self.change_com_vector('vel', 0, self.npart1, self.new_v1, self.v1)
+        self.data['vel'][self.npart1:, :] = self.change_com_vector('vel', self.npart1, None, self.new_v2, self.v2)
 
     def calculate_magnetic_field_around_pos(self, pos, seed_B=1e3, object_R=1e9, replace=True):
         mm = np.array([0., 0., seed_B * object_R ** 3 / 2.])  # 1e3 G at 1e9 cm
