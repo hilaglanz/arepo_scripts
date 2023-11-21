@@ -324,12 +324,12 @@ class BinariesICs:
         i_box, = np.where(relative_separation < self.data['boxsize'])
         relative_pos = self.data['pos'][i_box, :] - pos[None, :]
         bfld= 3. * relative_pos * (mm[None, :] * relative_pos).sum(axis=1)[:, None] / \
-               (relative_separation[i] ** 5)[:, None] - mm[None, :] / (relative_separation[i] ** 3)[:, None]
+               (relative_separation[i_box] ** 5)[:, None] - mm[None, :] / (relative_separation[i_box] ** 3)[:, None]
 
         if replace:
-            self.data['bfld'] = bfld
+            self.data['bfld'][i_box,:] = bfld
         else:
-            self.data['bfld'] += bfld
+            self.data['bfld'][i_box,:] += bfld
 
     def add_magnetic_field(self, seed_B=1000, object_R=None):
         c1 = (self.data['pos'] * self.data['mass'][:, None] * self.data['pass'][:, 0][:, None]).sum(axis=0) / self.m1
