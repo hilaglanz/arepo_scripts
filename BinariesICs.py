@@ -302,11 +302,11 @@ class BinariesICs:
 
     def place_objects_at_new_pos(self):
         self.data['pos'][:self.npart1, :] = self.change_com_vector('pos', 0, self.npart1, self.new_pos1, self.pos1)
-        self.data['pos'][self.npart1:, :] = self.change_com_vector('pos', self.npart1, -1, self.new_pos2, self.pos2)
+        self.data['pos'][self.npart1:, :] = self.change_com_vector('pos', self.npart1, None, self.new_pos2, self.pos2)
 
     def change_objects_velocity(self):
         self.data['vel'][:self.npart1, :] = self.change_com_vector('vel', 0, self.npart1, self.new_v1, self.v1)
-        self.data['vel'][self.npart1:, :] = self.change_com_vector('vel', self.npart1, -1, self.new_v2, self.v2)
+        self.data['vel'][self.npart1:, :] = self.change_com_vector('vel', self.npart1, None, self.new_v2, self.v2)
 
     def calculate_magnetic_field_around_pos(self, pos, seed_B=1e3, object_R=1e9, replace=True):
         mm = np.array([0., 0., seed_B * object_R ** 3 / 2.])  # 1e3 G at 1e9 cm
