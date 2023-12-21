@@ -1,8 +1,10 @@
 import os
 import glob
 import argparse
-import numpy as np
+
+
 from loadmodules import *
+from save_sink_heatmaps import *
 
 
 species = ['n', 'p', '^{4}He', '^{11}B', '^{12}C', '^{13}C', '^{13}N', '^{14}N', '^{15}N', '^{15}O',
@@ -117,7 +119,9 @@ def project_vector(v,r):
     dist = np.sqrt((r*r).sum(axis=1))
     return ((r*v).sum(axis=1)) / dist
 
-def plot_stream(loaded_snap, value='vel', xlab='x', ylab='y', axes=[0,1], box=False, res=1024, numthreads=1, center=None):
+
+def plot_stream(loaded_snap, value='vel', xlab='x', ylab='y', axes=[0,1], box=False, res=1024, numthreads=1, center=None,
+                saving_file=None):
     if center is None:
         center = loaded_snap.center
 
@@ -130,6 +134,9 @@ def plot_stream(loaded_snap, value='vel', xlab='x', ylab='y', axes=[0,1], box=Fa
     velx = pylab.transpose(slice_velx['grid'])
     vely = pylab.transpose(slice_vely['grid'])
     streamplot(posx, posy, velx, vely, density=2, color='black')
+    if saving_file is not None:
+        with open(saving_file,'wb') as pickle_file:
+            pickle.dump(plotted_stream(posx, posy, velx, vely), pickle_file)
     # quiver(loaded_snap.pos[:,0],loaded_snap.pos[:,1],loaded_snap.vel[:,0], loaded_snap.vel[:,1],
     # scale=50)#*loaded_snap.parameters['BoxSize']/box[0])
 
@@ -138,7 +145,7 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
                       additional_points_shape='X', additional_points_color='w', unit_length='cm', unit_velocity="$cm/s$",
                       unit_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
                       newfig=True, axes=[0,1], modified_units = False, ignore_types=[], colorbar=True,
-                      plot_xlabel=True, plot_ylabel=True, factor_value=1.0, units_value=None):
+                      plot_xlabel=True, plot_ylabel=True, factor_value=1.0, units_value=None, saving_file=None):
 
     if box == False:
         box = [loaded_snap.boxsize, loaded_snap.boxsize]
@@ -165,7 +172,25 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
     loaded_snap.plot_Aslice(value, logplot=logplot, colorbar=colorbar, cblabel=label, cmap=cmap, center=center, vrange=vrange,
                                   box=box, res=res, numthreads=numthreads, newfig=newfig, axes=axes,
                             minimum=min(1e-8, 0.1*vrange[0]))
+    stream_saving_file=None
+    if saving_file is not None:
+        stream_saving_file = saving_file + "_stream"
+        slice = loaded_snap.get_Aslice(value, logplot=logplot, colorbar=colorbar, cblabel=label, cmap=cmap, center=center,
+                                vrange=vrange,
+                                box=box, res=res, numthreads=numthreads, newfig=newfig, axes=axes,
+                                minimum=min(1e-8, 0.1 * vrange[0]))
+        posx = slice['x'][:-1]
+        posy = slice['y'][:-1]
+        slice_to_save = pylab.transpose(slice['grid'])
+        with open(saving_file, 'wb') as pickle_file:
+            pickle.dump(plotted_heatmap(posx,posy,slice_to_save), pickle_file)
 
+    if plot_velocities:
+        plot_stream(loaded_snap, value='vel', xlab=xlab, ylab=ylab, axes=axes, box=box, res=res, numthreads=numthreads,
+                    center=center, saving_file=stream_saving_file)
+    elif plot_bfld:
+        plot_stream(loaded_snap, value='bfld', xlab=xlab, ylab=ylab, axes=axes, box=box, res=res, numthreads=numthreads,
+                    center=center)
     if plot_points:
         points = [idx for idx in range(loaded_snap.npart) if (loaded_snap.type[idx] not in ignore_types) and
                   (loaded_snap.type[idx] > 0)]
@@ -185,12 +210,6 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
                                   , fill=False, color='white', linestyle='dashed', linewidth=3.0)
                     print(circ)
                     gca().add_patch(circ)
-    if plot_velocities:
-        plot_stream(loaded_snap, value='vel', xlab=xlab, ylab=ylab, axes=axes, box=box, res=res, numthreads=numthreads,
-                    center=center)
-    elif plot_bfld:
-        plot_stream(loaded_snap, value='bfld', xlab=xlab, ylab=ylab, axes=axes, box=box, res=res, numthreads=numthreads,
-                    center=center)
     '''
     regularize_length_units(max(box))
     change_ticks(xaxis=True)
