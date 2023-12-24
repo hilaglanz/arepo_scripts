@@ -308,8 +308,8 @@ class BinariesICs:
         self.new_vy1 = self.m2 * self.relative_vy / self.total_mass
         self.new_vy2 = -self.m1 * self.relative_vy / self.total_mass
 
-        self.new_v1 = np.array([self.new_vx1, self.new_vy1, self.v1[2]])
-        self.new_v2 = np.array([self.new_vx2, self.new_vy2, self.v2[2]])
+        self.new_v1 = np.array([self.new_vx1, self.new_vy1, 0])
+        self.new_v2 = np.array([self.new_vx2, self.new_vy2, 0])
 
     def change_com_vector(self, value, i_begin, i_end, new_vector, old_vector):
         return self.data[value][i_begin:i_end, :] + new_vector[None, :] - old_vector[None, :] #TODO: check this for mergers
