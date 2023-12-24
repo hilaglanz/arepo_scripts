@@ -200,6 +200,7 @@ class BinariesICs:
 
         self.relative_x = initial_distance
         self.relative_y = 0
+        self.relative_z = 0
         self.relative_vx = 0
         self.relative_vy = 0
         self.create_new_position_array()
@@ -289,8 +290,11 @@ class BinariesICs:
         self.new_y1 = - self.m2 * self.relative_y / self.total_mass
         self.new_y2 = self.m1 * self.relative_y / self.total_mass
 
-        self.new_pos1 = np.array([self.new_x1, self.new_y1, self.pos1[2]])
-        self.new_pos2 = np.array([self.new_x2, self.new_y2, self.pos2[2]])
+        self.new_z1 = - self.m2 * self.relative_z / self.total_mass
+        self.new_z2 = self.m1 * self.relative_z / self.total_mass
+
+        self.new_pos1 = np.array([self.new_x1, self.new_y1, self.new_z1])
+        self.new_pos2 = np.array([self.new_x2, self.new_y2, self.new_z2])
 
     def create_new_velocity_array(self):
         if len(self.relative_vx) > 1:
