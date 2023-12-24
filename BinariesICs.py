@@ -293,7 +293,7 @@ class BinariesICs:
         self.new_pos2 = np.array([self.new_x2, self.new_y2, self.pos2[2]])
 
     def create_new_velocity_array(self):
-        if len(self.relative_vx.shape) > 1:
+        if len(self.relative_vx) > 1:
             self.new_v1 = np.array([0, 0, 0])
             self.new_v2 = np.array([0, 0, 0])
             return
@@ -311,6 +311,7 @@ class BinariesICs:
         return self.data[value][i_begin:i_end, :] + new_vector[None, :] - old_vector[None, :] #TODO: check this for mergers
 
     def place_objects_at_new_pos(self):
+        print("changing positions from ", self.pos1, self.pos2, " to ", self.new_pos1, self.new_pos2)
         self.data['pos'][:self.npart1, :] = self.change_com_vector('pos', 0, self.npart1, self.new_pos1, self.pos1)
         self.data['pos'][self.npart1:, :] = self.change_com_vector('pos', self.npart1, None, self.new_pos2, self.pos2)
 
