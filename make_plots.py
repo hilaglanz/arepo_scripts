@@ -172,18 +172,11 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
     loaded_snap.plot_Aslice(value, logplot=logplot, colorbar=colorbar, cblabel=label, cmap=cmap, center=center, vrange=vrange,
                                   box=box, res=res, numthreads=numthreads, newfig=newfig, axes=axes,
                             minimum=min(1e-8, 0.1*vrange[0]))
-    stream_saving_file=None
+    stream_saving_file = None
     if saving_file is not None:
         stream_saving_file = saving_file + "_stream"
-        slice = loaded_snap.get_Aslice(value, logplot=logplot, colorbar=colorbar, cblabel=label, cmap=cmap, center=center,
-                                vrange=vrange,
-                                box=box, res=res, numthreads=numthreads, newfig=newfig, axes=axes,
-                                minimum=min(1e-8, 0.1 * vrange[0]))
-        posx = slice['x'][:-1]
-        posy = slice['y'][:-1]
-        slice_to_save = pylab.transpose(slice['grid'])
-        with open(stream_saving_file, 'wb') as pickle_file:
-            pickle.dump(plotted_heatmap(posx,posy,slice_to_save), pickle_file)
+    save_heatmap(axes, box, center, cmap, colorbar, label, loaded_snap, logplot, newfig, numthreads, res, saving_file,
+                 value, vrange)
 
     if plot_velocities:
         plot_stream(loaded_snap, value='vel', xlab=xlab, ylab=ylab, axes=axes, box=box, res=res, numthreads=numthreads,
@@ -211,12 +204,7 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
                     print(circ)
                     gca().add_patch(circ)
 
-                    if saving_file is not None:
-                        scatter_saving_file = saving_file + "_scatter"
-                        with open(scatter_saving_file, 'wb') as pickle_file:
-                            pickle.dump(plotted_scatter(point_pos[axes[0]], point_pos[axes[1]],
-                                                        loaded_snap.parameters['SinkFormationRadius']*
-                                                        basic_units["length"].factor), pickle_file)
+                    save_scatter(axes, loaded_snap, point_pos, saving_file)
     '''
     regularize_length_units(max(box))
     change_ticks(xaxis=True)
@@ -226,6 +214,30 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
         xlabel(xlab + ' [' + basic_units["length"].unit + ']', loc="left")
     if plot_ylabel:
         ylabel(ylab + ' [' + basic_units["length"].unit + ']')
+
+
+def save_heatmap(axes, box, center, cmap, colorbar, label, loaded_snap, logplot, newfig, numthreads, res, saving_file,
+                 value, vrange):
+    if saving_file is not None:
+        slice = loaded_snap.get_Aslice(value, logplot=logplot, colorbar=colorbar, cblabel=label, cmap=cmap,
+                                       center=center,
+                                       vrange=vrange,
+                                       box=box, res=res, numthreads=numthreads, newfig=newfig, axes=axes,
+                                       minimum=min(1e-8, 0.1 * vrange[0]))
+        posx = slice['x'][:-1]
+        posy = slice['y'][:-1]
+        slice_to_save = pylab.transpose(slice['grid'])
+        with open(saving_file, 'wb') as pickle_file:
+            pickle.dump(plotted_heatmap(posx, posy, slice_to_save), pickle_file)
+
+
+def save_scatter(axes, loaded_snap, point_pos, saving_file):
+    if saving_file is not None:
+        scatter_saving_file = saving_file + "_scatter"
+        with open(scatter_saving_file, 'wb') as pickle_file:
+            pickle.dump(plotted_scatter(point_pos[axes[0]], point_pos[axes[1]],
+                                        loaded_snap.parameters['SinkFormationRadius'] *
+                                        basic_units["length"].factor), pickle_file)
 
 
 def change_ticks(xaxis=True):

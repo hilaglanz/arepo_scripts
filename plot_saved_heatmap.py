@@ -1,5 +1,5 @@
 import pickle
-
+import argparse
 from make_plots import plot_single_value, regularize_time_units, basic_units, restore_basic_units, copy_current_units
 from loadmodules import *
 
@@ -25,6 +25,9 @@ def InitParser():
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('--snapshot_file', type=str,  help='path to snapshot file', default= "output/snapshot_000.hdf5")
     parser.add_argument('--saving_dir', type=str,  help='path to output directory', default= "plots")
+    parser.add_argument('--from_pickle', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
+                        help='should we plot from a saved pickle file? if not- plot and create pickle files',
+                        default=False)
     parser.add_argument('--value', type=str,  help='value to be plotted', default= "rho")
     parser.add_argument('--cmap', type=str,  help='cmap for each subplot', default= "hot")
     parser.add_argument('--axes0', type=int,  help='horizonal axes to plot in', default= None)
@@ -56,14 +59,18 @@ if __name__ == "__main__":
     val = args.value
     print(val)
     old_basic_units = copy_current_units()
-    plot_single_value(loaded_snap, value=val, cmap=args.cmap, box=args.boxsize,
-                      vrange=[args.vmin, args.vmax], logplot=args.logplot, res=args.res,
-                      numthreads=args.numthreads, center=args.center,
-                      relative_to_sink_id=args.relative_to_sink_id,
-                      plot_points=True,
-                      unit_length="Ra",
-                      unit_velocity=None, unit_density=None,
-                      plot_velocities=True, axes=[args.axes0,args.axes1], saving_file=saving_file)
+    if args.from_pickle:
+        plot_from_pickle(args.saving_file, args.saving_file+"_stream", args.saving_file+"_scatter", args.vmin,
+                         args.vmax, args.cmap, args.logplot)
+    else:
+        plot_single_value(loaded_snap, value=val, cmap=args.cmap, box=args.boxsize,
+                          vrange=[args.vmin, args.vmax], logplot=args.logplot, res=args.res,
+                          numthreads=args.numthreads, center=args.center,
+                          relative_to_sink_id=args.relative_to_sink_id,
+                          plot_points=True,
+                          unit_length="Ra",
+                          unit_velocity=None, unit_density=None,
+                          plot_velocities=True, axes=[args.axes0,args.axes1], saving_file=saving_file)
 
     regularize_time_units(loaded_snap)
     title('time : {:.2g}'.format(loaded_snap.time * basic_units["time"].factor) +
