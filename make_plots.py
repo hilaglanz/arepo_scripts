@@ -218,7 +218,7 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
 def save_heatmap(axes, box, center, loaded_snap, numthreads, res, saving_file, value):
     if saving_file is not None:
         slice = loaded_snap.get_Aslice(value, center=center,
-                                       box=box, res=res, numthreads=numthreads, axes=axes, numthreads=numthreads)
+                                       box=box, res=res, numthreads=numthreads, axes=axes)
         posx = slice['x'][:-1]
         posy = slice['y'][:-1]
         slice_to_save = pylab.transpose(slice['grid'])
