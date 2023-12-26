@@ -55,7 +55,7 @@ if __name__ == "__main__":
     parser = InitParser()
     args = parser.parse_args()
     loaded_snap = gadget_readsnapname(args.snapshot_file)
-    snap=int(args.snapshot_file.split('_')[-1].split('.')[0])
+    snap= args.snapshot_file.split('_')[-1].split('.')[0]
     print("doing snap ", snap)
     saving_file = args.saving_dir + "/pickled_" + snap
     val = args.value
