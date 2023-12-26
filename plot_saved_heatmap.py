@@ -70,7 +70,7 @@ if __name__ == "__main__":
                           numthreads=args.numthreads, center=[args.center_x,args.center_y,args.center_z],
                           relative_to_sink_id=args.relative_to_sink_id,
                           plot_points=True,
-                          unit_length=args.units_legnth,
+                          unit_length=args.units_length,
                           unit_velocity=args.units_velocity, unit_density=None,
                           plot_velocities=True, axes=[args.axes0,args.axes1], saving_file=saving_file)
 
