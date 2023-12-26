@@ -68,8 +68,8 @@ if __name__ == "__main__":
                           numthreads=args.numthreads, center=args.center,
                           relative_to_sink_id=args.relative_to_sink_id,
                           plot_points=True,
-                          unit_length="Ra",
-                          unit_velocity=None, unit_density=None,
+                          unit_length=args.units_legnth,
+                          unit_velocity=args.units_velocity, unit_density=None,
                           plot_velocities=True, axes=[args.axes0,args.axes1], saving_file=saving_file)
 
     regularize_time_units(loaded_snap)
