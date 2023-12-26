@@ -4,7 +4,7 @@ import argparse
 
 
 from loadmodules import *
-from save_sink_heatmaps import *
+from save_sink_heatmaps import plotted_stream, plotted_heatmap, plotted_scatter
 
 
 species = ['n', 'p', '^{4}He', '^{11}B', '^{12}C', '^{13}C', '^{13}N', '^{14}N', '^{15}N', '^{15}O',
