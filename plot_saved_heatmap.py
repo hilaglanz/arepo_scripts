@@ -65,7 +65,7 @@ if __name__ == "__main__":
         plot_from_pickle(args.saving_file, args.saving_file+"_stream", args.saving_file+"_scatter", args.vmin,
                          args.vmax, args.cmap, args.logplot)
     else:
-        plot_single_value(loaded_snap, value=val, cmap=args.cmap, box=args.boxsize,
+        plot_single_value(loaded_snap, value=val, cmap=args.cmap, box=[args.boxsize,args.boxsize,args.boxsize],
                           vrange=[args.vmin, args.vmax], logplot=args.logplot, res=args.res,
                           numthreads=args.numthreads, center=[args.center_x,args.center_y,args.center_z],
                           relative_to_sink_id=args.relative_to_sink_id,
