@@ -1,7 +1,7 @@
 import os
 import glob
 import argparse
-
+import pickle
 
 from loadmodules import *
 from save_sink_heatmaps import plotted_stream, plotted_heatmap, plotted_scatter
@@ -182,7 +182,7 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
         posx = slice['x'][:-1]
         posy = slice['y'][:-1]
         slice_to_save = pylab.transpose(slice['grid'])
-        with open(saving_file, 'wb') as pickle_file:
+        with open(stream_saving_file, 'wb') as pickle_file:
             pickle.dump(plotted_heatmap(posx,posy,slice_to_save), pickle_file)
 
     if plot_velocities:
@@ -210,6 +210,13 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
                                   , fill=False, color='white', linestyle='dashed', linewidth=3.0)
                     print(circ)
                     gca().add_patch(circ)
+
+                    if saving_file is not None:
+                        scatter_saving_file = saving_file + "_scatter"
+                        with open(scatter_saving_file, 'wb') as pickle_file:
+                            pickle.dump(plotted_scatter(point_pos[axes[0]], point_pos[axes[1]],
+                                                        loaded_snap.parameters['SinkFormationRadius']*
+                                                        basic_units["length"].factor), pickle_file)
     '''
     regularize_length_units(max(box))
     change_ticks(xaxis=True)
