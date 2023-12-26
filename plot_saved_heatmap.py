@@ -39,9 +39,9 @@ def InitParser():
                         default=True)
     parser.add_argument('--res', type=int, help='plotting resolution', default=1024)
     parser.add_argument('--numthreads', type=int, help='threads for plotting', default=1)
-    parser.add_argument('--center_x', type=float, help='point on x axis to be the center of the plot', default=None)
-    parser.add_argument('--center_y', type=float, help='point on y axis to be the center of the plot', default=None)
-    parser.add_argument('--center_z', type=float, help='point on z axis to be the center of the plot', default=0)
+    parser.add_argument('--center_x', type=float, help='point on x axis to be the center of the plot', default=16)
+    parser.add_argument('--center_y', type=float, help='point on y axis to be the center of the plot', default=16)
+    parser.add_argument('--center_z', type=float, help='point on z axis to be the center of the plot', default=16)
     parser.add_argument('--relative_to_sink_id', nargs='+', type=int,  help='id of sink particle to use as a reference point', default= None)
     parser.add_argument('--units_length', type=str,  help='name of the length units', default= "Ra")
     parser.add_argument('--units_velocity', type=str,  help='name of the velocity units default is cgs', default= "cs")
@@ -67,7 +67,7 @@ if __name__ == "__main__":
     else:
         plot_single_value(loaded_snap, value=val, cmap=args.cmap, box=args.boxsize,
                           vrange=[args.vmin, args.vmax], logplot=args.logplot, res=args.res,
-                          numthreads=args.numthreads, center=args.center,
+                          numthreads=args.numthreads, center=[args.center_x,args.center_y,args.center_z],
                           relative_to_sink_id=args.relative_to_sink_id,
                           plot_points=True,
                           unit_length=args.units_legnth,
