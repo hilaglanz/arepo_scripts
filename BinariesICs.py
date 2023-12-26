@@ -165,7 +165,7 @@ class BinariesICs:
         self.data['boxsize'] = max(self.snapshot1.boxsize, self.snapshot2.boxsize)
 
     def find_new_borders(self):
-        return 1.5 * np.sqrt(self.data['pos'][:, 0] ** 2 + self.data['pos'][:, 1] ** 2 +
+        return 1.1 * np.sqrt(self.data['pos'][:, 0] ** 2 + self.data['pos'][:, 1] ** 2 +
                              self.data['pos'][:, 2] ** 2).max()
 
     def add_grids_and_save_ic(self, ic_file_name):
