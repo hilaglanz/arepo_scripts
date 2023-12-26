@@ -43,6 +43,8 @@ def InitParser():
     parser.add_argument('--center_y', type=float, help='point on y axis to be the center of the plot', default=None)
     parser.add_argument('--center_z', type=float, help='point on z axis to be the center of the plot', default=0)
     parser.add_argument('--relative_to_sink_id', nargs='+', type=int,  help='id of sink particle to use as a reference point', default= None)
+    parser.add_argument('--units_length', type=str,  help='name of the length units', default= "Ra")
+    parser.add_argument('--units_velocity', type=str,  help='name of the velocity units default is cgs', default= "cs")
 
     return parser
 
