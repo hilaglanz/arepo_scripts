@@ -175,8 +175,7 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
     stream_saving_file = None
     if saving_file is not None:
         stream_saving_file = saving_file + "_stream"
-    save_heatmap(axes, box, center, cmap, colorbar, label, loaded_snap, logplot, newfig, numthreads, res, saving_file,
-                 value, vrange)
+    save_heatmap(axes, box, center, loaded_snap, numthreads, res, saving_file, value)
 
     if plot_velocities:
         plot_stream(loaded_snap, value='vel', xlab=xlab, ylab=ylab, axes=axes, box=box, res=res, numthreads=numthreads,
@@ -216,14 +215,10 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
         ylabel(ylab + ' [' + basic_units["length"].unit + ']')
 
 
-def save_heatmap(axes, box, center, cmap, colorbar, label, loaded_snap, logplot, newfig, numthreads, res, saving_file,
-                 value, vrange):
+def save_heatmap(axes, box, center, loaded_snap, numthreads, res, saving_file, value):
     if saving_file is not None:
-        slice = loaded_snap.get_Aslice(value, logplot=logplot, colorbar=colorbar, cblabel=label, cmap=cmap,
-                                       center=center,
-                                       vrange=vrange,
-                                       box=box, res=res, numthreads=numthreads, newfig=newfig, axes=axes,
-                                       minimum=min(1e-8, 0.1 * vrange[0]))
+        slice = loaded_snap.get_Aslice(value, center=center,
+                                       box=box, res=res, numthreads=numthreads, axes=axes, numthreads=numthreads)
         posx = slice['x'][:-1]
         posy = slice['y'][:-1]
         slice_to_save = pylab.transpose(slice['grid'])
