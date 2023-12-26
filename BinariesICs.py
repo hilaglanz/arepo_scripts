@@ -39,6 +39,9 @@ class BinariesICs:
     i2 = []
 
     def __init__(self, species_file="species55.txt", rhocut=1.0):
+        self.relative_z = None
+        self.new_z1 = None
+        self.new_z2 = None
         self.new_v1 = None
         self.new_v2 = None
         self.new_vx1 = None
