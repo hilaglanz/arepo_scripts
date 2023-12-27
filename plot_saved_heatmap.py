@@ -1,6 +1,6 @@
 import pickle
 import argparse
-from make_plots import plot_single_value, regularize_time_units, basic_units, restore_basic_units, copy_current_units
+from make_plots import *
 from loadmodules import *
 
 def plot_from_pickle(heatmap_pickle,stream_pickle, sink_pickle, vmin, vmax, cmap, logplot):
