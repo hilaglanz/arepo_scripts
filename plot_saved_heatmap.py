@@ -25,9 +25,10 @@ def plot_from_pickle(heatmap_pickle,stream_pickle, sink_pickle, vmin, vmax, cmap
         fmt.set_useOffset(False)
         cb = pylab.colorbar(format=fmt)
 
-    streamplot(stream.pos_x, stream.pos_y, stream.vel_x, stream.vel_y, density=2, color='black')
+    streamplot(stream.pos_x[:-1], stream.pos_y[:-1], stream.vel_x, stream.vel_y, density=2, color='black')
 
-    circ = Circle((sink.pos_x, sink.pos_y), sink.radius, fill=True, color='white', linewidth=2.0, linestyle="solid", edgecolor="black")
+    circ = Circle((sink.pos_x, sink.pos_y), sink.radius, fill=True, facecolor='white', linewidth=2.0,
+                  linestyle="solid", edgecolor="black")
     gca().add_patch(circ)
 
 
