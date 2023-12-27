@@ -62,7 +62,7 @@ if __name__ == "__main__":
     print(val)
     old_basic_units = copy_current_units()
     if args.from_pickle:
-        plot_from_pickle(args.saving_file, args.saving_file+"_stream", args.saving_file+"_scatter", args.vmin,
+        plot_from_pickle(saving_file, saving_file+"_stream", saving_file+"_scatter", args.vmin,
                          args.vmax, args.cmap, args.logplot)
     else:
         plot_single_value(loaded_snap, value=val, cmap=args.cmap, box=[args.boxsize,args.boxsize,args.boxsize],
