@@ -11,9 +11,14 @@ def plot_from_pickle(heatmap_pickle,stream_pickle, sink_pickle, vmin, vmax, cmap
     with open(sink_pickle, 'rb') as opened_scatter_pickle:
         sink = pickle.load(opened_scatter_pickle)
 
-    pylab.pcolormesh(heatmap.pos_x, heatmap.pos_y, heatmap.slice, shading='flat',
-                          norm=matplotlib.colors.LogNorm(vmin=vmin, vmax=vmax), rasterized=False,
-                          cmap=cmap, logplot=logplot)
+    if logplot:
+        pylab.pcolormesh(heatmap.pos_x, heatmap.pos_y, heatmap.slice, shading='flat',
+                         orm=matplotlib.colors.LogNorm(vmin=vmin, vmax=vmax), rasterized=False,
+                         cmap=cmap
+                         )
+    else:
+        pylab.pcolormesh(heatmap.pos_x, heatmap.pos_y, heatmap.slice, shading='flat', rasterized=False, vmin=vmin,
+                              vmax=vmax, cmap=cmap)
 
     streamplot(stream.pos_x, stream.pos_y, stream.vel_x, stream.vel_y, density=2, color='black')
 
