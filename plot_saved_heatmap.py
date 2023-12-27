@@ -22,7 +22,7 @@ def plot_from_pickle(heatmap_pickle,stream_pickle, sink_pickle, vmin, vmax, cmap
 
     streamplot(stream.pos_x, stream.pos_y, stream.vel_x, stream.vel_y, density=2, color='black')
 
-    circ = Circle((sink.pos_x, sink.pos_y), sink.radius, fill=False, color='white', linestyle='dashed', linewidth=3.0)
+    circ = Circle((sink.pos_x, sink.pos_y), sink.radius, fill=True, color='white', linewidth=2.0, edgecolor="black")
     gca().add_patch(circ)
 
 
