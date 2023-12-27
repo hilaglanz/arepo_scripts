@@ -1,3 +1,8 @@
+
+import pickle
+
+from loadmodules import *
+
 class plotted_stream:
     pos_x = None
     pos_y = None
@@ -29,3 +34,25 @@ class plotted_scatter:
         self.radius = radius
 
 
+
+def save_heatmap(axes, box, center, loaded_snap, numthreads, res, saving_file, value):
+    if saving_file is not None:
+        slice = loaded_snap.get_Aslice(value, center=center,
+                                       box=box, res=res, numthreads=numthreads, axes=axes)
+        posx = slice['x']
+        posy = slice['y']
+        slice_to_save = pylab.transpose(slice['grid'])
+        with open(saving_file, 'wb') as pickle_file:
+            pickle.dump(plotted_heatmap(posx, posy, slice_to_save), pickle_file)
+
+def save_stream(posx, posy, velx, vely, saving_file):
+    if saving_file is not None:
+        with open(saving_file, 'wb') as pickle_file:
+            pickle.dump(plotted_stream(posx, posy, velx, vely), pickle_file)
+def save_scatter(axes, loaded_snap, point_pos, length_factor, saving_file):
+    if saving_file is not None:
+        scatter_saving_file = saving_file + "_scatter"
+        with open(scatter_saving_file, 'wb') as pickle_file:
+            pickle.dump(plotted_scatter(point_pos[axes[0]], point_pos[axes[1]],
+                                        loaded_snap.parameters['SinkFormationRadius'] *
+                                        length_factor), pickle_file)

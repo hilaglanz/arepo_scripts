@@ -4,7 +4,7 @@ import argparse
 import pickle
 
 from loadmodules import *
-from save_sink_heatmaps import plotted_stream, plotted_heatmap, plotted_scatter
+from save_sink_heatmaps import save_heatmap,save_scatter,save_stream
 
 
 species = ['n', 'p', '^{4}He', '^{11}B', '^{12}C', '^{13}C', '^{13}N', '^{14}N', '^{15}N', '^{15}O',
@@ -134,11 +134,13 @@ def plot_stream(loaded_snap, value='vel', xlab='x', ylab='y', axes=[0,1], box=Fa
     velx = pylab.transpose(slice_velx['grid'])
     vely = pylab.transpose(slice_vely['grid'])
     streamplot(posx, posy, velx, vely, density=2, color='black')
-    if saving_file is not None:
-        with open(saving_file,'wb') as pickle_file:
-            pickle.dump(plotted_stream(posx, posy, velx, vely), pickle_file)
+    save_stream(posx, posy, velx, vely, saving_file)
     # quiver(loaded_snap.pos[:,0],loaded_snap.pos[:,1],loaded_snap.vel[:,0], loaded_snap.vel[:,1],
     # scale=50)#*loaded_snap.parameters['BoxSize']/box[0])
+
+
+
+
 
 def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=False,logplot=True, res=1024, numthreads=1,
                       relative_to_sink_id=None, central_id=None, center=True,plot_points=True, additional_points_size=30,
@@ -203,7 +205,7 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
                     print(circ)
                     gca().add_patch(circ)
 
-                    save_scatter(axes, loaded_snap, point_pos, saving_file)
+                    save_scatter(axes, loaded_snap, point_pos, basic_units["length"].factor, saving_file)
     '''
     regularize_length_units(max(box))
     change_ticks(xaxis=True)
@@ -215,24 +217,6 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
         ylabel(ylab + ' [' + basic_units["length"].unit + ']')
 
 
-def save_heatmap(axes, box, center, loaded_snap, numthreads, res, saving_file, value):
-    if saving_file is not None:
-        slice = loaded_snap.get_Aslice(value, center=center,
-                                       box=box, res=res, numthreads=numthreads, axes=axes)
-        posx = slice['x'][:-1]
-        posy = slice['y'][:-1]
-        slice_to_save = pylab.transpose(slice['grid'])
-        with open(saving_file, 'wb') as pickle_file:
-            pickle.dump(plotted_heatmap(posx, posy, slice_to_save), pickle_file)
-
-
-def save_scatter(axes, loaded_snap, point_pos, saving_file):
-    if saving_file is not None:
-        scatter_saving_file = saving_file + "_scatter"
-        with open(scatter_saving_file, 'wb') as pickle_file:
-            pickle.dump(plotted_scatter(point_pos[axes[0]], point_pos[axes[1]],
-                                        loaded_snap.parameters['SinkFormationRadius'] *
-                                        basic_units["length"].factor), pickle_file)
 
 
 def change_ticks(xaxis=True):
