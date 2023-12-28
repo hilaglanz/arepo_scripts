@@ -24,8 +24,11 @@ def plot_from_pickle(heatmap_pickle,stream_pickle, sink_pickle, vmin, vmax, cmap
         fmt.set_powerlimits((-2, 2))
         fmt.set_useOffset(False)
         cb = pylab.colorbar(format=fmt)
-
+    ax = gca()
+    y_lim = ax.get_ylim()
     streamplot(stream.pos_x, stream.pos_y, stream.vel_x, stream.vel_y, density=2, color='black')
+    ylim(y_lim)
+
 
     circ = Circle((sink.pos_x, sink.pos_y), sink.radius, fill=True, facecolor='white', linewidth=1.0,
                   linestyle="solid", edgecolor="black")
