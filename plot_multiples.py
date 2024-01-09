@@ -57,10 +57,18 @@ def get_surrounding_value(snapshot, obj_id, size, value, center=None):
         if snapshot.computeValueGas(value) != 0:
             print("could not add ", value, " for gas properties")
             return
+    if obj_id == -1:
+        print("using center")
+        if center is None:
+            print("using snapshot center")
+            center = snapshot.center
+    else:
+        obj_index = get_obj_index(snapshot, obj_id)
+        center = snapshot.pos[obj_index]
 
     obj_index = get_obj_index(snapshot, obj_id)
     surrounding_cells = np.where((snapshot.type == 0) &
-                                 (((snapshot.pos - snapshot.pos[obj_index]) ** 2).sum(axis=1)**0.5 < size))
+                                 (((snapshot.pos - center) ** 2).sum(axis=1)**0.5 < size))
     if value == "unbounded_mass_frac":
         return snapshot.data["unbounded_mass"].sum()
 
