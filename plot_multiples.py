@@ -28,16 +28,24 @@ def get_velocity(snapshot, obj_id, center, center_obj_id, take_inner_mass=False)
 
     return ((snapshot.vel[obj_index] - inner_vel) ** 2).sum() ** 0.5
 
-def get_surrounding_rho(snapshot, obj_id, size):
-    obj_index = get_obj_index(snapshot, obj_id)
-    surrounding_cells = np.where((snapshot.type == 0 ) &
-                                 (((snapshot.pos - snapshot.pos[obj_index]) ** 2).sum(axis=1)**0.5 < size))
+def get_surrounding_rho(snapshot, obj_id, size, center=None):
+    if obj_id == -1:
+        print("using center")
+        if center is None:
+            print("using snapshot center")
+            center = snapshot.center
+    else:
+        obj_index = get_obj_index(snapshot, obj_id)
+        center = snapshot.pos[obj_index]
+
+    surrounding_cells = np.where((snapshot.type == 0) &
+                                 (((snapshot.pos - center) ** 2).sum(axis=1)**0.5 < size))
 
     return snapshot.rho[surrounding_cells].mean()
 
-def get_surrounding_value(snapshot, obj_id, size, value):
+def get_surrounding_value(snapshot, obj_id, size, value, center=None):
     if value == "rho":
-        return get_surrounding_rho(snapshot, obj_id, size)
+        return get_surrounding_rho(snapshot, obj_id, size, center)
 
     if value == "unbounded_mass_frac":
         indgas = snapshot.data['type'] == 0
@@ -104,7 +112,7 @@ def get_out_mass(snapshot, obj_id, center, center_obj_id=None):
 
 
 def plot_value_range(snapshot_list, snapshot_dir, plotting_dir, value, core_id=1e9+1, secondary_id=1e9,
-                     tertiary_id=1e9+2, take_inner_mass=True, surrounding_radius=10*rsol, around_object_id=1e9 + 2):
+                     tertiary_id=1e9+2, take_inner_mass=True, surrounding_radius=10*rsol, around_object_id=1e9 + 2, center=None):
     times = []
     values = []
     ylab = value
@@ -148,7 +156,7 @@ def plot_value_range(snapshot_list, snapshot_dir, plotting_dir, value, core_id=1
             else:
                 testing_value = testing_value_splitted[-1]
             print("calculating surrounding of ", testing_value)
-            values.append(get_surrounding_value(snapshot, around_object_id, surrounding_radius, testing_value))
+            values.append(get_surrounding_value(snapshot, around_object_id, surrounding_radius, testing_value, center=center))
 
         elif value == "drag":
             values.append(get_drag(snapshot, around_object_id, center=snapshot.pos[get_obj_index(snapshot, core_id)],
@@ -200,6 +208,9 @@ def InitParser():
     parser.add_argument('--surrounding_radius', type=float,  help='radius around the object of interest to calculate for',
                         default=10*rsol)
     parser.add_argument('--around_object_id', type=int, help='id of the object to plot surrounding of', default=1e9+2)
+    parser.add_argument('--center_x', type=float, help='point on x axis to be the center of the plot', default=None)
+    parser.add_argument('--center_y', type=float, help='point on y axis to be the center of the plot', default=None)
+    parser.add_argument('--center_z', type=float, help='point on z axis to be the center of the plot', default=None)
 
     return parser
 
@@ -215,7 +226,12 @@ if __name__ == "__main__":
     if not os.path.exists(args.plotting_dir):
         os.mkdir(args.plotting_dir)
 
+    if None in [args.center_x, args.center_y, args.center_z]:
+        center = None
+    else:
+        center=[args.center_x, args.center_y, args.center_z]
+        
     plot_value_range(snapshot_number_list, args.output_dir, args.plotting_dir, args.value, args.core_id,
                      args.secondary_id, args.tertiary_id, args.take_inner_mass, args.surrounding_radius,
-                     args.around_object_id)
+                     args.around_object_id, center=center)
 
