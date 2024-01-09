@@ -230,7 +230,7 @@ if __name__ == "__main__":
         center = None
     else:
         center=[args.center_x, args.center_y, args.center_z]
-        
+
     plot_value_range(snapshot_number_list, args.output_dir, args.plotting_dir, args.value, args.core_id,
                      args.secondary_id, args.tertiary_id, args.take_inner_mass, args.surrounding_radius,
                      args.around_object_id, center=center)
