@@ -64,14 +64,10 @@ def get_surrounding_value(snapshot, obj_id, size, value, center=None):
             center = snapshot.center
     elif obj_id == -10:
         print("using center of passive scalars 0")
-        if center is None:
-            print("using snapshot center")
-            center = snapshot.getCenterOfMassPass0()
+        center = snapshot.getCenterOfMassPass0()
     elif obj_id == -11:
         print("using center of passive scalars 1")
-        if center is None:
-            print("using snapshot center")
-            center = snapshot.getCenterOfMassPass1()
+        center = snapshot.getCenterOfMassPass1()
     else:
         obj_index = get_obj_index(snapshot, obj_id)
         center = snapshot.pos[obj_index]
