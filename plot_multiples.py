@@ -62,6 +62,16 @@ def get_surrounding_value(snapshot, obj_id, size, value, center=None):
         if center is None:
             print("using snapshot center")
             center = snapshot.center
+    elif obj_id == -10:
+        print("using center of passive scalars 0")
+        if center is None:
+            print("using snapshot center")
+            center = snapshot.getCenterOfMassPass0()
+    elif obj_id == -11:
+        print("using center of passive scalars 1")
+        if center is None:
+            print("using snapshot center")
+            center = snapshot.getCenterOfMassPass1()
     else:
         obj_index = get_obj_index(snapshot, obj_id)
         center = snapshot.pos[obj_index]
@@ -164,7 +174,8 @@ def plot_value_range(snapshot_list, snapshot_dir, plotting_dir, value, core_id=1
             else:
                 testing_value = testing_value_splitted[-1]
             print("calculating surrounding of ", testing_value)
-            values.append(get_surrounding_value(snapshot, around_object_id, surrounding_radius, testing_value, center=center))
+            values.append(get_surrounding_value(snapshot, around_object_id, surrounding_radius, testing_value,
+                                                center=center) / msol)
 
         elif value == "drag":
             values.append(get_drag(snapshot, around_object_id, center=snapshot.pos[get_obj_index(snapshot, core_id)],
@@ -185,8 +196,6 @@ def plot_value_range(snapshot_list, snapshot_dir, plotting_dir, value, core_id=1
         elif "out_mass" in value:
             values.append(get_out_mass(snapshot, around_object_id, center=snapshot.pos[get_obj_index(snapshot, core_id)],
                                   center_obj_id=core_id) / msol)
-
-
 
 
     plot_vs_time(value, values, times, False)
