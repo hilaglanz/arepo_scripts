@@ -67,8 +67,8 @@ def create_a_radial_gowing_mesh(inner_sphere_radius, outer_sphere_radius, smalle
         x=x0
         y=current_distance
         z=z0
-        for phi in range(0,360,2*arcsin(cell_radius/(2*current_distance))):
-            for psi in range(0,180,2*arcsin(cell_radius/(2*current_distance))):
+        for phi in range(0,360,ceil(2*arcsin(cell_radius/(2*current_distance)))):
+            for psi in range(0,180,ceil(2*arcsin(cell_radius/(2*current_distance)))):
                 x = x0 + current_distance*sin(phi)*sin(psi)
                 y = y0 + current_distance*cos(phi)*sin(psi)
                 z = z0 + current_distance*cos(psi)
