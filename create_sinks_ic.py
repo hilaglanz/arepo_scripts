@@ -49,6 +49,34 @@ def create_hard_sphere_boundary(mass, radius, background_data, point_mass_id=0, 
     background_data['id'][sphere_cells] += 10**9
 
     return background_data
+
+def create_a_radial_gowing_mesh(inner_sphere_radius, outer_sphere_radius, smallest_cell_radius, growth_factor=1.1):
+    growing_radius = outer_sphere_radius - inner_sphere_radius
+    largest_cell_radius = ((growth_factor - 1)*growing_radius + smallest_cell_radius) / growth_factor
+    print("largest cell radius with a growth factor of" , growth_factor, "is ", largest_cell_radius)
+    last_index = ceil(log(largest_cell_radius / smallest_cell_radius) / log(growth_factor))
+    pos_array = []
+    cell_radius = smallest_cell_radius / growth_factor
+    current_distance = inner_sphere_radius - smallest_cell_radius
+    x0 = 0
+    y0 = inner_sphere_radius
+    z0 = 0
+    for i in range(last_index):
+        current_distance += cell_radius
+        cell_radius *= growth_factor
+        x=x0
+        y=current_distance
+        z=z0
+        for phi in range(0,360,2*arcsin(cell_radius/(2*current_distance))):
+            for psi in range(0,180,2*arcsin(cell_radius/(2*current_distance))):
+                x = x0 + current_distance*sin(phi)*sin(psi)
+                y = y0 + current_distance*cos(phi)*sin(psi)
+                z = z0 + current_distance*cos(psi)
+                pos_array.append([np.array([x,y,z])])
+    print(pos_array)
+
+    return cell_radius, current_distance, pos_array
+
 def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho=1, gamma=5.0/3, Ra=1, Rs=0.02, res=100,
                         binary=False, semimajor = 2.5, supersonic_perscription=True, surroundings=10, hard_sphere=False,
                         use_wind_ids_for_region=None):
@@ -66,18 +94,26 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
     num_sinks = last_sink_i + 1
     print("using cs= ", cs, "v_inf= ", vel, "mach= ", mach, "rho_inf= ", rho, "Ra= ", accretion_radius, "G= ", G)
 
-    finest_grid_size, highest_resolution = get_finest_grid_size_and_resolution(accretion_radius, Rs, surroundings)
-
     pointStar = initialize_dictionary_with_point_masses(sink_mass, num_sinks, boxsize)
     if not binary:
         background = initialize_dictionary_with_point_masses(rho,1,Rs*0.1)
         #gadget_add_grid(background, Rs * 0.5, res=min([res, highest_resolution])) # no need for so many cells well inside the sink
+        '''
         bgSphere = background_grid.BackgroundGridAroundSphere(background, boxsize=Rs*1.5, ndir=ceil(0.8*res),
                                                               newsize=Rs*2.0, grid_rho=rho,
                                                                grid_u=(cs**2)/(gamma*(gamma-1)))
+        '''
+
+        bgSphere = background_grid.BackgroundGridAroundSphere(background, boxsize=Rs * 1.5, ndir=ceil(0.8 * res),
+                                                              newsize=Rs * 2.0, grid_rho=rho,
+                                                              grid_u=(cs ** 2) / (gamma * (gamma - 1)))
         background = bgSphere.add_grid()
-        print("added background grid of size ",2.0*Rs, " around the sphere of size ", 1.5*Rs)
-        print("minimum volume= ", (2.0*Rs/ceil(0.8*res))**3.0)
+        maximum_cell_radius, sphere_size, pos = create_a_radial_gowing_mesh(Rs, minimum([20 * Rs, boxsize]), Rs / surroundings)
+        grid_data = bgSphere.set_grid_data()
+        bgSphere.data['boxsize'] = grid_data['boxsize']
+        background = background_grid.merge_data(bgSphere.data, grid_data)
+        print("added background grid of size ", background['boxsize'], " around the sphere of size ", 1.5*Rs)
+        print("minimum volume= ", (Rs/surroundings)**3.0)
         #gadget_add_grid(background, background['boxsize'], res) #filling the inner sphere
         background['pos'] += boxsize/2.0 - 0.5 * background['boxsize']
         for key in pointStar.keys():
@@ -87,11 +123,15 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
             if key == 'boxsize':
                 continue
             else:
-                pointStar[key] = np.append(pointStar[key], background[key],axis=0)
+                pointStar[key] = np.append(pointStar[key], background[key], axis=0)
 
+        #finest_grid_size, highest_resolution = get_finest_grid_size_and_resolution(accretion_radius, Rs, surroundings)
+        finest_grid_size = sphere_size
+        highest_resolution = maximum_cell_radius
         #gadget_add_grid(pointStar, Rs * 0.8, res=ceil(mean([res, highest_resolution])))  # no need for so many cells well inside the sink
         gadget_add_grid(pointStar, finest_grid_size, res=ceil(highest_resolution*0.8)) # should have many close to its surface
     else:
+        finest_grid_size, highest_resolution = get_finest_grid_size_and_resolution(accretion_radius, Rs, surroundings)
         gadget_add_grid(pointStar, finest_grid_size, res=ceil(highest_resolution)) # should have many close to its surface
 
     print("added inner grid with size of ", finest_grid_size / accretion_radius, "Ra")
