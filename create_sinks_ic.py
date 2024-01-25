@@ -108,7 +108,7 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
                                                               newsize=Rs * 2.0, grid_rho=rho,
                                                               grid_u=(cs ** 2) / (gamma * (gamma - 1)))
         background = bgSphere.add_grid()
-        maximum_cell_radius, sphere_size, pos = create_a_radial_gowing_mesh(Rs, minimum([20 * Rs, boxsize]), Rs / surroundings)
+        maximum_cell_radius, sphere_size, pos = create_a_radial_gowing_mesh(Rs, minimum(20 * Rs, boxsize), Rs / surroundings)
         grid_data = bgSphere.set_grid_data()
         bgSphere.data['boxsize'] = grid_data['boxsize']
         background = background_grid.merge_data(bgSphere.data, grid_data)
