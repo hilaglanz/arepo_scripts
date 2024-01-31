@@ -72,7 +72,7 @@ def create_a_radial_gowing_mesh(inner_sphere_radius, outer_sphere_radius, smalle
                 x = x0 + current_distance*sin(phi)*sin(psi)
                 y = y0 + current_distance*cos(phi)*sin(psi)
                 z = z0 + current_distance*cos(psi)
-                pos_array.append([np.array([x,y,z])])
+                pos_array.append(np.array([x,y,z]))
     pos_array = np.array(pos_array)
     print(pos_array)
 
