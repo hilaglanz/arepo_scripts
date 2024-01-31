@@ -120,8 +120,8 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
                                                               newsize=sphere_size, grid_rho=rho,
                                                               grid_u=(cs ** 2) / (gamma * (gamma - 1)))
         background = bgSphere.add_grid()
-
-        print("added background grid of size ", sphere_size, " around the sphere of size ", 1.5*Rs)
+        print("sphere_size= ", sphere_size, "background boxsize= ", background["boxsize"])
+        print("added background grid of size ", background["boxsize"], " around the sphere of size ", 1.5*Rs)
         print("minimum volume= ", (Rs/surroundings)**3.0)
         #gadget_add_grid(background, background['boxsize'], res) #filling the inner sphere
         background['pos'] += boxsize/2.0 - 0.5 * background['boxsize']
