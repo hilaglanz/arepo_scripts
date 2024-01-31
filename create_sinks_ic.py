@@ -3,6 +3,8 @@ import argparse
 import numpy as np
 from loadmodules import *
 from stellar_ics import background_grid
+from stellar_ics.tools import get_grid_u
+
 
 def initialize_dictionary_with_point_masses(point_mass, npart, boxsize):
     pointStar = {}
@@ -51,10 +53,11 @@ def create_hard_sphere_boundary(mass, radius, background_data, point_mass_id=0, 
     return background_data
 
 def create_a_radial_gowing_mesh(inner_sphere_radius, outer_sphere_radius, smallest_cell_radius, growth_factor=1.1,
-                                box_ceter=[0,0,0]):
+                                box_center=[0,0,0]):
     growing_radius = outer_sphere_radius - inner_sphere_radius
     largest_cell_radius = ((growth_factor - 1)*growing_radius + smallest_cell_radius) / growth_factor
     print("largest cell radius with a growth factor of" , growth_factor, "is ", largest_cell_radius)
+    print("box_center= ", box_center)
     last_index = ceil(log(largest_cell_radius / smallest_cell_radius) / log(growth_factor))
     pos_array = []
     cell_radius = smallest_cell_radius / growth_factor
@@ -74,7 +77,7 @@ def create_a_radial_gowing_mesh(inner_sphere_radius, outer_sphere_radius, smalle
                 y = y0 + current_distance*cos(phi)*sin(psi)
                 z = z0 + current_distance*cos(psi)
                 pos_array.append(np.array([x,y,z]))
-    pos_array = np.array(pos_array) + box_ceter
+    pos_array = np.array(pos_array) + box_center
     print(pos_array)
 
     return cell_radius, current_distance, pos_array
@@ -98,7 +101,14 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
 
     pointStar = initialize_dictionary_with_point_masses(sink_mass, num_sinks, boxsize)
     if not binary:
-        background = initialize_dictionary_with_point_masses(rho,1,Rs*0.1)
+        #background = initialize_dictionary_with_point_masses(rho,1,Rs*0.1)
+        maximum_cell_radius, sphere_size, pos = create_a_radial_gowing_mesh(Rs, minimum(20 * Rs, boxsize),
+                                                                            Rs / surroundings)
+        data={}
+        data["pos"] = pos
+        data["boxsize"] = sphere_size
+        pointStar['mass'] = np.array([rho] * pos.shape[0])
+        pointStar['vel'] = np.zeros( (pos.shape[0],3) )
         #gadget_add_grid(background, Rs * 0.5, res=min([res, highest_resolution])) # no need for so many cells well inside the sink
         '''
         bgSphere = background_grid.BackgroundGridAroundSphere(background, boxsize=Rs*1.5, ndir=ceil(0.8*res),
@@ -106,20 +116,12 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
                                                                grid_u=(cs**2)/(gamma*(gamma-1)))
         '''
 
-        bgSphere = background_grid.BackgroundGridAroundSphere(background, boxsize=Rs * 1.5, ndir=ceil(0.8 * res),
-                                                              newsize=Rs * 2.0, grid_rho=rho,
+        bgSphere = background_grid.BackgroundGridAroundSphere(data, boxsize=Rs * 1.5, ndir=ceil(0.8 * res),
+                                                              newsize=sphere_size, grid_rho=rho,
                                                               grid_u=(cs ** 2) / (gamma * (gamma - 1)))
         background = bgSphere.add_grid()
-        maximum_cell_radius, sphere_size, pos = create_a_radial_gowing_mesh(Rs, minimum(20 * Rs, boxsize),
-                                                                            Rs / surroundings,
-                                                                            box_ceter=[background["boxsize"] / 2,
-                                                                                       background["boxsize"] / 2,
-                                                                                       background["boxsize"] / 2])
-        grid_data = bgSphere.set_grid_data(pos)
-        bgSphere.data['boxsize'] = grid_data['boxsize']
-        background = background_grid.merge_data(bgSphere.data, grid_data)
-        background["boxsize"] = bgSphere.data["boxsize"]
-        print("added background grid of size ", background['boxsize'], " around the sphere of size ", 1.5*Rs)
+
+        print("added background grid of size ", sphere_size, " around the sphere of size ", 1.5*Rs)
         print("minimum volume= ", (Rs/surroundings)**3.0)
         #gadget_add_grid(background, background['boxsize'], res) #filling the inner sphere
         background['pos'] += boxsize/2.0 - 0.5 * background['boxsize']
