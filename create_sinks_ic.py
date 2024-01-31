@@ -126,12 +126,13 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
                 continue
             else:
                 pointStar[key] = np.append(pointStar[key], background[key], axis=0)
-
+        print(pointStar["pos"])
         #finest_grid_size, highest_resolution = get_finest_grid_size_and_resolution(accretion_radius, Rs, surroundings)
         finest_grid_size = sphere_size
         highest_resolution = maximum_cell_radius
         #gadget_add_grid(pointStar, Rs * 0.8, res=ceil(mean([res, highest_resolution])))  # no need for so many cells well inside the sink
         gadget_add_grid(pointStar, finest_grid_size, res=ceil(highest_resolution*0.8)) # should have many close to its surface
+        print(pointStar["pos"])
     else:
         finest_grid_size, highest_resolution = get_finest_grid_size_and_resolution(accretion_radius, Rs, surroundings)
         gadget_add_grid(pointStar, finest_grid_size, res=ceil(highest_resolution)) # should have many close to its surface
