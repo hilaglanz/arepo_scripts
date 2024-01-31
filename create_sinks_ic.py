@@ -56,7 +56,7 @@ def create_a_radial_gowing_mesh(inner_sphere_radius, outer_sphere_radius, smalle
                                 box_center=[0,0,0]):
     growing_radius = outer_sphere_radius - inner_sphere_radius
     largest_cell_radius = ((growth_factor - 1)*growing_radius + smallest_cell_radius) / growth_factor
-    print("largest cell radius with a growth factor of" , growth_factor, "is ", largest_cell_radius)
+    print("largest cell radius with a growth factor of", growth_factor, "is ", largest_cell_radius)
     print("box_center= ", box_center)
     last_index = ceil(log(largest_cell_radius / smallest_cell_radius) / log(growth_factor))
     pos_array = []
@@ -71,8 +71,8 @@ def create_a_radial_gowing_mesh(inner_sphere_radius, outer_sphere_radius, smalle
         x=x0
         y=current_distance
         z=z0
-        for phi in range(0,360,ceil(2*arcsin(cell_radius/(2*current_distance)))):
-            for psi in range(0,180,ceil(2*arcsin(cell_radius/(2*current_distance)))):
+        for phi in np.arange(0, 2*pi, ceil(2*arcsin(cell_radius/(2*current_distance)))):
+            for psi in np.arange(0, pi, ceil(2*arcsin(cell_radius/(2*current_distance)))):
                 x = x0 + current_distance*sin(phi)*sin(psi)
                 y = y0 + current_distance*cos(phi)*sin(psi)
                 z = z0 + current_distance*cos(psi)
