@@ -79,7 +79,8 @@ def create_a_radial_gowing_mesh(inner_sphere_radius, outer_sphere_radius, smalle
                 pos_array.append(np.array([x,y,z]))
     pos_array = np.array(pos_array) + box_center
     print(pos_array)
-    print(pos_array.max(), pos_array.min())
+    print(pos_array[:,0].max(), pos_array[:,1].max(), pos_array[:,2].max())
+    print(pos_array[:,0].min(), pos_array[:,1].min(), pos_array[:,2].min())
 
     return cell_radius, current_distance, pos_array
 
@@ -136,7 +137,7 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
                 pointStar[key] = np.append(pointStar[key], background[key], axis=0)
         print(pointStar["pos"])
         #finest_grid_size, highest_resolution = get_finest_grid_size_and_resolution(accretion_radius, Rs, surroundings)
-        finest_grid_size = sphere_size
+        finest_grid_size = sphere_size * 1.01
         highest_resolution = maximum_cell_radius
         #gadget_add_grid(pointStar, Rs * 0.8, res=ceil(mean([res, highest_resolution])))  # no need for so many cells well inside the sink
         gadget_add_grid(pointStar, finest_grid_size, res=ceil(highest_resolution*0.8)) # should have many close to its surface
