@@ -146,6 +146,7 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
 
     print("added inner grid with size of ", finest_grid_size / accretion_radius, "Ra")
     print("minimum vol =", (finest_grid_size ** 3) / highest_resolution ** 3)
+    print(pointStar["pos"])
 
     sub_grid_sizes = get_smoothed_sub_grid_sizes(boxsize, finest_grid_size)
     gadget_add_grids(pointStar, sub_grid_sizes, res=res)
