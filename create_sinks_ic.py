@@ -79,6 +79,7 @@ def create_a_radial_gowing_mesh(inner_sphere_radius, outer_sphere_radius, smalle
                 pos_array.append(np.array([x,y,z]))
     pos_array = np.array(pos_array) + box_center
     print(pos_array)
+    print(pos_array.max(), pos_array.min())
 
     return cell_radius, current_distance, pos_array
 
