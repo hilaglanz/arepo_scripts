@@ -64,15 +64,18 @@ def get_surrounding_value(snapshot, obj_id, size, value, center=None):
             center = snapshot.center
     elif obj_id == -10:
         print("using center of passive scalars 0")
-        center = snapshot.getCenterOfMassPass0()
+        ids, = np.where((snapshot.data['pass00'] == 1) & (snapshot.rho > 1e4))
+        print("number of cell participating= ", len(ids))
+        center = (snapshot.mass[ids][:, None] * snapshot.pos[ids]).sum(axis=0) / snapshot.mass[ids].sum()
     elif obj_id == -11:
         print("using center of passive scalars 1")
-        center = snapshot.getCenterOfMassPass1()
+        ids, = np.where((snapshot.data['pass01'] == 1) & (snapshot.rho > 1e4))
+        print("number of cell participating= ", len(ids))
+        center = (snapshot.mass[ids][:, None] * snapshot.pos[ids]).sum(axis=0) / snapshot.mass[ids].sum()
     else:
         obj_index = get_obj_index(snapshot, obj_id)
         center = snapshot.pos[obj_index]
 
-    obj_index = get_obj_index(snapshot, obj_id)
     surrounding_cells = np.where((snapshot.type == 0) &
                                  (((snapshot.pos - center) ** 2).sum(axis=1)**0.5 < size))
     if value == "unbounded_mass_frac":
