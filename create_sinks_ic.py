@@ -82,7 +82,7 @@ def create_a_radial_gowing_mesh(inner_sphere_radius, outer_sphere_radius, smalle
     print(pos_array[:,0].max(), pos_array[:,1].max(), pos_array[:,2].max())
     print(pos_array[:,0].min(), pos_array[:,1].min(), pos_array[:,2].min())
 
-    return cell_radius, current_distance, pos_array
+    return cell_radius, current_distance + y0, pos_array
 
 def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho=1, gamma=5.0/3, Ra=1, Rs=0.02, res=100,
                         binary=False, semimajor = 2.5, supersonic_perscription=True, surroundings=10, hard_sphere=False,
