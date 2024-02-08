@@ -71,7 +71,7 @@ def create_a_radial_gowing_mesh(inner_sphere_radius, outer_sphere_radius, smalle
         y = y0
         z = z0
         for phi in np.linspace(0, 2*pi, resolution): #2*arcsin(cell_radius/(2*current_distance))):
-            for psi in np.arange(0, pi, resolution): #2*arcsin(cell_radius/(2*current_distance))):
+            for psi in np.linspace(0, pi, resolution): #2*arcsin(cell_radius/(2*current_distance))):
                 x = x0 + current_distance*cos(phi)*sin(psi)
                 y = y0 + current_distance*sin(phi)*sin(psi)
                 z = z0 + current_distance*cos(psi)
