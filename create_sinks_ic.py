@@ -71,8 +71,8 @@ def create_a_radial_gowing_mesh(inner_sphere_radius, outer_sphere_radius, smalle
     psi, phi = np.meshgrid(psi, phi)
     for i in range(last_index):
         current_distance += cell_radius
-        x = x0 + np.cos(phi) * current_distance * sin(psi)
-        y = y0 + np.sin(phi) * current_distance * sin(psi)
+        x = x0 + np.cos(phi) * current_distance * np.sin(psi)
+        y = y0 + np.sin(phi) * current_distance * np.sin(psi)
         z = z0 + current_distance * np.cos(psi)
         pos_array.append(np.stack([x,y,z]))
         cell_radius *= growth_factor
