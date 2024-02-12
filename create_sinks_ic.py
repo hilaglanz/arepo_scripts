@@ -106,7 +106,7 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
     pointStar = initialize_dictionary_with_point_masses(sink_mass, num_sinks, boxsize)
     if not binary:
         #background = initialize_dictionary_with_point_masses(rho,1,Rs*0.1)
-        maximum_cell_radius, sphere_size, pos = create_a_radial_gowing_mesh(Rs, minimum(100 * Rs, boxsize),
+        maximum_cell_radius, sphere_size, pos = create_a_radial_gowing_mesh(Rs, minimum(1000 * Rs, boxsize),
                                                                             Rs / surroundings, resolution=surroundings)
         data={}
         data["pos"] = pos
