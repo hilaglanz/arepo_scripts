@@ -70,7 +70,7 @@ def create_a_radial_gowing_mesh(inner_sphere_radius, outer_sphere_radius, smalle
     for i in range(last_index):
         current_distance += cell_radius
         for j in range(resolution):
-            y = (1 - (i / float(resolution - 1)) * 2) * current_distance  # y goes from current_distance to -current_distance
+            y = (1 - (j / float(resolution - 1)) * 2) * current_distance  # y goes from current_distance to -current_distance
             radius = math.sqrt(current_distance * current_distance - y*y) # radius at y
 
             theta = phi * j
