@@ -66,16 +66,19 @@ def create_a_radial_gowing_mesh(inner_sphere_radius, outer_sphere_radius, smalle
     y0 = box_center[1]
     z0 = box_center[2]
 
-    phi = np.linspace(0, 2 * pi, resolution)
-    psi = np.linspace(0, pi, floor(resolution / 2))
-    psi, phi = np.meshgrid(psi, phi)
+    phi = math.pi * (math.sqrt(5.) - 1.)
     for i in range(last_index):
         current_distance += cell_radius
-        x = x0 + np.cos(phi) * current_distance * np.sin(psi)
-        y = y0 + np.sin(phi) * current_distance * np.sin(psi)
-        z = z0 + current_distance * np.cos(psi)
-        pos_array.append(np.stack([x,y,z]))
+        for j in range(resolution):
+            y = (1 - (i / float(resolution - 1)) * 2) * current_distance  # y goes from current_distance to -current_distance
+            radius = math.sqrt(current_distance * current_distance - y*y) # radius at y
+
+            theta = phi * j
+            x = math.cos(theta) * radius
+            z = math.sin(theta) * radius
+            pos_array.append(np.array([x,y,z]))
         cell_radius *= growth_factor
+
     pos_array = np.array(pos_array) + box_center
     print(pos_array)
     print(pos_array[:,0].max(), pos_array[:,1].max(), pos_array[:,2].max())
