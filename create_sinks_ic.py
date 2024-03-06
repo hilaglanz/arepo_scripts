@@ -53,7 +53,7 @@ def create_hard_sphere_boundary(mass, radius, background_data, point_mass_id=0, 
     return background_data
 
 def create_a_radial_gowing_mesh(inner_sphere_radius, outer_sphere_radius, smallest_cell_radius, growth_factor=1.1,
-                                box_center=[0,0,0]):
+                                box_center=[0,0,0], resolution  = 100):
     growing_radius = outer_sphere_radius - inner_sphere_radius
     largest_cell_radius = ((growth_factor - 1)*growing_radius + smallest_cell_radius) / growth_factor
     print("largest cell radius with a growth factor of", growth_factor, "is ", largest_cell_radius)
@@ -65,18 +65,20 @@ def create_a_radial_gowing_mesh(inner_sphere_radius, outer_sphere_radius, smalle
     x0 = box_center[0]
     y0 = box_center[1]
     z0 = box_center[2]
+
+    phi = math.pi * (math.sqrt(5.) - 1.)
     for i in range(last_index):
         current_distance += cell_radius
+        for j in range(resolution):
+            y = (1 - (j / float(resolution - 1)) * 2) * current_distance  # y goes from current_distance to -current_distance
+            radius = math.sqrt(current_distance * current_distance - y*y) # radius at y
+
+            theta = phi * j
+            x = math.cos(theta) * radius
+            z = math.sin(theta) * radius
+            pos_array.append(np.array([x,y,z]))
         cell_radius *= growth_factor
-        x = x0
-        y = y0
-        z = z0
-        for phi in np.arange(0, 2*pi, 2*arcsin(cell_radius/(2*current_distance))):
-            for psi in np.arange(0, pi, 2*arcsin(cell_radius/(2*current_distance))):
-                x = x0 + current_distance*cos(phi)*sin(psi)
-                y = y0 + current_distance*sin(phi)*sin(psi)
-                z = z0 + current_distance*cos(psi)
-                pos_array.append(np.array([x,y,z]))
+
     pos_array = np.array(pos_array) + box_center
     print(pos_array)
     print(pos_array[:,0].max(), pos_array[:,1].max(), pos_array[:,2].max())
@@ -104,8 +106,8 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
     pointStar = initialize_dictionary_with_point_masses(sink_mass, num_sinks, boxsize)
     if not binary:
         #background = initialize_dictionary_with_point_masses(rho,1,Rs*0.1)
-        maximum_cell_radius, sphere_size, pos = create_a_radial_gowing_mesh(Rs, minimum(20 * Rs, boxsize),
-                                                                            Rs / surroundings)
+        maximum_cell_radius, sphere_size, pos = create_a_radial_gowing_mesh(Rs, minimum(1000 * Rs, boxsize),
+                                                                            Rs / surroundings, resolution=surroundings)
         data={}
         data["pos"] = pos
         data["boxsize"] = sphere_size
