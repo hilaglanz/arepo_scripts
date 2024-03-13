@@ -111,8 +111,8 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
         data={}
         data["pos"] = pos
         data["boxsize"] = sphere_size
-        pointStar['mass'] = np.array([rho] * pos.shape[0])
-        pointStar['vel'] = np.zeros( (pos.shape[0],3) )
+        data['mass'] = np.array([rho] * pos.shape[0])
+        data['vel'] = np.zeros( (pos.shape[0],3) )
         #gadget_add_grid(background, Rs * 0.5, res=min([res, highest_resolution])) # no need for so many cells well inside the sink
         '''
         bgSphere = background_grid.BackgroundGridAroundSphere(background, boxsize=Rs*1.5, ndir=ceil(0.8*res),
@@ -159,6 +159,7 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
     pointStar['type']=np.zeros(pointStar['count'])
     if num_sinks > 0:
         pointStar['type'][:num_sinks] = [5] * num_sinks
+        pointStar['mass'][:num_sinks] = [sink_mass] * num_sinks
     pointStar['mass'][num_sinks:] = rho #3e-2 with read mass as density will give same densities to all subgrids cells
     pointStar['vel'][num_sinks:,0] = vel
     pointStar['u'] = np.zeros(pointStar['count'])
