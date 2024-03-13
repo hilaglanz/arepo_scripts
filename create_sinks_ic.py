@@ -174,7 +174,7 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
         pointStar['id'][np.where(pointStar['pos'][:, 0] > (pointStar['boxsize'] - use_wind_ids_for_region))] += 10 ** 9
 
     if hard_sphere:
-        pointStar = create_hard_sphere_boundary(0, 1.8*Rs, pointStar, 0,1)
+        pointStar = create_hard_sphere_boundary(0, 1.0*Rs, pointStar, 0,1)
 
     print(pointStar.keys())
     if num_sinks > 0:
