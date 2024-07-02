@@ -1,3 +1,4 @@
+import numpy as np
 from loadmodules import *
 from time_plots import *
 
@@ -16,6 +17,32 @@ def get_separation(snapshot, obj_id, center, take_inner_mass=False):
 
     return ((snapshot.pos[obj_index] - center)**2).sum()**0.5 / rsol
 
+def get_semi_eccentricity_along_time(snapshot, obj_id, take_inner_mass=False):
+    apocenters = []
+    pericenters = []
+    times = []
+
+def get_eccentricity(snapshot, obj_id, center, center_obj_id=0, take_inner_mass=False):
+    V= get_velocity(snapshot, obj_id, center, center_obj_id=center_obj_id, take_inner_mass=take_inner_mass)
+    R = get_separation(snapshot, obj_id, center, take_inner_mass=take_inner_mass)
+    h = np.cross(R,V)
+    hSize = (h**2).sum()**0.5
+    '''
+    if a < 0.0 |units.m:
+        e =  (1 + ((hSize**2)/(constants.G*(particle1.mass + particle2.mass)*a)))**0.5
+    else:
+        e =  (1 - ((hSize**2)/(constants.G*(particle1.mass + particle2.mass)*a)))**0.5
+    '''
+    miu = constants.G*(particle1.mass + particle2.mass)
+    element2 = (R[0].value_in(units.m),R[1].value_in(units.m),R[2].value_in(units.m))/(CalculateVectorSize(R).value_in(units.m))
+    vxh = VectorCross(V,h)
+    element10 = (vxh[0].value_in(units.m**3*units.s**-2),vxh[1].value_in(units.m**3*units.s**-2),vxh[2].value_in(units.m**3*units.s**-2))
+    element11 = miu.value_in(units.m**3*units.s**-2)
+    element1 = element10/element11
+    eAttitude1 = CalculateVectorSize(element1 - element2)
+    eAttitude2 = (1 + (2 * CalculateSpecificEnergy(V,R,particle1,particle2)*(hSize**2))/(constants.G*(particle1.mass+particle2.mass))**2)**0.5
+    #print eAttitude1, eAttitude2
+    return eAttitude1
 def get_velocity(snapshot, obj_id, center, center_obj_id, take_inner_mass=False):
     obj_index = get_obj_index(snapshot, obj_id)
     if take_inner_mass:
@@ -81,6 +108,9 @@ def get_surrounding_value(snapshot, obj_id, size, value, center=None):
     if value == "unbounded_mass_frac":
         return snapshot.data["unbounded_mass"].sum()
 
+    if value =="mass":
+        return snapshot.mass[surrounding_cells].sum()
+    
     com_value = (snapshot.data[value][surrounding_cells] * snapshot.mass[surrounding_cells][:, None]).sum(axis=0) / \
                 snapshot.mass[surrounding_cells].sum()
     if len(com_value) > 1:
