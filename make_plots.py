@@ -173,7 +173,7 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
 
     if contour:
         levels=10
-        proj=True
+        proj=False
     else:
         levels= [0.99]
         proj=False
