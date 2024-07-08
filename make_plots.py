@@ -788,4 +788,4 @@ if __name__ == "__main__":
                units_length=args.units_length, units_velocity=args.units_velocity, units_density= args.units_density,
                plot_velocities=args.plot_velocities, plot_bfld= args.plot_bfld, axes_array=axes_array,
                ignore_types=args.ignore_types, per_value_evolution=args.plot_per_value_evolution,
-               factor_value=args.factor_value, units_value=args.units_value, contour=args.contour)
+               factor_value=args.factor_value, units_value=args.units_value, contour=args.plot_contours)
