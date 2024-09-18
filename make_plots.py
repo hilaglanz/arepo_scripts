@@ -625,7 +625,7 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
                plot_points,
                additional_points_size,additional_points_shape, additional_points_color, units_length,
                units_velocity, units_density, plot_velocities, plot_bfld,
-               axes_array, ignore_types, snapshot_list)
+               axes_array, ignore_types, snapshot_list=snapshot_list)
 
     if not os.path.exists(plottingDir):
         os.mkdir(plottingDir)
