@@ -534,15 +534,15 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
                central_id=None, plot_points=True,
                additional_points_size=30,additional_points_shape='X', additional_points_color='w', units_length = 'cm',
                units_velocity="$cm/s$", units_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
-               axes_array=[[0,1]], ignore_types=[], horizontal=True, relative_to_motion=False):
+               axes_array=[[0,1]], ignore_types=[], horizontal=True, relative_to_motion=False, snapshot_list=None):
     if not os.path.exists(plottingDir):
         os.mkdir(plottingDir)
     convert_to_cgs = False
     if units_velocity is None and units_density is None:
         convert_to_cgs = True
     modified_units = False
-
-    snapshots_list = get_snapshot_number_list(snapshotDir, "snapshot_", firstSnap, lastSnap, skipSteps)
+    if snapshot_list is None:
+        snapshots_list = get_snapshot_number_list(snapshotDir, "snapshot_", firstSnap, lastSnap, skipSteps)
     num_figures = len(snapshots_list)
 
     for index, val in enumerate(value):
@@ -617,7 +617,7 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
                additional_points_size=30,additional_points_shape='X', additional_points_color='w', units_length = 'cm',
                units_velocity="$cm/s$", units_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
                axes_array=[[0,1]], ignore_types=[], per_value_evolution=False, relative_to_motion=False,
-               factor_value=[1.0], units_value=[None], contour=False):
+               factor_value=[1.0], units_value=[None], contour=False, snapshot_list=None):
 
     if per_value_evolution:
         return plot_single_value_evolutions(value, snapshotDir, plottingDir, firstSnap, lastSnap, skipSteps, box,
@@ -625,7 +625,7 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
                plot_points,
                additional_points_size,additional_points_shape, additional_points_color, units_length,
                units_velocity, units_density, plot_velocities, plot_bfld,
-               axes_array, ignore_types, per_value_evolution)
+               axes_array, ignore_types, per_value_evolution, snapshot_list)
 
     if not os.path.exists(plottingDir):
         os.mkdir(plottingDir)
@@ -757,6 +757,8 @@ def InitParser():
     parser.add_argument('--plot_contours', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
                         help='should plot contours?',
                         default=False)
+    parser.add_argument('--snapshot_list', nargs='+', type=int,  help='list of snapshots to plot for '
+                                                                      '(currently only for evolution)', default=[None])
     return parser
 
 
@@ -782,6 +784,11 @@ if __name__ == "__main__":
     if args.axes0 is not None and args.axes1 is not None:
         axes_array = [[args.axes0[i],args.axes1[i]] for i in range(len(args.axes0))]
 
+    if args.snapshot_list[0] is None:
+        snapshot_list = None
+    else:
+        snapshot_list = args.snapshot_list
+
     change_unit_conversion(args.factor_length, args.factor_velocity, args.factor_mass)
     #TODO: add conversion to temperature
 
@@ -794,4 +801,5 @@ if __name__ == "__main__":
                units_length=args.units_length, units_velocity=args.units_velocity, units_density= args.units_density,
                plot_velocities=args.plot_velocities, plot_bfld= args.plot_bfld, axes_array=axes_array,
                ignore_types=args.ignore_types, per_value_evolution=args.plot_per_value_evolution,
-               factor_value=args.factor_value, units_value=args.units_value, contour=args.plot_contours)
+               factor_value=args.factor_value, units_value=args.units_value, contour=args.plot_contours,
+               snapshot_list=snapshot_list)
