@@ -20,7 +20,7 @@ def change_time(snapshotDir, savingDir, firstSnap, lastSnap, skipSteps, timeshif
         print("doing snapshot ", snap)
         loaded_snap = gadget_readsnap(snap, snapshotDir)
         loaded_snap.time += timeshift
-        gadget_write_ics(savingDir+"/snapshot_"+snap, loaded_snap.data, double=True,format="hdf5",time=loaded_snap.time)
+        gadget_write_ics(savingDir+"/snapshot_"+snap, loaded_snap.data, double=True, format="hdf5", time=loaded_snap.time)
 
     print("Done shifting by ", timeshift, "[s].")
 
@@ -31,4 +31,4 @@ if __name__ == "__main__":
     parser = InitParser()
     args = parser.parse_args()
 
-    change_time(args.source_dir, args.saving_dit, args.beginStep, args.lastStep, args.timeshift)
+    change_time(args.source_dir, args.saving_dir, args.beginStep, args.lastStep, args.timeshift)
