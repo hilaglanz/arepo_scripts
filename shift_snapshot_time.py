@@ -31,4 +31,4 @@ if __name__ == "__main__":
     parser = InitParser()
     args = parser.parse_args()
 
-    change_time(args.source_dir, args.saving_dir, args.beginStep, args.lastStep, args.timeshift)
+    change_time(args.source_dir, args.saving_dir, args.beginStep, args.lastStep, args.skipStep, args.timeshift)
