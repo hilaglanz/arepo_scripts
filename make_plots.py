@@ -569,7 +569,8 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
             plot_single_value(loaded_snap,  value=val, cmap=curr_cmap, box=get_single_value(box,index),
                                   vrange=get_single_value(vrange,index), logplot=get_single_value(logplot,index),
                                   res=res,
-                                  numthreads=numthreads, center=center,  relative_to_sink_id=get_single_value(relative_to_sink_id,index),
+                                  numthreads=numthreads, center=get_single_value(center,index),
+                              relative_to_sink_id=get_single_value(relative_to_sink_id,index),
                                   central_id=get_single_value(central_id, index), plot_points=plot_points,
                                   additional_points_size=additional_points_size,
                                   additional_points_shape=additional_points_shape,
@@ -645,7 +646,7 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
             old_basic_units = copy_current_units()
             plot_single_value(loaded_snap, value=val, cmap=curr_cmap, box=get_single_value(box),
                               vrange=get_single_value(vrange), logplot=get_single_value(logplot), res=res,
-                              numthreads=numthreads, center=center,
+                              numthreads=numthreads, center=get_single_value(center),
                               relative_to_sink_id=get_single_value(relative_to_sink_id),
                               central_id=get_single_value(central_id), plot_points=plot_points,
                               additional_points_size=additional_points_size,
@@ -680,7 +681,7 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
                 plot_single_value(loaded_snap,  value=val, cmap=curr_cmap, box=get_single_value(box,index),
                                   vrange=get_single_value(vrange,index), logplot=get_single_value(logplot,index),
                                   res=res,
-                                  numthreads=numthreads, center=center,
+                                  numthreads=numthreads, center=get_single_value(center,index),
                                   relative_to_sink_id=get_single_value(relative_to_sink_id, index),
                                   central_id=get_single_value(central_id, index), plot_points=plot_points,
                                   additional_points_size=additional_points_size,
@@ -729,9 +730,9 @@ def InitParser():
                         default=[True])
     parser.add_argument('--res', type=int, help='plotting resolution', default=1024)
     parser.add_argument('--numthreads', type=int, help='threads for plotting', default=1)
-    parser.add_argument('--center_x', type=float, help='point on x axis to be the center of the plot', default=None)
-    parser.add_argument('--center_y', type=float, help='point on y axis to be the center of the plot', default=None)
-    parser.add_argument('--center_z', type=float, help='point on z axis to be the center of the plot', default=0)
+    parser.add_argument('--center_x', nargs='+', type=float, help='point on x axis to be the center of the plot', default=None)
+    parser.add_argument('--center_y', nargs='+', type=float, help='point on y axis to be the center of the plot', default=None)
+    parser.add_argument('--center_z', nargs='+', type=float, help='point on z axis to be the center of the plot', default=0)
     parser.add_argument('--relative_to_sink_id', nargs='+', type=int,  help='id of sink particle to use as a reference point', default= None)
     parser.add_argument('--relative_to_id', nargs='+', type=int,  help='id of centeral particle', default= None)
     parser.add_argument('--plot_per_value_evolution', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
@@ -779,7 +780,7 @@ if __name__ == "__main__":
 
     center = False
     if args.center_x is not None and args.center_y is not None:
-        center = [args.center_x, args.center_y,args.center_z]
+        center = [[args.center_x, args.center_y,args.center_z]  for i in range(len(args.center_x))]
 
     axes_array = [[0,1]]
     if args.axes0 is not None and args.axes1 is not None:
