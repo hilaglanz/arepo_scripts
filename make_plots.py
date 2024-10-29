@@ -95,7 +95,7 @@ def regularize_time_units(snapshot):
         basic_units["time"].unit = "years"
     elif basic_units["time"].factor <= 1/day or snapshot.time * basic_units["time"].factor > day:
         basic_units["time"].factor /= day
-        basic_units["time"].unit = "day"
+        basic_units["time"].unit = "days"
     elif basic_units["time"].factor <= 1/hour or snapshot.time * basic_units["time"].factor > hour:
         basic_units["time"].factor /= hour
         basic_units["time"].unit = "hours"
@@ -547,8 +547,8 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
 
     for index, val in enumerate(value):
         print(val)
-        fig = figure(figsize=(num_figures*15, 16))
-        rcParams.update({'font.size': 40, 'font.family': 'Serif'})
+        fig = figure(figsize=(num_figures*15, 17))
+        rcParams.update({'font.size': 70, 'font.family': 'Serif', 'axes.formatter.useoffset':False})
         rcParams['text.usetex'] = True
         curr_cmap = cmap[index % len(cmap)]
         for snap_i, snap in enumerate(snapshots_list):
@@ -581,11 +581,12 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
                               plot_ylabel=(not horizontal or ((horizontal) and (snap_i == 0))))
             #subplot(curr_subplot)
             regularize_time_units(loaded_snap)
-            curr_ax.set_title('time : {:.2g}'.format(loaded_snap.time * basic_units["time"].factor) +
-                              " [" + basic_units["time"].unit + "]", fontsize='x-large')
+            ax.tick_params(axis='x',labelrotation=45)
+            curr_ax.set_title('{:.3g}'.format(loaded_snap.time * basic_units["time"].factor) +
+                              " [" + basic_units["time"].unit + "]", fontsize='70',loc='right')
             restore_basic_units(old_basic_units)
 
-            rcParams.update({'font.size': 40, 'font.family': 'Serif'})
+            rcParams.update({'font.size': 70, 'font.family': 'Serif', 'axes.formatter.useoffset':False})
             rcParams['text.usetex'] = True
             if horizontal is True and snap_i!=0:
                 curr_ax.set_axis_off()
@@ -595,14 +596,14 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
             fig.subplots_adjust(bottom=0.1, top=0.9, left=0.1, right=0.8, wspace=0.002, hspace=0.2)
         else:
             fig.subplots_adjust(bottom=0.1, top=0.9, left=0.1, right=0.8, wspace=0.2, hspace=0.002)
-        cax = fig.add_axes([0.905, 0.1055, 0.04/num_figures, 0.788])
+        cax = fig.add_axes([0.905, 0.1946, 0.04/num_figures, 0.702])
         if "xnuc" in val:
             val = "rho" + val
         colorbar(cax=cax, label= name_and_units[val].name + " [" + basic_units[name_and_units[val].unit_name].unit + "]",
                  aspect=15, pad=0, shrink=1)
         tight_layout(pad=0, h_pad=0, w_pad=0, rect=(0.01, 0, 0.9, 1))
         #title('time : {:.2f} [s]'.format(loaded_snap.time))
-        rcParams.update({'font.size': 40, 'font.family': 'Serif'})
+        rcParams.update({'font.size': 70, 'font.family': 'Serif', 'axes.formatter.useoffset':False})
         rcParams['text.usetex'] = True
         filename = plottingDir + "/Aslice_" + val + "_" + "_".join([str(s) for s in snapshots_list]) + ".png".format(snap)
         print("saving to: ", filename)
