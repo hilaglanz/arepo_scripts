@@ -96,6 +96,6 @@ if __name__ == "__main__":
     s = gadget_readsnap(args.snap_num,args.source_dir,loadonlytype=[0])
     sum_table = get_abundances_table(s,low_dens=args.low_dens)
     print("Writing elements")
-    with open(args.saving_dir+'/abundances'+'_'+str(args.snap_num)+'.txt') as out_file:
+    with open(args.saving_dir+'/abundances'+'_'+str(args.snap_num)+'.txt', 'w') as out_file:
         out_file.writelines(sum_table)
     print("Done.")
