@@ -73,8 +73,8 @@ def get_abundances_table(snap, low_dens=1e2):
         unbound_abundances[element] = (snap.xnuc[unbound,element]*snap.mass[unbound]).sum()/msol
 
     for element in range(55):
-        sum_table.append(element_names[element] + r' & \num{' + str(bound_abundances[element]) + r'}' + r' & \num{' +
-                         str(unbound_abundances[element]) + r'}\\')
+        sum_table.append(element_names[element] + r' & \num{' + '{:0.3e}'.format(bound_abundances[element]) + r'}' +
+                         r' & \num{' + '{:0.3e}'.format(unbound_abundances[element]) + r'}\\' +'\r\n')
 
     return sum_table
 
