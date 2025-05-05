@@ -95,7 +95,7 @@ def regularize_time_units(snapshot):
         basic_units["time"].unit = "years"
     elif basic_units["time"].factor <= 1/day or snapshot.time * basic_units["time"].factor > day:
         basic_units["time"].factor /= day
-        basic_units["time"].unit = "day"
+        basic_units["time"].unit = "days"
     elif basic_units["time"].factor <= 1/hour or snapshot.time * basic_units["time"].factor > hour:
         basic_units["time"].factor /= hour
         basic_units["time"].unit = "hours"
@@ -534,21 +534,21 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
                central_id=None, plot_points=True,
                additional_points_size=30,additional_points_shape='X', additional_points_color='w', units_length = 'cm',
                units_velocity="$cm/s$", units_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
-               axes_array=[[0,1]], ignore_types=[], horizontal=True, relative_to_motion=False):
+               axes_array=[[0,1]], ignore_types=[], horizontal=True, relative_to_motion=False, snapshots_list=None):
     if not os.path.exists(plottingDir):
         os.mkdir(plottingDir)
     convert_to_cgs = False
     if units_velocity is None and units_density is None:
         convert_to_cgs = True
     modified_units = False
-
-    snapshots_list = get_snapshot_number_list(snapshotDir, "snapshot_", firstSnap, lastSnap, skipSteps)
+    if snapshots_list is None:
+        snapshots_list = get_snapshot_number_list(snapshotDir, "snapshot_", firstSnap, lastSnap, skipSteps)
     num_figures = len(snapshots_list)
 
     for index, val in enumerate(value):
         print(val)
-        fig = figure(figsize=(num_figures*15, 16))
-        rcParams.update({'font.size': 40, 'font.family': 'Serif'})
+        fig = figure(figsize=(num_figures*15, 17))
+        rcParams.update({'font.size': 70, 'font.family': 'Serif', 'axes.formatter.useoffset':False})
         rcParams['text.usetex'] = True
         curr_cmap = cmap[index % len(cmap)]
         for snap_i, snap in enumerate(snapshots_list):
@@ -569,7 +569,8 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
             plot_single_value(loaded_snap,  value=val, cmap=curr_cmap, box=get_single_value(box,index),
                                   vrange=get_single_value(vrange,index), logplot=get_single_value(logplot,index),
                                   res=res,
-                                  numthreads=numthreads, center=center,  relative_to_sink_id=get_single_value(relative_to_sink_id,index),
+                                  numthreads=numthreads, center=get_single_value(center,index),
+                              relative_to_sink_id=get_single_value(relative_to_sink_id,index),
                                   central_id=get_single_value(central_id, index), plot_points=plot_points,
                                   additional_points_size=additional_points_size,
                                   additional_points_shape=additional_points_shape,
@@ -581,11 +582,12 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
                               plot_ylabel=(not horizontal or ((horizontal) and (snap_i == 0))))
             #subplot(curr_subplot)
             regularize_time_units(loaded_snap)
-            curr_ax.set_title('time : {:.2g}'.format(loaded_snap.time * basic_units["time"].factor) +
-                              " [" + basic_units["time"].unit + "]", fontsize='x-large')
+            ax.tick_params(axis='x',labelrotation=45)
+            curr_ax.set_title('{:.3g}'.format(loaded_snap.time * basic_units["time"].factor) +
+                              " [" + basic_units["time"].unit + "]", fontsize='70',loc='right')
             restore_basic_units(old_basic_units)
 
-            rcParams.update({'font.size': 40, 'font.family': 'Serif'})
+            rcParams.update({'font.size': 70, 'font.family': 'Serif', 'axes.formatter.useoffset':False})
             rcParams['text.usetex'] = True
             if horizontal is True and snap_i!=0:
                 curr_ax.set_axis_off()
@@ -595,14 +597,14 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
             fig.subplots_adjust(bottom=0.1, top=0.9, left=0.1, right=0.8, wspace=0.002, hspace=0.2)
         else:
             fig.subplots_adjust(bottom=0.1, top=0.9, left=0.1, right=0.8, wspace=0.2, hspace=0.002)
-        cax = fig.add_axes([0.905, 0.1055, 0.04/num_figures, 0.788])
+        cax = fig.add_axes([0.905, 0.1946, 0.04/num_figures, 0.702])
         if "xnuc" in val:
             val = "rho" + val
         colorbar(cax=cax, label= name_and_units[val].name + " [" + basic_units[name_and_units[val].unit_name].unit + "]",
                  aspect=15, pad=0, shrink=1)
         tight_layout(pad=0, h_pad=0, w_pad=0, rect=(0.01, 0, 0.9, 1))
         #title('time : {:.2f} [s]'.format(loaded_snap.time))
-        rcParams.update({'font.size': 40, 'font.family': 'Serif'})
+        rcParams.update({'font.size': 70, 'font.family': 'Serif', 'axes.formatter.useoffset':False})
         rcParams['text.usetex'] = True
         filename = plottingDir + "/Aslice_" + val + "_" + "_".join([str(s) for s in snapshots_list]) + ".png".format(snap)
         print("saving to: ", filename)
@@ -617,7 +619,7 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
                additional_points_size=30,additional_points_shape='X', additional_points_color='w', units_length = 'cm',
                units_velocity="$cm/s$", units_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
                axes_array=[[0,1]], ignore_types=[], per_value_evolution=False, relative_to_motion=False,
-               factor_value=[1.0], units_value=[None], contour=False):
+               factor_value=[1.0], units_value=[None], contour=False, snapshots_list=None):
 
     if per_value_evolution:
         return plot_single_value_evolutions(value, snapshotDir, plottingDir, firstSnap, lastSnap, skipSteps, box,
@@ -625,7 +627,7 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
                plot_points,
                additional_points_size,additional_points_shape, additional_points_color, units_length,
                units_velocity, units_density, plot_velocities, plot_bfld,
-               axes_array, ignore_types, per_value_evolution)
+               axes_array, ignore_types, snapshots_list=snapshots_list)
 
     if not os.path.exists(plottingDir):
         os.mkdir(plottingDir)
@@ -644,7 +646,7 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
             old_basic_units = copy_current_units()
             plot_single_value(loaded_snap, value=val, cmap=curr_cmap, box=get_single_value(box),
                               vrange=get_single_value(vrange), logplot=get_single_value(logplot), res=res,
-                              numthreads=numthreads, center=center,
+                              numthreads=numthreads, center=get_single_value(center),
                               relative_to_sink_id=get_single_value(relative_to_sink_id),
                               central_id=get_single_value(central_id), plot_points=plot_points,
                               additional_points_size=additional_points_size,
@@ -679,7 +681,7 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
                 plot_single_value(loaded_snap,  value=val, cmap=curr_cmap, box=get_single_value(box,index),
                                   vrange=get_single_value(vrange,index), logplot=get_single_value(logplot,index),
                                   res=res,
-                                  numthreads=numthreads, center=center,
+                                  numthreads=numthreads, center=get_single_value(center,index),
                                   relative_to_sink_id=get_single_value(relative_to_sink_id, index),
                                   central_id=get_single_value(central_id, index), plot_points=plot_points,
                                   additional_points_size=additional_points_size,
@@ -728,9 +730,9 @@ def InitParser():
                         default=[True])
     parser.add_argument('--res', type=int, help='plotting resolution', default=1024)
     parser.add_argument('--numthreads', type=int, help='threads for plotting', default=1)
-    parser.add_argument('--center_x', type=float, help='point on x axis to be the center of the plot', default=None)
-    parser.add_argument('--center_y', type=float, help='point on y axis to be the center of the plot', default=None)
-    parser.add_argument('--center_z', type=float, help='point on z axis to be the center of the plot', default=0)
+    parser.add_argument('--center_x', nargs='+', type=float, help='point on x axis to be the center of the plot', default=None)
+    parser.add_argument('--center_y', nargs='+', type=float, help='point on y axis to be the center of the plot', default=None)
+    parser.add_argument('--center_z', nargs='+', type=float, help='point on z axis to be the center of the plot', default=0)
     parser.add_argument('--relative_to_sink_id', nargs='+', type=int,  help='id of sink particle to use as a reference point', default= None)
     parser.add_argument('--relative_to_id', nargs='+', type=int,  help='id of centeral particle', default= None)
     parser.add_argument('--plot_per_value_evolution', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
@@ -757,6 +759,8 @@ def InitParser():
     parser.add_argument('--plot_contours', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
                         help='should plot contours?',
                         default=False)
+    parser.add_argument('--snapshot_list', nargs='+', type=int,  help='list of snapshots to plot for '
+                                                                      '(currently only for evolution)', default=[None])
     return parser
 
 
@@ -776,11 +780,16 @@ if __name__ == "__main__":
 
     center = False
     if args.center_x is not None and args.center_y is not None:
-        center = [args.center_x, args.center_y,args.center_z]
+        center = [[args.center_x, args.center_y,args.center_z]  for i in range(len(args.center_x))]
 
     axes_array = [[0,1]]
     if args.axes0 is not None and args.axes1 is not None:
         axes_array = [[args.axes0[i],args.axes1[i]] for i in range(len(args.axes0))]
+
+    if args.snapshot_list[0] is None:
+        snapshots_list = None
+    else:
+        snapshots_list = args.snapshot_list
 
     change_unit_conversion(args.factor_length, args.factor_velocity, args.factor_mass)
     #TODO: add conversion to temperature
@@ -794,4 +803,5 @@ if __name__ == "__main__":
                units_length=args.units_length, units_velocity=args.units_velocity, units_density= args.units_density,
                plot_velocities=args.plot_velocities, plot_bfld= args.plot_bfld, axes_array=axes_array,
                ignore_types=args.ignore_types, per_value_evolution=args.plot_per_value_evolution,
-               factor_value=args.factor_value, units_value=args.units_value, contour=args.plot_contours)
+               factor_value=args.factor_value, units_value=args.units_value, contour=args.plot_contours,
+               snapshots_list=snapshots_list)
