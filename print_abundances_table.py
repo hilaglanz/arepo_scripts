@@ -83,7 +83,7 @@ def InitParser():
     parser.add_argument('--snap_num', type=int,  help='number of the snapshot to analyze', default=0)
     parser.add_argument('--low_dens', type=float, help='cutoff density', default=1e2)
 
-
+    return parser
 
 if __name__ == "__main__":
     for arg in sys.argv:

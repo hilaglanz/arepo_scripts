@@ -18,6 +18,7 @@ def InitParser():
     parser.add_argument('--source_dir', type=str,  help='path to snapshot files directory', default= sys.argv[0])
     parser.add_argument('--saving_dir', type=str,  help='path to output directory', default= "zipped")
 
+    return parser
 
 if __name__ == "__main__":
     for arg in sys.argv:
