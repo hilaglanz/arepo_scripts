@@ -26,7 +26,7 @@ def create_co_wd(mass=1.10, he4_mass=0.03, species_file="species55.txt", eos_fil
         co_mass = wd['dm'][k].sum() / msol
     print("Mass of WD: %gMsun" % (wd_mass))
     print("Mass of CO core: %gMsun" % (co_mass))
-    sp = loaders.load_species("species55.txt")
+    sp = loaders.load_species(species_file)
     wd['v'] = np.zeros(wd['ncells'])
     wd['xnuc'] = np.zeros(sp['count'])
     wd['xnuc'][iC12] = 0.5
@@ -65,7 +65,7 @@ def create_co_wd(mass=1.10, he4_mass=0.03, species_file="species55.txt", eos_fil
     data['pass'][i, 0] = 1.
     r = rad[i].max()
     print("WD Radius: %gkm" % (r * 1e-5))
-    gadget_write_ics(ic_file, data, double=True, format="hdf5")
+    gadget_write_ics(ic_file, data, double=False, format="hdf5")
 
 
 
