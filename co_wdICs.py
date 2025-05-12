@@ -15,13 +15,17 @@ def create_co_wd(mass=1.10, he4_mass=0.03, species_file="species55.txt", eos_fil
     rhoc = wdCOgetRhoCFromMassExact(mtot, eos)
     wd = create_wd(eos, rhoc, xC12=0.5, xO16=0.5, tol=1e-10)
     mcum = np.cumsum(wd['dm'])
-    j, = np.where((mcum > (mcum.max() - mhe4)))
-    rad_heshell = wd['r'][j[0]].min()
-    k, = np.where((mcum <= (mcum.max() - mhe4)))
-    print("Radius of He shell: %gkm" % (rad_heshell * 1e-5))
-    print("Mass of WD: %gMsun" % (wd['dm'].sum() / msol))
-    print("Mass of He shell: %gMsun" % (wd['dm'][j].sum() / msol))
-    print("Mass of CO core: %gMsun" % (wd['dm'][k].sum() / msol))
+    wd_mass = wd['dm'].sum() / msol
+    co_mass = wd_mass
+    if mhe4 > 0:
+        j, = np.where((mcum > (mcum.max() - mhe4)))
+        rad_heshell = wd['r'][j[0]].min()
+        k, = np.where((mcum <= (mcum.max() - mhe4)))
+        print("Radius of He shell: %gkm" % (rad_heshell * 1e-5))
+        print("Mass of He shell: %gMsun" % (wd['dm'][j].sum() / msol))
+        co_mass = wd['dm'][k].sum() / msol
+    print("Mass of WD: %gMsun" % (wd_mass))
+    print("Mass of CO core: %gMsun" % (co_mass))
     sp = loaders.load_species("species55.txt")
     wd['v'] = np.zeros(wd['ncells'])
     wd['xnuc'] = np.zeros(sp['count'])
@@ -43,11 +47,12 @@ def create_co_wd(mass=1.10, he4_mass=0.03, species_file="species55.txt", eos_fil
     data['xnuc'] = np.zeros((data['count'], sp['count']))
     data['xnuc'][:, iC12] = 0.5
     data['xnuc'][:, iO16] = 0.5
-    j, = np.where((rad < wd['r'].max()) & (rad > rad_heshell))
-    print("He shell is made up of %d cells." % size(j))
-    data['xnuc'][j, iC12] = 0.
-    data['xnuc'][j, iO16] = 0.
-    data['xnuc'][j, iHe4] = 1.
+    if mhe4 > 0:
+        j, = np.where((rad < wd['r'].max()) & (rad > rad_heshell))
+        print("He shell is made up of %d cells." % size(j))
+        data['xnuc'][j, iC12] = 0.
+        data['xnuc'][j, iO16] = 0.
+        data['xnuc'][j, iHe4] = 1.
     for index in range(size(i)):
         idx = i[index]
         temp, data['u'][idx] = eos.pgiven(rho[index], data['xnuc'][index, :], pres[index])
