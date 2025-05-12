@@ -56,11 +56,12 @@ def create_co_wd(mass=1.10, he4_mass=0.03, species_file="species55.txt", eos_fil
     for index in range(size(i)):
         idx = i[index]
         temp, data['u'][idx] = eos.pgiven(rho[index], data['xnuc'][index, :], pres[index])
-        data['pass'][j, 1] = 1.
     data['mass'][:] = 0.
     data['mass'][i] = rho
     data['bfld'] = np.zeros((data['count'], 3))
     data['pass'] = np.zeros((data['count'], 2))
+    if mhe4 > 0:
+        data['pass'][j, 1] = 1.
     data['pass'][i, 0] = 1.
     r = rad[i].max()
     print("WD Radius: %gkm" % (r * 1e-5))
