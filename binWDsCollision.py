@@ -99,8 +99,8 @@ data['u'][npart1:] = s2.data['u'][i2]
 data['xnuc'][npart1:, :] = s2.data['xnuc'][i2, :]
 data['pass'][npart1:, 1] = 1.0
 
-data['vel'][:npart1, 0] = data['vel'][:npart1, 0] + velocity #some velocity in the x direction
-data['vel'][npart1:, 0] = data['vel'][npart1:, 0] - velocity
+data['vel'][:npart1, 0] = data['vel'][:npart1, 0] + (m1/m)*velocity #some velocity in the x direction
+data['vel'][npart1:, 0] = data['vel'][npart1:, 0] - (m2/m)*velocity
 
 mm = np.array([0., 0., 1e3 * 1e9 ** 3 / 2.])  # 1e3 G at 1e9 cm
 
