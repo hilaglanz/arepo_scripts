@@ -273,7 +273,7 @@ def change_basic_units(loaded_snap, unit_density, unit_length, unit_velocity):
     if unit_density is not None:
         basic_units["rho"].unit = unit_density
         convert_to_cgs = False
-    if convert_to_cgs:
+    if convert_to_cgs and "UnitLength_in_cm" in loaded_snap.parameters.keys():
         change_unit_conversion(factor_length=float(loaded_snap.parameters["UnitLength_in_cm"]),
                                factor_velocity=float(loaded_snap.parameters["UnitVelocity_in_cm_per_s"]),
                                factor_mass=float(loaded_snap.parameters["UnitMass_in_g"]))
@@ -503,7 +503,7 @@ def get_sink_idk(loaded_snap, relative_to_sink_id):
 
 
 def get_single_value(value,index=0):
-    if value is None:
+    if value is None or value == False or value == True:
         return value
 
     if len(value) > index:
@@ -547,8 +547,10 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
 
     for index, val in enumerate(value):
         print(val)
+
+        #fig = figure(figsize=(num_figures*15, 17))
         fig = figure(figsize=(num_figures*15, 17))
-        rcParams.update({'font.size': 70, 'font.family': 'Serif', 'axes.formatter.useoffset':False})
+        rcParams.update({'font.size': 70, 'font.family': 'Serif', 'axes.formatter.useoffset':True})
         rcParams['text.usetex'] = True
         curr_cmap = cmap[index % len(cmap)]
         for snap_i, snap in enumerate(snapshots_list):
@@ -582,7 +584,7 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
                               plot_ylabel=(not horizontal or ((horizontal) and (snap_i == 0))))
             #subplot(curr_subplot)
             regularize_time_units(loaded_snap)
-            ax.tick_params(axis='x',labelrotation=45)
+            #ax.tick_params(axis='x',labelrotation=45)
             curr_ax.set_title('{:.3g}'.format(loaded_snap.time * basic_units["time"].factor) +
                               " [" + basic_units["time"].unit + "]", fontsize='70',loc='right')
             restore_basic_units(old_basic_units)
@@ -597,18 +599,19 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
             fig.subplots_adjust(bottom=0.1, top=0.9, left=0.1, right=0.8, wspace=0.002, hspace=0.2)
         else:
             fig.subplots_adjust(bottom=0.1, top=0.9, left=0.1, right=0.8, wspace=0.2, hspace=0.002)
-        cax = fig.add_axes([0.905, 0.1946, 0.04/num_figures, 0.702])
+        cax = fig.add_axes([0.937, 0.122, 0.045/num_figures, 0.777])
         if "xnuc" in val:
             val = "rho" + val
         colorbar(cax=cax, label= name_and_units[val].name + " [" + basic_units[name_and_units[val].unit_name].unit + "]",
                  aspect=15, pad=0, shrink=1)
-        tight_layout(pad=0, h_pad=0, w_pad=0, rect=(0.01, 0, 0.9, 1))
+        tight_layout(pad=0, h_pad=0, w_pad=0, rect=(0.005, 0, 0.93, 1))
+
         #title('time : {:.2f} [s]'.format(loaded_snap.time))
         rcParams.update({'font.size': 70, 'font.family': 'Serif', 'axes.formatter.useoffset':False})
         rcParams['text.usetex'] = True
         filename = plottingDir + "/Aslice_" + val + "_" + "_".join([str(s) for s in snapshots_list]) + ".png".format(snap)
         print("saving to: ", filename)
-        savefig(filename)
+        savefig(filename,dpi=300)
         print("saved fig")
         close('all')
         modified_units = True
