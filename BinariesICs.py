@@ -227,9 +227,15 @@ class BinariesICs:
     def create_ic_at_apastron(self, semimajor, eccentricity=0):
         raise Exception("not implemented")
 
-    def create_ic_collision(self, impact_parameter, velocity=None, ic_file_name="bin.dat.ic"):
+    def create_ic_collision(self, impact_parameter, ic_file_name="bin.dat.ic", velocity=None, separation=None,
+                            relative_to_RL=1):
         self.relative_y = impact_parameter
-        self.relative_x = self.calculate_RL()
+        if separation is None:
+            if relative_to_RL is None:
+                relative_to_RL = 1
+            self.relative_x = relative_to_RL * self.calculate_RL()
+        else:
+            self.relative_x = separation
         print("relative positions= ", self.relative_x, self.relative_y)
 
         velocity = self.calculate_escape_velocity(velocity, self.relative_x)
@@ -245,6 +251,7 @@ class BinariesICs:
 
     def calculate_escape_velocity(self, velocity, distance):
         if velocity is None:
+            print("computing escape velocity at separation ", distance)
             velocity = ((2 * G * (self.total_mass) / distance) ** 0.5)
         return velocity
 
@@ -459,6 +466,14 @@ if __name__ == "__main__":
         i2, = np.where(binary.snapshot2.rho > args.impact_parameter_rhocut)
         b = binary.snapshot1.r()[i1].max() + binary.snapshot2.r()[i2].max()
         print("b = ", b)
-        binary.create_ic_collision(b, args.relative_velocity, args.ic_file_name)
+        binary.create_ic_collision(b, args.ic_file_name, args.relative_velocity, args.separation,
+                                   args.impact_parameter_rhocut)
+
+    elif args.impact_parameter_rhocut > 0:
+        b = args.impact_parameter
+        print("b = ", b)
+        binary.create_ic_collision(b, args.ic_file_name, args.relative_velocity, args.separation,
+                                   args.impact_parameter_rhocut)
+
     elif args.find_next_interaction:
         binary.create_ic_for_next_interaction(args.ic_file_name, args.relative_to_RL, args.RL_factor, args.separation)
