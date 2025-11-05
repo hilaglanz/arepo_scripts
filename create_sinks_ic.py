@@ -80,7 +80,7 @@ def create_a_radial_gowing_mesh(inner_sphere_radius, outer_sphere_radius, smalle
         cell_radius *= growth_factor
 
     pos_array = np.array(pos_array) + box_center
-    print(pos_array)
+    #print(pos_array)
     print(pos_array[:,0].max(), pos_array[:,1].max(), pos_array[:,2].max())
     print(pos_array[:,0].min(), pos_array[:,1].min(), pos_array[:,2].min())
 
@@ -106,7 +106,7 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
     pointStar = initialize_dictionary_with_point_masses(sink_mass, num_sinks, boxsize)
     if not binary:
         #background = initialize_dictionary_with_point_masses(rho,1,Rs*0.1)
-        maximum_cell_radius, sphere_size, pos = create_a_radial_gowing_mesh(Rs, minimum(1000 * Rs, boxsize),
+        maximum_cell_radius, sphere_size, pos = create_a_radial_gowing_mesh(Rs, minimum(1000 * Rs, 0.5*boxsize),
                                                                             Rs / surroundings, resolution=surroundings)
         data={}
         data["pos"] = pos
@@ -137,10 +137,10 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
                 continue
             else:
                 pointStar[key] = np.append(pointStar[key], background[key], axis=0)
-        print(pointStar["pos"])
+        #print(pointStar["pos"])
         #finest_grid_size, highest_resolution = get_finest_grid_size_and_resolution(accretion_radius, Rs, surroundings)
         finest_grid_size = sphere_size * 1.01
-        highest_resolution = maximum_cell_radius
+        highest_resolution = finest_grid_size / maximum_cell_radius
         #gadget_add_grid(pointStar, Rs * 0.8, res=ceil(mean([res, highest_resolution])))  # no need for so many cells well inside the sink
         gadget_add_grid(pointStar, finest_grid_size, res=ceil(highest_resolution*0.8)) # should have many close to its surface
     else:
@@ -149,7 +149,7 @@ def create_ic_with_sink(ic_path, boxsize=32, G=6.672*10**-8, mach=1.4, cs=1, rho
 
     print("added inner grid with size of ", finest_grid_size / accretion_radius, "Ra")
     print("minimum vol =", (finest_grid_size ** 3) / highest_resolution ** 3)
-    print(pointStar["pos"])
+    #print(pointStar["pos"])
 
     sub_grid_sizes = get_smoothed_sub_grid_sizes(boxsize, finest_grid_size)
     gadget_add_grids(pointStar, sub_grid_sizes, res=res)
