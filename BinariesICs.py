@@ -308,10 +308,12 @@ class BinariesICs:
 
     def create_new_velocity_array(self):
         if len(self.relative_vx) > 1:
+            print("received a vector for relative velocity in x, using just 0 for relative velocity")
             self.new_v1 = np.array([0, 0, 0])
             self.new_v2 = np.array([0, 0, 0])
             return
 
+        print("using relative velocity ", self.relative_vx, self.relative_vy, " for new relative velocity")
         self.new_vx1 = self.m2 * self.relative_vx / self.total_mass
         self.new_vx2 = -self.m1 * self.relative_vx / self.total_mass
 
@@ -430,7 +432,9 @@ def InitParser():
     parser.add_argument('--load_types', type=int, nargs='+', help='load only these types', default=[0])
     parser.add_argument('--period', type=float, help='orbital period in seconds for mergers', default=0)
     parser.add_argument('--impact_parameter_rhocut', type=float,
-                        help='calculate impact parameter according to this density cutoff', default=0)
+                        help='calculate impact parameter according to this density cutoff', default=0
+    parser.add_argument('--impact_parameter', type=float,
+                        help='use this initial impact parameter at the initial separation specified by either separation or relative_to_RL, used only if not using impact_parameter_rho_cut', default=0))
     parser.add_argument('--relative_velocity', type=float, help='', default=None)
     parser.add_argument('--relative_to_RL', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
                         help='is the distance should be relative to RL size?',

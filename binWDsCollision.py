@@ -118,6 +118,8 @@ rad2 = data['pos'][i, :] - c2[None, :]
 data['bfld'][i, :] += 3. * rad2 * (mm[None, :] * rad2).sum(axis=1)[:, None] / (r2[i] ** 5)[:, None] \
                     - mm[None, :] / (r2[i] ** 3)[:,None]
 
+
+
 #TODO: Check many different uses of r1 and r2!!
 
 print(c1)
