@@ -59,6 +59,8 @@ def InitParser():
     parser.add_argument('--relative_to_sink_id', nargs='+', type=int,  help='id of sink particle to use as a reference point', default= None)
     parser.add_argument('--units_length', type=str,  help='name of the length units', default= "Ra")
     parser.add_argument('--units_velocity', type=str,  help='name of the velocity units default is cgs', default= "cs")
+    parser.add_argument('--species_file', type=str, help='path to species file used in the simulation',
+                        default="../species55.txt")
 
     return parser
 
@@ -86,7 +88,8 @@ if __name__ == "__main__":
                           plot_points=True,
                           unit_length=args.units_length,
                           unit_velocity=args.units_velocity, unit_density=None,
-                          plot_velocities=True, axes=[args.axes0,args.axes1], saving_file=saving_file)
+                          plot_velocities=True, axes=[args.axes0,args.axes1], saving_file=saving_file,
+                          species_file=args.species_file)
 
     regularize_time_units(loaded_snap)
     title('time : {:.2g}'.format(loaded_snap.time * basic_units["time"].factor) +

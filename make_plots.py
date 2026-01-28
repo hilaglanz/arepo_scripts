@@ -148,6 +148,8 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
                       unit_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
                       newfig=True, axes=[0,1], modified_units = False, ignore_types=[], colorbar=True,
                       plot_xlabel=True, plot_ylabel=True, factor_value=1.0, units_value=None, saving_file=None, contour=False):
+                      plot_xlabel=True, plot_ylabel=True, factor_value=1.0, units_value=None, saving_file=None,
+                      contour=False, species_file="../species55.txt"):
 
     if box == False:
         box = [loaded_snap.boxsize, loaded_snap.boxsize]
@@ -159,7 +161,7 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
     print("units: ")
     for val in name_and_units.values():
         print(val.name, basic_units[val.unit_name].factor)
-    loaded_snap, value = calculate_label_and_value(loaded_snap, value, relative_to_sink_id, central_id=central_id,)
+    loaded_snap, value = calculate_label_and_value(loaded_snap, value, relative_to_sink_id, central_id=central_id, species_file=species_file)
 
     print(value)
 
@@ -313,7 +315,7 @@ def get_value_at_inf(value, data):
 
     return val_inf
 
-def calculate_label_and_value(loaded_snap, value, relative_to_sink_id, central_id=None):
+def calculate_label_and_value(loaded_snap, value, relative_to_sink_id, central_id=None, species_file="..\species55.txt"):
     if "xnuc" in value:
         loaded_snap.data["rho" + value] = loaded_snap.rho * loaded_snap.data[value]
         value = "rho" + value
@@ -330,7 +332,7 @@ def calculate_label_and_value(loaded_snap, value, relative_to_sink_id, central_i
             return loaded_snap, value
 
     if value == "mean_a":
-        loaded_snap.calc_mean_a()
+        loaded_snap.calc_mean_a(species_file)
         add_name_and_unit(value, "Mean Atomic Weight", "none")
 
     if value == "bfld" or value == "B":
@@ -478,6 +480,7 @@ def calculate_value_relative_to_vector(loaded_snap, value, vector):
         add_name_and_unit(value+"_u", name_and_units[value].name + "_u", name_and_units[value].unit_name)
 
         return loaded_snap
+
 def add_computed_value_to_name_and_unit_dict(loaded_snap, value):
     if value not in name_and_units.keys():
         name = value
@@ -493,7 +496,6 @@ def calculate_sink_properties(loaded_snap, relative_to_sink_id):
     r = loaded_snap.pos[np.where(loaded_snap.type == 0)] - sink_pos
     dist = np.sqrt((r * r).sum(axis=1))
     return dist, r, sink_idk
-
 
 def get_sink_idk(loaded_snap, relative_to_sink_id):
     sink_idks = np.where(loaded_snap.type == 5)
@@ -535,6 +537,8 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
                additional_points_size=30,additional_points_shape='X', additional_points_color='w', units_length = 'cm',
                units_velocity="$cm/s$", units_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
                axes_array=[[0,1]], ignore_types=[], horizontal=True, relative_to_motion=False, snapshots_list=None):
+               axes_array=[[0,1]], ignore_types=[], horizontal=True, relative_to_motion=False, snapshots_list=None,
+               species_file="../species55.txt"):
     if not os.path.exists(plottingDir):
         os.mkdir(plottingDir)
     convert_to_cgs = False
@@ -581,7 +585,7 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
                                   plot_velocities=plot_velocities, plot_bfld= plot_bfld, newfig=False,
                                   axes=get_single_value(axes_array, index), ignore_types=ignore_types, colorbar=False,
                               plot_xlabel=(horizontal is True or ((not horizontal) and (snap_i == num_figures))),
-                              plot_ylabel=(not horizontal or ((horizontal) and (snap_i == 0))))
+                              plot_ylabel=(not horizontal or ((horizontal) and (snap_i == 0))), species_file=species_file)
             #subplot(curr_subplot)
             regularize_time_units(loaded_snap)
             #ax.tick_params(axis='x',labelrotation=45)
@@ -622,7 +626,7 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
                additional_points_size=30,additional_points_shape='X', additional_points_color='w', units_length = 'cm',
                units_velocity="$cm/s$", units_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
                axes_array=[[0,1]], ignore_types=[], per_value_evolution=False, relative_to_motion=False,
-               factor_value=[1.0], units_value=[None], contour=False, snapshots_list=None):
+               factor_value=[1.0], units_value=[None], contour=False, snapshots_list=None, species_file="../species55.txt"):
 
     if per_value_evolution:
         return plot_single_value_evolutions(value, snapshotDir, plottingDir, firstSnap, lastSnap, skipSteps, box,
@@ -659,6 +663,8 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
                               plot_velocities=plot_velocities, plot_bfld= plot_bfld, axes=get_single_value(axes_array),
                               modified_units=modified_units, ignore_types=ignore_types,
                               factor_value=factor_value[0], units_value=units_value[0], contour=contour)
+                              factor_value=factor_value[0], units_value=units_value[0], contour=contour,
+                              species_file=species_file)
 
             regularize_time_units(loaded_snap)
             title('time : {:.2g}'.format(loaded_snap.time * basic_units["time"].factor) +
@@ -694,7 +700,7 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
                                   plot_velocities=plot_velocities, plot_bfld= plot_bfld, newfig=False,
                                   axes=get_single_value(axes_array, index), ignore_types=ignore_types,
                                   factor_value=factor_value[index % len(units_value)],
-                                  units_value=units_value[index % len(units_value)], contour=contour)
+                                  units_value=units_value[index % len(units_value)], contour=contour, species_file=species_file)
                 if index < len(value) - 1:
                     restore_basic_units(old_basic_units)
                 rcParams.update({'font.size': 40, 'font.family': 'Serif'})
@@ -764,6 +770,8 @@ def InitParser():
                         default=False)
     parser.add_argument('--snapshot_list', nargs='+', type=int,  help='list of snapshots to plot for '
                                                                       '(currently only for evolution)', default=[None])
+    parser.add_argument('--species_file', type=str,  help='path to species file used in the simulation',
+                        default= "../species55.txt")
     return parser
 
 
@@ -807,4 +815,4 @@ if __name__ == "__main__":
                plot_velocities=args.plot_velocities, plot_bfld= args.plot_bfld, axes_array=axes_array,
                ignore_types=args.ignore_types, per_value_evolution=args.plot_per_value_evolution,
                factor_value=args.factor_value, units_value=args.units_value, contour=args.plot_contours,
-               snapshots_list=snapshots_list)
+               snapshots_list=snapshots_list, species_file=args.species_file)
