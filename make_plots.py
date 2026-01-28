@@ -148,7 +148,6 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
                       unit_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
                       newfig=True, axes=[0,1], modified_units = False, ignore_types=[], colorbar=True,
                       plot_xlabel=True, plot_ylabel=True, factor_value=1.0, units_value=None, saving_file=None, contour=False):
-                      plot_xlabel=True, plot_ylabel=True, factor_value=1.0, units_value=None, saving_file=None,
                       contour=False, species_file="../species55.txt"):
 
     if box == False:
@@ -531,12 +530,12 @@ def get_snapshot_number_list(snapshotDir="outupt", snapshotName="snapshot_", fir
 
     return range(firstSnap, lastSnap+1, skipSteps)
 
+
 def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingDir="plots", firstSnap=0,lastSnap=-1,skipSteps=1,box=False,
                vrange=False, cmap=["hot"], logplot=True, res=1024, numthreads=1, center=True, relative_to_sink_id=None,
                central_id=None, plot_points=True,
                additional_points_size=30,additional_points_shape='X', additional_points_color='w', units_length = 'cm',
                units_velocity="$cm/s$", units_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
-               axes_array=[[0,1]], ignore_types=[], horizontal=True, relative_to_motion=False, snapshots_list=None):
                axes_array=[[0,1]], ignore_types=[], horizontal=True, relative_to_motion=False, snapshots_list=None,
                species_file="../species55.txt"):
     if not os.path.exists(plottingDir):
@@ -662,7 +661,6 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
                               unit_velocity= units_velocity, unit_density= units_density,
                               plot_velocities=plot_velocities, plot_bfld= plot_bfld, axes=get_single_value(axes_array),
                               modified_units=modified_units, ignore_types=ignore_types,
-                              factor_value=factor_value[0], units_value=units_value[0], contour=contour)
                               factor_value=factor_value[0], units_value=units_value[0], contour=contour,
                               species_file=species_file)
 
