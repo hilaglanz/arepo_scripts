@@ -138,16 +138,12 @@ def plot_stream(loaded_snap, value='vel', xlab='x', ylab='y', axes=[0,1], box=Fa
     # quiver(loaded_snap.pos[:,0],loaded_snap.pos[:,1],loaded_snap.vel[:,0], loaded_snap.vel[:,1],
     # scale=50)#*loaded_snap.parameters['BoxSize']/box[0])
 
-
-
-
-
 def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=False,logplot=True, res=1024, numthreads=1,
                       relative_to_sink_id=None, central_id=None, center=True,plot_points=True, additional_points_size=30,
                       additional_points_shape='X', additional_points_color='w', unit_length='cm', unit_velocity="$cm/s$",
                       unit_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
                       newfig=True, axes=[0,1], modified_units = False, ignore_types=[], colorbar=True,
-                      plot_xlabel=True, plot_ylabel=True, factor_value=1.0, units_value=None, saving_file=None, contour=False):
+                      plot_xlabel=True, plot_ylabel=True, factor_value=1.0, units_value=None, saving_file=None,
                       contour=False, species_file="../species55.txt"):
 
     if box == False:
