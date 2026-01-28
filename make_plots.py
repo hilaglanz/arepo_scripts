@@ -330,7 +330,7 @@ def calculate_label_and_value(loaded_snap, value, relative_to_sink_id, central_i
             return loaded_snap, value
 
     if value == "mean_a":
-        loaded_snap.calculate_mean_a()
+        loaded_snap.calc_mean_a()
         add_name_and_unit(value, "Mean Atomic Weight", "none")
 
     if value == "bfld" or value == "B":
