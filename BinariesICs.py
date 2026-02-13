@@ -474,7 +474,7 @@ if __name__ == "__main__":
         binary.create_ic_collision(b, args.ic_file_name, args.relative_velocity, args.separation,
                                    args.impact_parameter_rhocut)
 
-    elif args.impact_parameter_rhocut > 0:
+    elif args.impact_parameter > 0:
         b = args.impact_parameter
         print("b = ", b)
         binary.create_ic_collision(b, args.ic_file_name, args.relative_velocity, args.separation,
