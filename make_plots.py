@@ -550,7 +550,7 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
         #fig = figure(figsize=(num_figures*15, 17))
         fig = figure(figsize=(num_figures*15, 17))
         rcParams.update({'font.size': 70, 'font.family': 'Serif', 'axes.formatter.useoffset':True})
-        rcParams['text.usetex'] = True
+        rcParams['text.usetex'] = False
         curr_cmap = cmap[index % len(cmap)]
         for snap_i, snap in enumerate(snapshots_list):
             print("doing snapshot ", snap)
