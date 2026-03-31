@@ -197,7 +197,7 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
                 point_pos = loaded_snap.data["pos"][point]
 
                 scatter(point_pos[axes[0]], point_pos[axes[1]], additional_points_size, additional_points_color,
-                        additional_points_shape)
+                        additional_points_shape, cmap=cmap, vmin=vrange[0], vmax=vrange[1])
 
                 if loaded_snap.type[point] == 5:
                     print("plotting accretion radius of: ",
