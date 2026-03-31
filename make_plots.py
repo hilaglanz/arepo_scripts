@@ -196,8 +196,8 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
             for point in points:
                 point_pos = loaded_snap.data["pos"][point]
 
-                scatter(point_pos[axes[0]], point_pos[axes[1]], additional_points_size, additional_points_color,
-                        additional_points_shape, cmap=cmap, vmin=vrange[0], vmax=vrange[1])
+                scatter(point_pos[axes[0]], point_pos[axes[1]], s=additional_points_size, c=additional_points_color,
+                        marker=additional_points_shape, cmap=cmap, vmin=vrange[0], vmax=vrange[1])
 
                 if loaded_snap.type[point] == 5:
                     print("plotting accretion radius of: ",
@@ -310,7 +310,7 @@ def get_value_at_inf(value, data):
 
     return val_inf
 
-def calculate_label_and_value(loaded_snap, value, relative_to_sink_id, central_id=None, species_file="..\species55.txt"):
+def calculate_label_and_value(loaded_snap, value, relative_to_sink_id, central_id=None, species_file=r"..\species55.txt"):
     if "xnuc" in value:
         loaded_snap.data["rho" + value] = loaded_snap.rho * loaded_snap.data[value]
         value = "rho" + value
@@ -587,6 +587,10 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
             curr_ax.set_title('{:.3g}'.format(loaded_snap.time * basic_units["time"].factor) +
                               " [" + basic_units["time"].unit + "]", fontsize='70',loc='right')
             restore_basic_units(old_basic_units)
+
+            del loaded_snap
+            import gc
+            gc.collect()
 
             rcParams.update({'font.size': 70, 'font.family': 'Serif', 'axes.formatter.useoffset':False})
             rcParams['text.usetex'] = True
