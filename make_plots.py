@@ -255,16 +255,16 @@ def change_basic_units(loaded_snap, unit_density, unit_length, unit_velocity):
     convert_to_cgs = True
     if unit_velocity is not None:
         basic_units["vel"].unit = unit_velocity
-        basic_units["acce"].unit = r'$' + unit_velocity + '^2 /' + unit_length + '$'
-        basic_units["time"].unit = r'$' + unit_length + "/" + unit_velocity + '$'
-        basic_units["ang_mom"].unit = r'$' + unit_length + "\cdot " + unit_velocity + '$'
-        basic_units["vol"].unit = r'$' + unit_length + '^3$'
-        basic_units["length"].unit = r'$' + unit_length + '$'
+        basic_units["acce"].unit = r'$' + unit_velocity + r"^2 /" + unit_length + r'$'
+        basic_units["time"].unit = r'$' + unit_length + r"/" + unit_velocity + r'$'
+        basic_units["ang_mom"].unit = r'$' + unit_length + r"\cdot " + unit_velocity + r'$'
+        basic_units["vol"].unit = r'$' + unit_length + r'^3$'
+        basic_units["length"].unit = r'$' + unit_length + r'$'
 
         if unit_density is not None:
-            basic_units["pres"].unit = r'$' + unit_density + '\cdot' + unit_velocity + '^2$'
+            basic_units["pres"].unit = r'$' + unit_density + r"\cdot " + unit_velocity + r"^2$"
         else:
-            basic_units["pres"].unit = r'$\rho_\infty \cdot ' + unit_velocity + '^2$'
+            basic_units["pres"].unit = r'$\rho_\infty \cdot ' + unit_velocity + r'^2$'
 
         convert_to_cgs = False
     if unit_density is not None:
@@ -784,8 +784,8 @@ if __name__ == "__main__":
         vrange = [[args.vmin[i], args.vmax[i]] for i in range(len(args.vmin))]
 
     center = False
-    if args.center_x is not None and args.center_y is not None:
-        center = [[args.center_x, args.center_y,args.center_z]  for i in range(len(args.center_x))]
+    if args.center_x is not None and args.center_y is not None and args.center_y is not None:
+        center = [[args.center_x[i], args.center_y[i],args.center_z[i]]  for i in range(len(args.center_x))]
 
     axes_array = [[0,1]]
     if args.axes0 is not None and args.axes1 is not None:
