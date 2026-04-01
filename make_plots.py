@@ -593,7 +593,7 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
             gc.collect()
 
             rcParams.update({'font.size': 70, 'font.family': 'Serif', 'axes.formatter.useoffset':False})
-            rcParams['text.usetex'] = True
+            rcParams['text.usetex'] = False
             if horizontal is True and snap_i!=0:
                 curr_ax.set_axis_off()
             if horizontal is False and snap_i+1!=num_figures:
@@ -611,7 +611,7 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
 
         #title('time : {:.2f} [s]'.format(loaded_snap.time))
         rcParams.update({'font.size': 70, 'font.family': 'Serif', 'axes.formatter.useoffset':False})
-        rcParams['text.usetex'] = True
+        rcParams['text.usetex'] = False
         filename = plottingDir + "/Aslice_" + val + "_" + "_".join([str(s) for s in snapshots_list]) + ".png".format(snap)
         print("saving to: ", filename)
         savefig(filename,dpi=300)
@@ -677,7 +677,7 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
             fig = figure(figsize=(36,20))
             fig.subplots_adjust(hspace=0.4,wspace=0.4)
             rcParams.update({'font.size': 40, 'font.family': 'Serif'})
-            rcParams['text.usetex'] = True
+            rcParams['text.usetex'] = False
             num_figures = int(ceil(len(value)/2))
             old_basic_units = copy_current_units()
             for index,val in enumerate(value):
@@ -703,7 +703,7 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
                 if index < len(value) - 1:
                     restore_basic_units(old_basic_units)
                 rcParams.update({'font.size': 40, 'font.family': 'Serif'})
-                rcParams['text.usetex'] = True
+                rcParams['text.usetex'] = False
 
             #title('time : {:.2f} [s]'.format(loaded_snap.time))
             regularize_time_units(loaded_snap)
@@ -711,7 +711,7 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
                      " [" + basic_units["time"].unit + "]", fontsize='x-large')
             restore_basic_units(old_basic_units)
             rcParams.update({'font.size': 40, 'font.family': 'Serif'})
-            rcParams['text.usetex'] = True
+            rcParams['text.usetex'] = False
             filename = plottingDir + "/Aslice_" + "_".join(value) + "_{0}.png".format(snap)
             print("saving to: ", filename)
             savefig(filename)
