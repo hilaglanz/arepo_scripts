@@ -533,7 +533,7 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
                additional_points_size=30,additional_points_shape='X', additional_points_color='w', units_length = 'cm',
                units_velocity="$cm/s$", units_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
                axes_array=[[0,1]], ignore_types=[], horizontal=True, relative_to_motion=False, snapshots_list=None,
-               species_file="../species55.txt"):
+               species_file="../species55.txt",lazy_load=True):
     if not os.path.exists(plottingDir):
         os.mkdir(plottingDir)
     convert_to_cgs = False
@@ -563,7 +563,7 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
                 ax = subplot(num_figures, 1, 1)
                 curr_ax = subplot(curr_subplot, sharex=ax)
             loaded_snap = gadget_readsnap(snap, snapshotDir,
-                                          loadonlytype=[t for t in range(6) if t not in ignore_types])
+                                          loadonlytype=[t for t in range(6) if t not in ignore_types],lazy_load=lazy_load)
 
             old_basic_units = copy_current_units()
             print("curr snapshot: ", snap_i + 1)
@@ -625,7 +625,8 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
                additional_points_size=30,additional_points_shape='X', additional_points_color='w', units_length = 'cm',
                units_velocity="$cm/s$", units_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
                axes_array=[[0,1]], ignore_types=[], per_value_evolution=False, relative_to_motion=False,
-               factor_value=[1.0], units_value=[None], contour=False, snapshots_list=None, species_file="../species55.txt"):
+               factor_value=[1.0], units_value=[None], contour=False, snapshots_list=None, species_file="../species55.txt"
+               ,lazy_load=True):
 
     if per_value_evolution:
         return plot_single_value_evolutions(value, snapshotDir, plottingDir, firstSnap, lastSnap, skipSteps, box,
@@ -633,7 +634,7 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
                plot_points,
                additional_points_size,additional_points_shape, additional_points_color, units_length,
                units_velocity, units_density, plot_velocities, plot_bfld,
-               axes_array, ignore_types, snapshots_list=snapshots_list)
+               axes_array, ignore_types, snapshots_list=snapshots_list, lazy_load=lazy_load)
 
     if not os.path.exists(plottingDir):
         os.mkdir(plottingDir)
@@ -645,7 +646,7 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
     curr_cmap = cmap[0]
     for snap in get_snapshot_number_list(snapshotDir, "snapshot_", firstSnap, lastSnap, skipSteps):
         print("doing snapshot ",snap)
-        loaded_snap = gadget_readsnap(snap, snapshotDir)
+        loaded_snap = gadget_readsnap(snap, snapshotDir, lazy_load=lazy_load)
         if len(value) == 1:
             val = value[0]
             print(val)
@@ -770,6 +771,8 @@ def InitParser():
                                                                       '(currently only for evolution)', default=[None])
     parser.add_argument('--species_file', type=str,  help='path to species file used in the simulation',
                         default= "../species55.txt")
+    parser.add_argument('--lazy_load', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
+                        help='load data only on demand to save memory',  default=[True])
     return parser
 
 
@@ -813,4 +816,4 @@ if __name__ == "__main__":
                plot_velocities=args.plot_velocities, plot_bfld= args.plot_bfld, axes_array=axes_array,
                ignore_types=args.ignore_types, per_value_evolution=args.plot_per_value_evolution,
                factor_value=args.factor_value, units_value=args.units_value, contour=args.plot_contours,
-               snapshots_list=snapshots_list, species_file=args.species_file)
+               snapshots_list=snapshots_list, species_file=args.species_file, lazy_load=args.lazy_load)
