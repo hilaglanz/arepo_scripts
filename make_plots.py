@@ -555,7 +555,7 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir="output", plottingDi
     for index, val in enumerate(value):
         print(val)
 
-        rcParams.update({'font.size': 70, 'font.family': 'Serif', 'axes.formatter.useoffset': True})
+        rcParams.update({'font.size': 40, 'font.family': 'Serif', 'axes.formatter.useoffset': True})
         rcParams['text.usetex'] = False
 
         # sharey=True automatically hides the inner Y-axis tick labels
@@ -694,7 +694,13 @@ def plot_range(value=['rho'], snapshotDir="output", plottingDir="plots", firstSn
         if len(value) == 1:
             val = value[0]
             print(val)
+            # Create explicit figure and axis to reliably attach colorbar
+            fig, ax = pylab.subplots(figsize=(15, 12))
+            pylab.sca(ax)
+
             old_basic_units = copy_current_units()
+
+            # Note: colorbar=False and newfig=False are passed here!
             plot_single_value(loaded_snap, value=val, cmap=curr_cmap, box=get_single_value(box),
                               vrange=get_single_value(vrange), logplot=get_single_value(logplot), res=res,
                               numthreads=numthreads, center=get_single_value(center),
@@ -707,15 +713,29 @@ def plot_range(value=['rho'], snapshotDir="output", plottingDir="plots", firstSn
                               plot_velocities=plot_velocities, plot_bfld=plot_bfld, axes=get_single_value(axes_array),
                               modified_units=modified_units, ignore_types=ignore_types,
                               factor_value=factor_value[0], units_value=units_value[0], contour=contour,
-                              species_file=species_file)
+                              species_file=species_file, colorbar=False, newfig=False)
 
             regularize_time_units(loaded_snap)
-            pylab.title('time : {:.2g}'.format(loaded_snap.time * basic_units["time"].factor) +
-                        " [" + basic_units["time"].unit + "]")
+            ax.set_title('time : {:.2g}'.format(loaded_snap.time * basic_units["time"].factor) +
+                         " [" + basic_units["time"].unit + "]")
             restore_basic_units(old_basic_units)
+
+            # --- INSET COLORBAR LOGIC FOR SINGLE PLOT ---
+            mappable = None
+            if ax.collections:
+                mappable = ax.collections[0]
+            elif ax.images:
+                mappable = ax.images[0]
+
+            if mappable is not None:
+                cax = ax.inset_axes([1.03, 0.0, 0.05, 1.0])
+                cbar = fig.colorbar(mappable, cax=cax)
+                val_name = "rho" + val if "xnuc" in val else val
+                cbar.set_label(extract_label(val_name), labelpad=20)
+
             filename = plottingDir + "/Aslice_" + val + "_{0}.png".format(snap)
             print("saving to: ", filename)
-            pylab.savefig(filename, bbox_inches='tight')
+            pylab.savefig(filename, bbox_inches='tight', dpi=300)
             print("saved fig")
 
         else:
@@ -723,18 +743,20 @@ def plot_range(value=['rho'], snapshotDir="output", plottingDir="plots", firstSn
             ncols = 2 if len(value) > 1 else 1
             nrows = int(np.ceil(len(value) / float(ncols)))
 
-            fig = pylab.figure(figsize=(36, 20))
-            fig.subplots_adjust(hspace=0.4, wspace=0.4)
+            fig = pylab.figure(figsize=(15 * ncols, 12 * nrows))
+            # Increased wspace slightly so the colorbar and the next row's Y-label don't collide
+            fig.subplots_adjust(hspace=0.3, wspace=0.3)
             rcParams.update({'font.size': 40, 'font.family': 'Serif'})
             rcParams['text.usetex'] = False
 
             old_basic_units = copy_current_units()
             for index, val in enumerate(value):
-                # Using standard subplot grid creation to avoid the 3-digit breakage
                 curr_ax = fig.add_subplot(nrows, ncols, index + 1)
                 pylab.sca(curr_ax)
 
                 curr_cmap = cmap[index % len(cmap)]
+
+                # Note: colorbar=False is passed here!
                 plot_single_value(loaded_snap, value=val, cmap=curr_cmap, box=get_single_value(box, index),
                                   vrange=get_single_value(vrange, index), logplot=get_single_value(logplot, index),
                                   res=res,
@@ -749,7 +771,21 @@ def plot_range(value=['rho'], snapshotDir="output", plottingDir="plots", firstSn
                                   axes=get_single_value(axes_array, index), ignore_types=ignore_types,
                                   factor_value=factor_value[index % len(units_value)],
                                   units_value=units_value[index % len(units_value)], contour=contour,
-                                  species_file=species_file)
+                                  species_file=species_file, colorbar=False)
+
+                # --- INSET COLORBAR LOGIC PER SUBPLOT ---
+                mappable = None
+                if curr_ax.collections:
+                    mappable = curr_ax.collections[0]
+                elif curr_ax.images:
+                    mappable = curr_ax.images[0]
+
+                if mappable is not None:
+                    cax = curr_ax.inset_axes([1.03, 0.0, 0.05, 1.0])
+                    cbar = fig.colorbar(mappable, cax=cax)
+                    val_name = "rho" + val if "xnuc" in val else val
+                    # Your script already has extract_label, which perfectly formats the name/units
+                    cbar.set_label(extract_label(val_name), labelpad=20)
 
                 if index < len(value) - 1:
                     restore_basic_units(old_basic_units)
@@ -765,7 +801,7 @@ def plot_range(value=['rho'], snapshotDir="output", plottingDir="plots", firstSn
 
             filename = plottingDir + "/Aslice_" + "_".join(value) + "_{0}.png".format(snap)
             print("saving to: ", filename)
-            pylab.savefig(filename, bbox_inches='tight')
+            pylab.savefig(filename, bbox_inches='tight', dpi=300)
             print("saved fig")
 
         pylab.close('all')
