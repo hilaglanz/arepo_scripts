@@ -555,16 +555,15 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir="output", plottingDi
     for index, val in enumerate(value):
         print(val)
 
-        # Setup the figure and axes properly using subplots
         rcParams.update({'font.size': 70, 'font.family': 'Serif', 'axes.formatter.useoffset': True})
         rcParams['text.usetex'] = False
 
+        # sharey=True automatically hides the inner Y-axis tick labels
         if horizontal:
             fig, axes = pylab.subplots(1, num_figures, figsize=(num_figures * 15, 17), sharey=True)
         else:
             fig, axes = pylab.subplots(num_figures, 1, figsize=(15, num_figures * 17), sharex=True)
 
-        # Ensure axes is iterable even if there's only 1 figure
         if num_figures == 1:
             axes = [axes]
 
@@ -573,7 +572,7 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir="output", plottingDi
         for snap_i, snap in enumerate(snapshots_list):
             print("doing snapshot ", snap)
             curr_ax = axes[snap_i]
-            pylab.sca(curr_ax)  # Set current axis so plot_single_value renders here
+            pylab.sca(curr_ax)
 
             loaded_snap = gadget_readsnap(snap, snapshotDir,
                                           loadonlytype=[t for t in range(6) if t not in ignore_types],
@@ -581,6 +580,9 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir="output", plottingDi
 
             old_basic_units = copy_current_units()
             print("curr snapshot: ", snap_i + 1)
+
+            # Force both X and Y labels to ONLY plot on the leftmost (0th) subplot
+            is_leftmost = (snap_i == 0)
 
             plot_single_value(loaded_snap, value=val, cmap=curr_cmap, box=get_single_value(box, index),
                               vrange=get_single_value(vrange, index), logplot=get_single_value(logplot, index),
@@ -594,8 +596,8 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir="output", plottingDi
                               unit_velocity=units_velocity, unit_density=units_density,
                               plot_velocities=plot_velocities, plot_bfld=plot_bfld, newfig=False,
                               axes=get_single_value(axes_array, index), ignore_types=ignore_types, colorbar=False,
-                              plot_xlabel=(horizontal is True or ((not horizontal) and (snap_i == num_figures - 1))),
-                              plot_ylabel=(not horizontal or ((horizontal) and (snap_i == 0))),
+                              plot_xlabel=is_leftmost,
+                              plot_ylabel=is_leftmost,
                               species_file=species_file)
 
             regularize_time_units(loaded_snap)
@@ -607,37 +609,43 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir="output", plottingDi
             import gc
             gc.collect()
 
-            # Remove inner tick labels for a tight plot
-            if horizontal and snap_i > 0:
-                curr_ax.tick_params(labelleft=False)
-            if not horizontal and snap_i < num_figures - 1:
-                curr_ax.tick_params(labelbottom=False)
+            # Double check: explicitly remove the string labels from inner axes just in case `plot_single_value` forced them
+            if snap_i > 0:
+                curr_ax.set_ylabel("")
+                curr_ax.set_xlabel("")
 
         rcParams.update({'font.size': 70, 'font.family': 'Serif', 'axes.formatter.useoffset': False})
 
-        # Adjust spacing strictly via subplots_adjust, removing tight_layout to prevent fighting
+        # Added a wspace/hspace of 0.05 so they aren't touching perfectly (reduces tightness)
         if horizontal:
-            fig.subplots_adjust(bottom=0.1, top=0.9, left=0.1, right=0.9, wspace=0.0)
+            fig.subplots_adjust(bottom=0.1, top=0.9, left=0.1, right=0.9, wspace=0.05)
         else:
-            fig.subplots_adjust(bottom=0.1, top=0.9, left=0.1, right=0.9, hspace=0.0)
+            fig.subplots_adjust(bottom=0.1, top=0.9, left=0.1, right=0.9, hspace=0.05)
 
-        # Attach colorbar matching exact height of the last plot
         if "xnuc" in val:
             val_name = "rho" + val
         else:
             val_name = val
 
-        divider = make_axes_locatable(axes[-1])
-        cax = divider.append_axes("right", size="5%", pad=0.1)
+        # Extract the drawn image/mesh to pass to the colorbar so ranges/colors match exactly
+        mappable = None
+        if axes[-1].collections:
+            mappable = axes[-1].collections[0]  # Matches pcolormesh/contourf
+        elif axes[-1].images:
+            mappable = axes[-1].images[0]  # Matches imshow
 
-        cbar = pylab.colorbar(cax=cax)
-        cbar.set_label(
-            name_and_units[val_name].name + " [" + basic_units[name_and_units[val_name].unit_name].unit + "]",
-            labelpad=20)
+        if mappable is not None:
+            # Passing ax=axes (the list of all axes) ensures all subplots shrink uniformly!
+            cbar = fig.colorbar(mappable, ax=axes, pad=0.02, fraction=0.05)
+            cbar.set_label(
+                name_and_units[val_name].name + " [" + basic_units[name_and_units[val_name].unit_name].unit + "]",
+                labelpad=20)
+        else:
+            print("Warning: Could not extract mappable from the plot to generate colorbar.")
 
         filename = plottingDir + "/Aslice_" + val_name + "_" + "_".join([str(s) for s in snapshots_list]) + ".png"
         print("saving to: ", filename)
-        pylab.savefig(filename, dpi=300, bbox_inches='tight')  # bbox_inches catches the colorbar safely
+        pylab.savefig(filename, dpi=300, bbox_inches='tight')
         print("saved fig")
         pylab.close('all')
         modified_units = True
