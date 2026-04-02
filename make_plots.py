@@ -610,19 +610,21 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir="output", plottingDi
             gc.collect()
 
             # Double check: explicitly remove the string labels from inner axes just in case `plot_single_value` forced them
-
+            if horizontal==True:
+                if snap_i > 0:
+                    curr_ax.set_axis_off()
+            else:
+                if snap_i < num_figures - 1:
+                    curr_ax.set_axis_off()
 
         rcParams.update({'font.size': 70, 'font.family': 'Serif', 'axes.formatter.useoffset': False})
 
         # Added a wspace/hspace of 0.05 so they aren't touching perfectly (reduces tightness)
         if horizontal:
             fig.subplots_adjust(bottom=0.1, top=0.9, left=0.1, right=0.9, wspace=0.01)
-            if snap_i > 0:
-                curr_ax.set_axis_off()
         else:
             fig.subplots_adjust(bottom=0.1, top=0.9, left=0.1, right=0.9, hspace=0.01)
-            if snap_i < num_figures - 1:
-                curr_ax.set_axis_off()
+
 
         if "xnuc" in val:
             val_name = "rho" + val
