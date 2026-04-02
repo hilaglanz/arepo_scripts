@@ -745,8 +745,8 @@ def plot_range(value=['rho'], snapshotDir="output", plottingDir="plots", firstSn
 
             fig = pylab.figure(figsize=(15 * ncols, 12 * nrows))
             # Increased wspace slightly so the colorbar and the next row's Y-label don't collide
-            fig.subplots_adjust(hspace=0.3, wspace=0.3)
-            rcParams.update({'font.size': 40, 'font.family': 'Serif'})
+            fig.subplots_adjust(hspace=0.3, wspace=0.55)
+            rcParams.update({'font.size': 30, 'font.family': 'Serif'})
             rcParams['text.usetex'] = False
 
             old_basic_units = copy_current_units()
@@ -789,14 +789,14 @@ def plot_range(value=['rho'], snapshotDir="output", plottingDir="plots", firstSn
 
                 if index < len(value) - 1:
                     restore_basic_units(old_basic_units)
-                rcParams.update({'font.size': 40, 'font.family': 'Serif'})
+                rcParams.update({'font.size': 30, 'font.family': 'Serif'})
                 rcParams['text.usetex'] = False
 
             regularize_time_units(loaded_snap)
             pylab.suptitle('time : {:.2g}'.format(loaded_snap.time * basic_units["time"].factor) +
                            " [" + basic_units["time"].unit + "]", fontsize='x-large')
             restore_basic_units(old_basic_units)
-            rcParams.update({'font.size': 40, 'font.family': 'Serif'})
+            rcParams.update({'font.size': 30, 'font.family': 'Serif'})
             rcParams['text.usetex'] = False
 
             filename = plottingDir + "/Aslice_" + "_".join(value) + "_{0}.png".format(snap)
