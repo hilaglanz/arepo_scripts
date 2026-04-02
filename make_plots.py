@@ -2,6 +2,7 @@ import os
 import glob
 import argparse
 import pickle
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 from loadmodules import *
 from save_sink_heatmaps import save_heatmap,save_scatter,save_stream
@@ -527,19 +528,26 @@ def get_snapshot_number_list(snapshotDir="outupt", snapshotName="snapshot_", fir
     return range(firstSnap, lastSnap+1, skipSteps)
 
 
-def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingDir="plots", firstSnap=0,lastSnap=-1,skipSteps=1,box=False,
-               vrange=False, cmap=["hot"], logplot=True, res=1024, numthreads=1, center=True, relative_to_sink_id=None,
-               central_id=None, plot_points=True,
-               additional_points_size=30,additional_points_shape='X', additional_points_color='w', units_length = 'cm',
-               units_velocity="$cm/s$", units_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
-               axes_array=[[0,1]], ignore_types=[], horizontal=True, relative_to_motion=False, snapshots_list=None,
-               species_file="../species55.txt",lazy_load=True):
+def plot_single_value_evolutions(value=['rho'], snapshotDir="output", plottingDir="plots", firstSnap=0, lastSnap=-1,
+                                 skipSteps=1, box=False,
+                                 vrange=False, cmap=["hot"], logplot=True, res=1024, numthreads=1, center=True,
+                                 relative_to_sink_id=None,
+                                 central_id=None, plot_points=True,
+                                 additional_points_size=30, additional_points_shape='X', additional_points_color='w',
+                                 units_length='cm',
+                                 units_velocity="$cm/s$", units_density=r'$g/cm^3$', plot_velocities=False,
+                                 plot_bfld=False,
+                                 axes_array=[[0, 1]], ignore_types=[], horizontal=True, relative_to_motion=False,
+                                 snapshots_list=None,
+                                 species_file="../species55.txt", lazy_load=True):
     if not os.path.exists(plottingDir):
         os.mkdir(plottingDir)
+
     convert_to_cgs = False
     if units_velocity is None and units_density is None:
         convert_to_cgs = True
     modified_units = False
+
     if snapshots_list is None:
         snapshots_list = get_snapshot_number_list(snapshotDir, "snapshot_", firstSnap, lastSnap, skipSteps)
     num_figures = len(snapshots_list)
@@ -547,97 +555,118 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir= "output", plottingD
     for index, val in enumerate(value):
         print(val)
 
-        #fig = figure(figsize=(num_figures*15, 17))
-        fig = figure(figsize=(num_figures*15, 17))
-        rcParams.update({'font.size': 70, 'font.family': 'Serif', 'axes.formatter.useoffset':True})
+        # Setup the figure and axes properly using subplots
+        rcParams.update({'font.size': 70, 'font.family': 'Serif', 'axes.formatter.useoffset': True})
         rcParams['text.usetex'] = False
+
+        if horizontal:
+            fig, axes = pylab.subplots(1, num_figures, figsize=(num_figures * 15, 17), sharey=True)
+        else:
+            fig, axes = pylab.subplots(num_figures, 1, figsize=(15, num_figures * 17), sharex=True)
+
+        # Ensure axes is iterable even if there's only 1 figure
+        if num_figures == 1:
+            axes = [axes]
+
         curr_cmap = cmap[index % len(cmap)]
+
         for snap_i, snap in enumerate(snapshots_list):
             print("doing snapshot ", snap)
-            if horizontal:
-                curr_subplot = int(100 + 10*num_figures + (snap_i+1))
-                ax = subplot(1, num_figures, 1)
-                curr_ax = subplot(curr_subplot, sharey=ax)
-            else:
-                curr_subplot = int(num_figures * 100 + 10 + (snap_i + 1))
-                ax = subplot(num_figures, 1, 1)
-                curr_ax = subplot(curr_subplot, sharex=ax)
+            curr_ax = axes[snap_i]
+            pylab.sca(curr_ax)  # Set current axis so plot_single_value renders here
+
             loaded_snap = gadget_readsnap(snap, snapshotDir,
-                                          loadonlytype=[t for t in range(6) if t not in ignore_types],lazy_load=lazy_load)
+                                          loadonlytype=[t for t in range(6) if t not in ignore_types],
+                                          lazy_load=lazy_load)
 
             old_basic_units = copy_current_units()
             print("curr snapshot: ", snap_i + 1)
-            plot_single_value(loaded_snap,  value=val, cmap=curr_cmap, box=get_single_value(box,index),
-                                  vrange=get_single_value(vrange,index), logplot=get_single_value(logplot,index),
-                                  res=res,
-                                  numthreads=numthreads, center=get_single_value(center,index),
-                              relative_to_sink_id=get_single_value(relative_to_sink_id,index),
-                                  central_id=get_single_value(central_id, index), plot_points=plot_points,
-                                  additional_points_size=additional_points_size,
-                                  additional_points_shape=additional_points_shape,
-                                  additional_points_color=additional_points_color, unit_length=units_length,
-                                  unit_velocity= units_velocity, unit_density= units_density,
-                                  plot_velocities=plot_velocities, plot_bfld= plot_bfld, newfig=False,
-                                  axes=get_single_value(axes_array, index), ignore_types=ignore_types, colorbar=False,
-                              plot_xlabel=(horizontal is True or ((not horizontal) and (snap_i == num_figures))),
-                              plot_ylabel=(not horizontal or ((horizontal) and (snap_i == 0))), species_file=species_file)
-            #subplot(curr_subplot)
+
+            plot_single_value(loaded_snap, value=val, cmap=curr_cmap, box=get_single_value(box, index),
+                              vrange=get_single_value(vrange, index), logplot=get_single_value(logplot, index),
+                              res=res,
+                              numthreads=numthreads, center=get_single_value(center, index),
+                              relative_to_sink_id=get_single_value(relative_to_sink_id, index),
+                              central_id=get_single_value(central_id, index), plot_points=plot_points,
+                              additional_points_size=additional_points_size,
+                              additional_points_shape=additional_points_shape,
+                              additional_points_color=additional_points_color, unit_length=units_length,
+                              unit_velocity=units_velocity, unit_density=units_density,
+                              plot_velocities=plot_velocities, plot_bfld=plot_bfld, newfig=False,
+                              axes=get_single_value(axes_array, index), ignore_types=ignore_types, colorbar=False,
+                              plot_xlabel=(horizontal is True or ((not horizontal) and (snap_i == num_figures - 1))),
+                              plot_ylabel=(not horizontal or ((horizontal) and (snap_i == 0))),
+                              species_file=species_file)
+
             regularize_time_units(loaded_snap)
-            #ax.tick_params(axis='x',labelrotation=45)
             curr_ax.set_title('{:.3g}'.format(loaded_snap.time * basic_units["time"].factor) +
-                              " [" + basic_units["time"].unit + "]", fontsize='70',loc='right')
+                              " [" + basic_units["time"].unit + "]", fontsize='70', loc='right')
             restore_basic_units(old_basic_units)
 
             del loaded_snap
             import gc
             gc.collect()
 
-            rcParams.update({'font.size': 70, 'font.family': 'Serif', 'axes.formatter.useoffset':False})
-            rcParams['text.usetex'] = False
-            if horizontal is True and snap_i!=0:
-                curr_ax.set_axis_off()
-            if horizontal is False and snap_i+1!=num_figures:
-                curr_ax.set_axis_off()
-        if horizontal:
-            fig.subplots_adjust(bottom=0.1, top=0.9, left=0.1, right=0.8, wspace=0.002, hspace=0.2)
-        else:
-            fig.subplots_adjust(bottom=0.1, top=0.9, left=0.1, right=0.8, wspace=0.2, hspace=0.002)
-        cax = fig.add_axes([0.937, 0.122, 0.045/num_figures, 0.777])
-        if "xnuc" in val:
-            val = "rho" + val
-        colorbar(cax=cax, label= name_and_units[val].name + " [" + basic_units[name_and_units[val].unit_name].unit + "]",
-                 aspect=15, pad=0, shrink=1)
-        tight_layout(pad=0, h_pad=0, w_pad=0, rect=(0.005, 0, 0.93, 1))
+            # Remove inner tick labels for a tight plot
+            if horizontal and snap_i > 0:
+                curr_ax.tick_params(labelleft=False)
+            if not horizontal and snap_i < num_figures - 1:
+                curr_ax.tick_params(labelbottom=False)
 
-        #title('time : {:.2f} [s]'.format(loaded_snap.time))
-        rcParams.update({'font.size': 70, 'font.family': 'Serif', 'axes.formatter.useoffset':False})
-        rcParams['text.usetex'] = False
-        filename = plottingDir + "/Aslice_" + val + "_" + "_".join([str(s) for s in snapshots_list]) + ".png".format(snap)
+        rcParams.update({'font.size': 70, 'font.family': 'Serif', 'axes.formatter.useoffset': False})
+
+        # Adjust spacing strictly via subplots_adjust, removing tight_layout to prevent fighting
+        if horizontal:
+            fig.subplots_adjust(bottom=0.1, top=0.9, left=0.1, right=0.9, wspace=0.0)
+        else:
+            fig.subplots_adjust(bottom=0.1, top=0.9, left=0.1, right=0.9, hspace=0.0)
+
+        # Attach colorbar matching exact height of the last plot
+        if "xnuc" in val:
+            val_name = "rho" + val
+        else:
+            val_name = val
+
+        divider = make_axes_locatable(axes[-1])
+        cax = divider.append_axes("right", size="5%", pad=0.1)
+
+        cbar = pylab.colorbar(cax=cax)
+        cbar.set_label(
+            name_and_units[val_name].name + " [" + basic_units[name_and_units[val_name].unit_name].unit + "]",
+            labelpad=20)
+
+        filename = plottingDir + "/Aslice_" + val_name + "_" + "_".join([str(s) for s in snapshots_list]) + ".png"
         print("saving to: ", filename)
-        savefig(filename,dpi=300)
+        pylab.savefig(filename, dpi=300, bbox_inches='tight')  # bbox_inches catches the colorbar safely
         print("saved fig")
-        close('all')
+        pylab.close('all')
         modified_units = True
 
-def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstSnap=0,lastSnap=-1,skipSteps=1,box=False,
+
+def plot_range(value=['rho'], snapshotDir="output", plottingDir="plots", firstSnap=0, lastSnap=-1, skipSteps=1,
+               box=False,
                vrange=False, cmap=["hot"], logplot=True, res=1024, numthreads=1, center=True, relative_to_sink_id=None,
                central_id=None, plot_points=True,
-               additional_points_size=30,additional_points_shape='X', additional_points_color='w', units_length = 'cm',
+               additional_points_size=30, additional_points_shape='X', additional_points_color='w', units_length='cm',
                units_velocity="$cm/s$", units_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
-               axes_array=[[0,1]], ignore_types=[], per_value_evolution=False, relative_to_motion=False,
-               factor_value=[1.0], units_value=[None], contour=False, snapshots_list=None, species_file="../species55.txt"
-               ,lazy_load=True):
-
+               axes_array=[[0, 1]], ignore_types=[], per_value_evolution=False, relative_to_motion=False,
+               factor_value=[1.0], units_value=[None], contour=False, snapshots_list=None,
+               species_file="../species55.txt"
+               , lazy_load=True):
     if per_value_evolution:
         return plot_single_value_evolutions(value, snapshotDir, plottingDir, firstSnap, lastSnap, skipSteps, box,
-               vrange, cmap, logplot, res, numthreads, center, relative_to_sink_id, central_id,
-               plot_points,
-               additional_points_size,additional_points_shape, additional_points_color, units_length,
-               units_velocity, units_density, plot_velocities, plot_bfld,
-               axes_array, ignore_types, snapshots_list=snapshots_list, lazy_load=lazy_load)
+                                            vrange, cmap, logplot, res, numthreads, center, relative_to_sink_id,
+                                            central_id,
+                                            plot_points,
+                                            additional_points_size, additional_points_shape, additional_points_color,
+                                            units_length,
+                                            units_velocity, units_density, plot_velocities, plot_bfld,
+                                            axes_array, ignore_types, snapshots_list=snapshots_list,
+                                            lazy_load=lazy_load)
 
     if not os.path.exists(plottingDir):
         os.mkdir(plottingDir)
+
     convert_to_cgs = False
     if units_velocity is None and units_density is None:
         convert_to_cgs = True
@@ -645,8 +674,9 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
 
     curr_cmap = cmap[0]
     for snap in get_snapshot_number_list(snapshotDir, "snapshot_", firstSnap, lastSnap, skipSteps):
-        print("doing snapshot ",snap)
+        print("doing snapshot ", snap)
         loaded_snap = gadget_readsnap(snap, snapshotDir, lazy_load=lazy_load)
+
         if len(value) == 1:
             val = value[0]
             print(val)
@@ -659,64 +689,72 @@ def plot_range(value=['rho'], snapshotDir= "output", plottingDir="plots", firstS
                               additional_points_size=additional_points_size,
                               additional_points_shape=additional_points_shape,
                               additional_points_color=additional_points_color, unit_length=units_length,
-                              unit_velocity= units_velocity, unit_density= units_density,
-                              plot_velocities=plot_velocities, plot_bfld= plot_bfld, axes=get_single_value(axes_array),
+                              unit_velocity=units_velocity, unit_density=units_density,
+                              plot_velocities=plot_velocities, plot_bfld=plot_bfld, axes=get_single_value(axes_array),
                               modified_units=modified_units, ignore_types=ignore_types,
                               factor_value=factor_value[0], units_value=units_value[0], contour=contour,
                               species_file=species_file)
 
             regularize_time_units(loaded_snap)
-            title('time : {:.2g}'.format(loaded_snap.time * basic_units["time"].factor) +
-                  " [" + basic_units["time"].unit + "]")
+            pylab.title('time : {:.2g}'.format(loaded_snap.time * basic_units["time"].factor) +
+                        " [" + basic_units["time"].unit + "]")
             restore_basic_units(old_basic_units)
             filename = plottingDir + "/Aslice_" + val + "_{0}.png".format(snap)
             print("saving to: ", filename)
-            savefig(filename)
+            pylab.savefig(filename, bbox_inches='tight')
             print("saved fig")
+
         else:
-            fig = figure(figsize=(36,20))
-            fig.subplots_adjust(hspace=0.4,wspace=0.4)
+            # Safe grid calculation
+            ncols = 2 if len(value) > 1 else 1
+            nrows = int(np.ceil(len(value) / float(ncols)))
+
+            fig = pylab.figure(figsize=(36, 20))
+            fig.subplots_adjust(hspace=0.4, wspace=0.4)
             rcParams.update({'font.size': 40, 'font.family': 'Serif'})
             rcParams['text.usetex'] = False
-            num_figures = int(ceil(len(value)/2))
+
             old_basic_units = copy_current_units()
-            for index,val in enumerate(value):
-                if num_figures >= 1:
-                    curr_subplot = int(num_figures*100 + 21 + index)
-                print("curr subplot: ", curr_subplot)
-                subplot(curr_subplot)
+            for index, val in enumerate(value):
+                # Using standard subplot grid creation to avoid the 3-digit breakage
+                curr_ax = fig.add_subplot(nrows, ncols, index + 1)
+                pylab.sca(curr_ax)
+
                 curr_cmap = cmap[index % len(cmap)]
-                plot_single_value(loaded_snap,  value=val, cmap=curr_cmap, box=get_single_value(box,index),
-                                  vrange=get_single_value(vrange,index), logplot=get_single_value(logplot,index),
+                plot_single_value(loaded_snap, value=val, cmap=curr_cmap, box=get_single_value(box, index),
+                                  vrange=get_single_value(vrange, index), logplot=get_single_value(logplot, index),
                                   res=res,
-                                  numthreads=numthreads, center=get_single_value(center,index),
+                                  numthreads=numthreads, center=get_single_value(center, index),
                                   relative_to_sink_id=get_single_value(relative_to_sink_id, index),
                                   central_id=get_single_value(central_id, index), plot_points=plot_points,
                                   additional_points_size=additional_points_size,
                                   additional_points_shape=additional_points_shape,
                                   additional_points_color=additional_points_color, unit_length=units_length,
-                                  unit_velocity= units_velocity, unit_density= units_density,
-                                  plot_velocities=plot_velocities, plot_bfld= plot_bfld, newfig=False,
+                                  unit_velocity=units_velocity, unit_density=units_density,
+                                  plot_velocities=plot_velocities, plot_bfld=plot_bfld, newfig=False,
                                   axes=get_single_value(axes_array, index), ignore_types=ignore_types,
                                   factor_value=factor_value[index % len(units_value)],
-                                  units_value=units_value[index % len(units_value)], contour=contour, species_file=species_file)
+                                  units_value=units_value[index % len(units_value)], contour=contour,
+                                  species_file=species_file)
+
                 if index < len(value) - 1:
                     restore_basic_units(old_basic_units)
                 rcParams.update({'font.size': 40, 'font.family': 'Serif'})
                 rcParams['text.usetex'] = False
 
-            #title('time : {:.2f} [s]'.format(loaded_snap.time))
             regularize_time_units(loaded_snap)
-            suptitle('time : {:.2g}'.format(loaded_snap.time * basic_units["time"].factor) +
-                     " [" + basic_units["time"].unit + "]", fontsize='x-large')
+            pylab.suptitle('time : {:.2g}'.format(loaded_snap.time * basic_units["time"].factor) +
+                           " [" + basic_units["time"].unit + "]", fontsize='x-large')
             restore_basic_units(old_basic_units)
             rcParams.update({'font.size': 40, 'font.family': 'Serif'})
             rcParams['text.usetex'] = False
+
             filename = plottingDir + "/Aslice_" + "_".join(value) + "_{0}.png".format(snap)
             print("saving to: ", filename)
-            savefig(filename)
+            pylab.savefig(filename, bbox_inches='tight')
             print("saved fig")
-        close('all')
+
+        pylab.close('all')
         modified_units = True
 
 
