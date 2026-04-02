@@ -618,9 +618,9 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir="output", plottingDi
 
         # Added a wspace/hspace of 0.05 so they aren't touching perfectly (reduces tightness)
         if horizontal:
-            fig.subplots_adjust(bottom=0.1, top=0.9, left=0.1, right=0.9, wspace=0.05)
+            fig.subplots_adjust(bottom=0.1, top=0.9, left=0.1, right=0.9, wspace=0.01)
         else:
-            fig.subplots_adjust(bottom=0.1, top=0.9, left=0.1, right=0.9, hspace=0.05)
+            fig.subplots_adjust(bottom=0.1, top=0.9, left=0.1, right=0.9, hspace=0.01)
 
         if "xnuc" in val:
             val_name = "rho" + val
@@ -635,11 +635,13 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir="output", plottingDi
             mappable = axes[-1].images[0]  # Matches imshow
 
         if mappable is not None:
-            # Passing ax=axes (the list of all axes) ensures all subplots shrink uniformly!
-            cbar = fig.colorbar(mappable, ax=axes, pad=0.02, fraction=0.05)
-            cbar.set_label(
-                name_and_units[val_name].name + " [" + basic_units[name_and_units[val_name].unit_name].unit + "]",
-                labelpad=20)
+            # THE FIX: inset_axes links the colorbar's height strictly to the drawn plot's height.
+            # Dimensions are [x0, y0, width, height] relative to the last subplot.
+            # x0=1.03 means "start 3% to the right of the plot boundary". height=1.0 means "100% of the plot's height"
+            cax = axes[-1].inset_axes([1.03, 0.0, 0.05, 1.0])
+            cbar = fig.colorbar(mappable, cax=cax)
+            cbar.set_label(name_and_units[val_name].name + " [" + basic_units[name_and_units[val_name].unit_name].unit
+                           + "]", labelpad=20)
         else:
             print("Warning: Could not extract mappable from the plot to generate colorbar.")
 
