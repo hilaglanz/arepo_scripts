@@ -358,7 +358,7 @@ def calculate_label_and_value(loaded_snap, value, relative_to_sink_id, central_i
     if "xnuc" in value:
         loaded_snap.data["rho" + value] = loaded_snap.rho * loaded_snap.data[value]
         value = "rho" + value
-        add_name_and_unit(value, r'$\rho \left(' + species[int(value.split("xnuc")[-1])] + r"\right)$", "rho")
+        add_name_and_unit(value, r'$\rho \left(\mathrm{' + species[int(value.split("xnuc")[-1])] + r"}\right)$", "rho")
 
     if value in loaded_snap.data.keys():
         if len(loaded_snap.data[value].shape) == 1:
@@ -598,7 +598,7 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir="output", plottingDi
     for index, val in enumerate(value):
         print(val)
 
-        rcParams.update({'font.size': 40, 'font.family': 'Serif', 'axes.formatter.useoffset': True})
+        rcParams.update({'font.size': 40, 'font.family': 'Serif', 'axes.formatter.useoffset': True, 'axes.formatter.use_mathtext': True})
         rcParams['text.usetex'] = False
 
         # sharey=True automatically hides the inner Y-axis tick labels
@@ -660,7 +660,7 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir="output", plottingDi
                 if snap_i < num_figures - 1:
                     curr_ax.set_axis_off()
 
-        rcParams.update({'font.size': 70, 'font.family': 'Serif', 'axes.formatter.useoffset': False})
+        rcParams.update({'font.size': 70, 'font.family': 'Serif', 'axes.formatter.useoffset': False, 'axes.formatter.use_mathtext': True})
 
         # Added a wspace/hspace of 0.05 so they aren't touching perfectly (reduces tightness)
         if horizontal:
@@ -789,7 +789,7 @@ def plot_range(value=['rho'], snapshotDir="output", plottingDir="plots", firstSn
             fig = pylab.figure(figsize=(15 * ncols, 12 * nrows))
             # Increased wspace slightly so the colorbar and the next row's Y-label don't collide
             fig.subplots_adjust(hspace=0.3, wspace=0.55)
-            rcParams.update({'font.size': 30, 'font.family': 'Serif'})
+            rcParams.update({'font.size': 30, 'font.family': 'Serif', 'axes.formatter.use_mathtext': True})
             rcParams['text.usetex'] = False
 
             old_basic_units = copy_current_units()
@@ -832,14 +832,14 @@ def plot_range(value=['rho'], snapshotDir="output", plottingDir="plots", firstSn
 
                 if index < len(value) - 1:
                     restore_basic_units(old_basic_units)
-                rcParams.update({'font.size': 30, 'font.family': 'Serif'})
+                rcParams.update({'font.size': 30, 'font.family': 'Serif', 'axes.formatter.use_mathtext': True})
                 rcParams['text.usetex'] = False
 
             regularize_time_units(loaded_snap)
             pylab.suptitle('time : {:.2g}'.format(loaded_snap.time * basic_units["time"].factor) +
                            " [" + basic_units["time"].unit + "]", fontsize='x-large')
             restore_basic_units(old_basic_units)
-            rcParams.update({'font.size': 30, 'font.family': 'Serif'})
+            rcParams.update({'font.size': 30, 'font.family': 'Serif', 'axes.formatter.use_mathtext': True})
             rcParams['text.usetex'] = False
 
             filename = plottingDir + "/Aslice_" + "_".join(value) + "_{0}.png".format(snap)
