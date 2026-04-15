@@ -1,7 +1,10 @@
 import os
+import io
 import glob
 import argparse
 import pickle
+import pylab
+from PIL import Image
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 from loadmodules import *
@@ -120,6 +123,46 @@ def project_vector(v,r):
     dist = np.sqrt((r*r).sum(axis=1))
     return ((r*v).sum(axis=1)) / dist
 
+def make_image_dimensions_even(filename):
+    """
+    Checks the saved image. If width or height is odd, it crops 1 pixel
+    so FFmpeg encoding works perfectly natively.
+    """
+    try:
+        with Image.open(filename) as img:
+            w, h = img.size
+            if w % 2 != 0 or h % 2 != 0:
+                new_w = w - (w % 2)
+                new_h = h - (h % 2)
+                # Cropping 1 pixel off the edge is completely unnoticeable on a high-res plot
+                img = img.crop((0, 0, new_w, new_h))
+                img.save(filename)
+    except Exception as e:
+        print(f"Could not resize image {filename}: {e}")
+
+
+def save_even_tight_fig(fig, filename, dpi=300):
+    """
+    Saves a matplotlib figure with bbox_inches='tight' into memory,
+    ensures dimensions are even for FFmpeg, and writes to disk exactly once.
+    """
+    # 1. Save to a temporary memory buffer instead of the hard drive
+    buf = io.BytesIO()
+    fig.savefig(buf, format='png', dpi=dpi, bbox_inches='tight')
+    buf.seek(0)  # Rewind the buffer to the beginning
+
+    # 2. Open the image from memory using PIL
+    with Image.open(buf) as img:
+        w, h = img.size
+
+        # 3. Check and fix odd dimensions
+        if w % 2 != 0 or h % 2 != 0:
+            new_w = w - (w % 2)
+            new_h = h - (h % 2)
+            img = img.crop((0, 0, new_w, new_h))
+
+        # 4. Write the final perfect image to the hard drive
+        img.save(filename)
 
 def plot_stream(loaded_snap, value='vel', xlab='x', ylab='y', axes=[0,1], box=False, res=1024, numthreads=1, center=None,
                 saving_file=None):
@@ -651,7 +694,7 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir="output", plottingDi
 
         filename = plottingDir + "/Aslice_" + val_name + "_" + "_".join([str(s) for s in snapshots_list]) + ".png"
         print("saving to: ", filename)
-        pylab.savefig(filename, dpi=300, bbox_inches='tight')
+        save_even_tight_fig(pylab.gcf(), filename, dpi=300)
         print("saved fig")
         pylab.close('all')
         modified_units = True
@@ -735,7 +778,7 @@ def plot_range(value=['rho'], snapshotDir="output", plottingDir="plots", firstSn
 
             filename = plottingDir + "/Aslice_" + val + "_{0}.png".format(snap)
             print("saving to: ", filename)
-            pylab.savefig(filename, bbox_inches='tight', dpi=300)
+            save_even_tight_fig(pylab.gcf(), filename, dpi=300)
             print("saved fig")
 
         else:
@@ -801,7 +844,7 @@ def plot_range(value=['rho'], snapshotDir="output", plottingDir="plots", firstSn
 
             filename = plottingDir + "/Aslice_" + "_".join(value) + "_{0}.png".format(snap)
             print("saving to: ", filename)
-            pylab.savefig(filename, bbox_inches='tight', dpi=300)
+            save_even_tight_fig(pylab.gcf(), filename, dpi=300)
             print("saved fig")
 
         pylab.close('all')
