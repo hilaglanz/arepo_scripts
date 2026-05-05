@@ -253,6 +253,7 @@ class BinariesICs:
     def create_ic_collision(self, impact_parameter, ic_file_name="bin.dat.ic", velocity=None, separation=None,
                             relative_to_RL=1):
         self.relative_y = impact_parameter
+        self.relative_z = 0.0
         if separation is None:
             if relative_to_RL is None:
                 relative_to_RL = 1
