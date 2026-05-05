@@ -180,7 +180,7 @@ class BinariesICs:
         self.data['boxsize'] = max(self.snapshot1.boxsize, self.snapshot2.boxsize)
 
     def find_new_borders(self):
-        return 1.1 * np.sqrt(self.data['pos'][:, 0] ** 2 + self.data['pos'][:, 1] ** 2 +
+        return 2.2 * np.sqrt(self.data['pos'][:, 0] ** 2 + self.data['pos'][:, 1] ** 2 +
                              self.data['pos'][:, 2] ** 2).max()
 
     def add_grids_and_save_ic(self, ic_file_name):
@@ -196,6 +196,11 @@ class BinariesICs:
         gadget_add_grids(self.data, [boxsize, 10 * boxsize, 100 * boxsize], 32, xnuc=xnuc)
 
         if 'type' in self.data:
+            new_npart = len(self.data['pos'])
+            full_type_array = np.zeros(new_npart, dtype=int)
+            full_type_array[:len(self.data['type'])] = self.data['type']
+            self.data['type'] = full_type_array
+
             print("Sorting particles by type")
             sort_idx = np.argsort(self.data['type'])
             for key in self.data.keys():
