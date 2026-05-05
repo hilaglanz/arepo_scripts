@@ -33,7 +33,7 @@ class SingleObject:
 
 class MockPointMassSnapshot:
     def __init__(self, mass, sp_count=55):
-        self.mass = np.array([mass])
+        self.mass = np.array([mass * msol])
         self.pos = np.zeros((1, 3))
         self.vel = np.zeros((1, 3))
         self.rho = np.array([1e15])  # Artificially high to pass rhocut
@@ -480,7 +480,7 @@ def InitParser():
                         help='is the distance should be relative to RL size?',
                         default=False)
     parser.add_argument('--separation', type=float, help='initial separation between the binary objects', default=None)
-    parser.add_argument('--point_mass', type=float, help='mass of the point mass (in grams), '
+    parser.add_argument('--point_mass', type=float, help='mass of the point mass (in Msun), '
                                                          'put 0 nothing for no point mass', default=-1)
     parser.add_argument('--ic_file_name', type=str, help='path to save the ic file', default="bin.ic.dat")
     return parser
@@ -493,7 +493,8 @@ if __name__ == "__main__":
     parser = InitParser()
     args = parser.parse_args()
     if args.point_mass > 0:
-        print(f"Loading object 1 from snapshot, and creating a point mass of {args.point_mass} g for object 2")
+        print(f"Loading object 1 from snapshot, and creating a point mass of {args.point_mass} Msun = "
+              f"{args.point_mass * msol} g for object 2")
         binary = PointMassBinariesLoader(args.snapshot_file, args.point_mass, rhocut=args.rhocut,
                                          species_file=args.species_file, load_types=args.load_types)
     elif args.snapshot_file2 is None or args.snapshot_file2 == "":
