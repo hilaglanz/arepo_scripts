@@ -470,7 +470,7 @@ def InitParser():
                         help='calculate impact parameter according to this density cutoff', default=0)
     parser.add_argument('--impact_parameter', type=float,
                         help='use this initial impact parameter at the initial separation specified by either '
-                             'separation or relative_to_RL, used only if not using impact_parameter_rho_cut', default=0)
+                             'separation or relative_to_RL, used only if not using impact_parameter_rho_cut', default=-1)
     parser.add_argument('--relative_velocity', type=float, help='', default=None)
     parser.add_argument('--relative_to_RL', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
                         help='is the distance should be relative to RL size?',
@@ -516,7 +516,7 @@ if __name__ == "__main__":
         binary.create_ic_collision(b, args.ic_file_name, args.relative_velocity, args.separation,
                                    args.impact_parameter_rhocut)
 
-    elif args.impact_parameter > 0:
+    elif args.impact_parameter >= 0:
         b = args.impact_parameter
         print("b = ", b)
         binary.create_ic_collision(b, args.ic_file_name, args.relative_velocity, args.separation,
