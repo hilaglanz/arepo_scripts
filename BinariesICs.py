@@ -513,14 +513,15 @@ if __name__ == "__main__":
         i2, = np.where(binary.snapshot2.rho > args.impact_parameter_rhocut)
         b = binary.snapshot1.r()[i1].max() + binary.snapshot2.r()[i2].max()
         print("b = ", b)
-        binary.create_ic_collision(b, args.ic_file_name, args.relative_velocity, args.separation,
-                                   args.impact_parameter_rhocut)
+        binary.create_ic_collision(impact_parameter=b, ic_file_name=args.ic_file_name, velocity=args.relative_velocity,
+                                   separation=args.separation, relative_to_RL=args.RL_factor)
 
     elif args.impact_parameter >= 0:
         b = args.impact_parameter
         print("b = ", b)
-        binary.create_ic_collision(b, args.ic_file_name, args.relative_velocity, args.separation,
-                                   args.impact_parameter_rhocut)
+        binary.create_ic_collision(impact_parameter=b, ic_file_name=args.ic_file_name, velocity=args.relative_velocity,
+                                   separation=args.separation, relative_to_RL=args.RL_factor)
 
     elif args.find_next_interaction:
-        binary.create_ic_for_next_interaction(args.ic_file_name, args.relative_to_RL, args.RL_factor, args.separation)
+        binary.create_ic_for_next_interaction(ic_file_name=args.ic_file_name, relative_to_RL=args.relative_to_RL,
+                                              factor=args.RL_factor, dist=args.separation)
