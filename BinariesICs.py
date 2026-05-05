@@ -17,7 +17,7 @@ class SingleObject:
             self.get_objects_density(rhocut)
         self.m = self.snapshot.mass[self.i].astype('float64').sum()
         self.max_distance = self.snapshot.r()[self.i].max()  # maximum distance from the center of the box
-        self.npart = size(self.i)
+        self.npart = len(self.i)
         self.init_orbital_parameters()
 
     def get_objects_density(self, rhocut=1.0):
@@ -30,6 +30,20 @@ class SingleObject:
         print("pos: ", self.pos)
         self.r = self.snapshot.r(center=self.pos)[self.i].max()  # radius of particles
         self.v = (self.snapshot.vel[self.i, :].astype('f8') * self.snapshot.mass[self.i][:, None]).sum(axis=0) / self.m
+
+class MockPointMassSnapshot:
+    def __init__(self, mass, sp_count=55):
+        self.mass = np.array([mass])
+        self.pos = np.zeros((1, 3))
+        self.vel = np.zeros((1, 3))
+        self.rho = np.array([1e15])  # Artificially high to pass rhocut
+        self.data = {'u': np.array([3.0e53]), 'xnuc': np.zeros((1, sp_count))}
+        self.boxsize = 1e10
+        self.center = np.array([self.boxsize / 2, self.boxsize / 2, self.boxsize / 2])
+        self.pass01 = np.array([1])
+
+    def r(self, center=None):
+        return np.zeros(1)
 
 
 class BinariesICs:
@@ -146,6 +160,7 @@ class BinariesICs:
         self.data['xnuc'] = np.zeros((self.npart, self.sp['count']))
         self.data['pass'] = np.zeros((self.npart, 2))
         self.data['count'] = self.npart
+        self.data['type'] = np.zeros(self.npart,dtype=int)
 
     def copy_old_data_to_objects(self, i_begin, i_end, obj, passive_scalar):
         self.data['mass'][i_begin: i_end] = obj.snapshot.mass[obj.i]
@@ -179,6 +194,14 @@ class BinariesICs:
         print("using inner boxsize= ", boxsize)
 
         gadget_add_grids(self.data, [boxsize, 10 * boxsize, 100 * boxsize], 32, xnuc=xnuc)
+
+        if 'type' in self.data:
+            print("Sorting particles by type")
+            sort_idx = np.argsort(self.data['type'])
+            for key in self.data.keys():
+                if key not in ['count', 'boxsize'] and isinstance(self.data[key], np.ndarray):
+                    self.data[key] = self.data[key][sort_idx]
+
         gadget_write_ics(ic_file_name, self.data, double=True, format="hdf5")
         print("ic file saved to ", ic_file_name)
 
@@ -368,6 +391,18 @@ class BinariesICs:
         return max(RL1, RL2)
 
 
+
+
+class PointMassBinariesLoader(BinariesICs):
+    def __init__(self, snapshot_file1, point_mass, rhocut=1, species_file="species55.txt", load_types=[0]):
+        self.snapshot1 = gadget_readsnapname(snapshot_file1, hdf5=True, loadonlytype=load_types)
+
+        sp = loaders.load_species(species_file)
+        self.snapshot2 = MockPointMassSnapshot(point_mass, sp['count'])
+
+        super().__init__(species_file, rhocut=rhocut)
+        self.data['type'][self.npart1:] = 1
+
 class BinariesLoader(BinariesICs):
     def __init__(self, snapshot_file, conditional_axis=0, rhocut=1, species_file="species55.txt", load_types=[0]):
         print("initializeing binaries from a single snapshot")
@@ -445,6 +480,8 @@ def InitParser():
                         help='is the distance should be relative to RL size?',
                         default=False)
     parser.add_argument('--separation', type=float, help='initial separation between the binary objects', default=None)
+    parser.add_argument('--point_mass', type=float, help='mass of the point mass (in grams), '
+                                                         'put 0 nothing for no point mass', default=-1)
     parser.add_argument('--ic_file_name', type=str, help='path to save the ic file', default="bin.ic.dat")
     return parser
 
@@ -455,7 +492,11 @@ if __name__ == "__main__":
     print(len(sys.argv))
     parser = InitParser()
     args = parser.parse_args()
-    if args.snapshot_file2 is None:
+    if args.point_mass > 0:
+        print(f"Loading object 1 from snapshot, and creating a point mass of {args.point_mass} g for object 2")
+        binary = PointMassBinariesLoader(args.snapshot_file, args.point_mass, rhocut=args.rhocut,
+                                         species_file=args.species_file, load_types=args.load_types)
+    elif args.snapshot_file2 is None or args.snapshot_file2 == "":
         binary = BinariesLoader(args.snapshot_file, conditional_axis=args.conditional_axis,
                                 rhocut=args.rhocut, species_file=args.species_file, load_types=args.load_types)
     else:
