@@ -483,7 +483,7 @@ def InitParser():
     parser.add_argument('--separation', type=float, help='initial separation between the binary objects', default=None)
     parser.add_argument('--point_mass', type=float, help='mass of the point mass (in Msun), '
                                                          'put 0 nothing for no point mass', default=-1)
-    parser.add_argument('--ic_file_name', type=str, help='path to save the ic file', default="bin.ic.dat")
+    parser.add_argument('--ic_file_name', type=str, help='path to save the ic file', default="bin.dat.ic")
     return parser
 
 
