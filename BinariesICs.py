@@ -331,7 +331,7 @@ class BinariesICs:
         self.new_pos2 = np.array([self.new_x2, self.new_y2, self.new_z2])
 
     def create_new_velocity_array(self):
-        if len(self.relative_vx) > 1:
+        if np.size(self.relative_vx) > 1:
             print("received a vector for relative velocity in x, using just 0 for relative velocity")
             self.new_v1 = np.array([0, 0, 0])
             self.new_v2 = np.array([0, 0, 0])
