@@ -199,20 +199,21 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
     change_value_units(value, units_value, factor_value)
     change_snap_units(loaded_snap)
 
+    if central_id is not None:
+        center = loaded_snap.pos[np.where(loaded_snap.id == central_id)][0]
+        print("centralizing around id ", central_id, " at ", center)
+
     print("units: ")
     for val in name_and_units.values():
         print(val.name, basic_units[val.unit_name].factor)
-    loaded_snap, value = calculate_label_and_value(loaded_snap, value, relative_to_sink_id, central_id=central_id, species_file=species_file)
+    loaded_snap, value = calculate_label_and_value(loaded_snap, value, relative_to_sink_id, central_id=central_id,
+                                                   center= center, species_file=species_file)
 
     print(value)
 
     label = extract_label(value)
     xlab = chr(ord('x') + axes[0])
     ylab = chr(ord('x') + axes[1])
-
-    if central_id is not None:
-        center = loaded_snap.pos[np.where(loaded_snap.id == central_id)][0]
-        print("centralizing around id ", central_id, " at ", center)
 
     if contour:
         levels=10
@@ -356,7 +357,11 @@ def get_value_at_inf(value, data):
 
     return val_inf
 
-def calculate_label_and_value(loaded_snap, value, relative_to_sink_id, central_id=None, species_file=r"..\species55.txt"):
+def calculate_label_and_value(loaded_snap, value, relative_to_sink_id, central_id=None, center=None,
+                              species_file=r"..\species55.txt"):
+    if center == None:
+        center = loaded_snap.center()
+
     if "xnuc" in value:
         loaded_snap.data["rho" + value] = loaded_snap.rho * loaded_snap.data[value]
         value = "rho" + value
@@ -403,7 +408,8 @@ def calculate_label_and_value(loaded_snap, value, relative_to_sink_id, central_i
 
     if value == "gamma_d":
         if "cum_mass" not in loaded_snap.data:
-            calculate_label_and_value(loaded_snap, "cum_mass", relative_to_sink_id, central_id, species_file)
+            calculate_label_and_value(loaded_snap, value="cum_mass", relative_to_sink_id=relative_to_sink_id,
+                                      central_id=central_id, center=center, species_file=species_file)
         loaded_snap.data["gamma_d"] = (loaded_snap.ka_r * loaded_snap.fradr * (loaded_snap.r(center) ** 2) /
                                        (G * loaded_snap.data["cum_mass"] * c))
 
