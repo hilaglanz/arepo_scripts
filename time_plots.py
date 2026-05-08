@@ -4,9 +4,9 @@ import argparse
 import numpy as np
 import pylab
 from loadmodules import *
-from BinariesICs import *
-from profiles_plots import *
-from make_plots import *
+from BinariesICs import BinariesLoader
+from profiles_plots import set_new_fig_properties
+from make_plots import calculate_value_relative_to_vector, get_snapshot_number_list
 
 def calculate_particle_value_diff_rate(snapshot, particle_index, value, old_val, old_time):
     return calculate_particle_value_diff(snapshot, particle_index, value, old_val) / (snapshot.time - old_time)
@@ -127,9 +127,9 @@ def calculate_value_over_time(snapshots_number_list, snapshot_dir="output", valu
             print("plotting difference of value")
             value_to_calc = value.split("diff")[0]
         if along_axis_line:
-            relevant_cells, = np.where((absolute(snapshot.pos[:, (motion_axis + 1) % 3] - center[(motion_axis + 1) % 3]) < (
+            relevant_cells, = np.where((abs(snapshot.pos[:, (motion_axis + 1) % 3] - center[(motion_axis + 1) % 3]) < (
                         2 * snapshot.data["vol"] ** (1.0 / 3))) &
-                                      (absolute(snapshot.pos[:, (motion_axis + 2) % 3] - center[(motion_axis + 2) % 3]) < (
+                                      (abs(snapshot.pos[:, (motion_axis + 2) % 3] - center[(motion_axis + 2) % 3]) < (
                                                   2 * snapshot.data["vol"] ** (1.0 / 3))))
             cell_indices = np.intersect1d(cell_indices, relevant_cells)
         if relative_to_motion is not None:

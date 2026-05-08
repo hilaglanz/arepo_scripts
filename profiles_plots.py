@@ -4,8 +4,8 @@ import argparse
 import numpy as np
 import pylab
 from loadmodules import *
-from BinariesICs import *
-from plot_multiples import *
+from BinariesICs import BinariesLoader
+from plot_multiples import get_obj_index
 
 
 def set_new_fig_properties():
