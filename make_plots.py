@@ -404,7 +404,7 @@ def calculate_label_and_value(loaded_snap, value, relative_to_sink_id, central_i
     if value == "gamma_d":
         if "cum_mass" not in loaded_snap.data:
             calculate_label_and_value(loaded_snap, "cum_mass", relative_to_sink_id, central_id, species_file)
-        loaded_snap.data["gamma_d"] = (loaded_snap.ka_r * loaded_snap.fradrr * (loaded_snap.r(center) ** 2) /
+        loaded_snap.data["gamma_d"] = (loaded_snap.ka_r * loaded_snap.fradr * (loaded_snap.r(center) ** 2) /
                                        (G * loaded_snap.data["cum_mass"] * c))
 
     if "vort" in value:
