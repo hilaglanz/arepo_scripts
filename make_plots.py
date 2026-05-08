@@ -8,8 +8,10 @@ from PIL import Image
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 from loadmodules import *
+from vector_manipulations import *
 from save_sink_heatmaps import save_heatmap,save_scatter,save_stream
 from profiles_plots import compute_cumulative_mass
+
 
 
 species = ['n', 'p', '^{4}He', '^{11}B', '^{12}C', '^{13}C', '^{13}N', '^{14}N', '^{15}N', '^{15}O',
@@ -66,6 +68,7 @@ def copy_basic_units(old_dictionary, new_dictionary=None):
         new_dictionary[key] = old_dictionary[key]
 
     return new_dictionary
+
 def copy_current_units():
     return copy_basic_units(basic_units)
 def restore_basic_units(old_basic_units):
@@ -91,6 +94,7 @@ def regularize_length_units(boxsize):
         basic_units["length"].factor /= rsol
         basic_units["length"].unit = r'$R_\odot$'
         print("changed length units to Rsun")
+
 def regularize_time_units(snapshot):
     if basic_units["time"].unit != "s":
         return
@@ -120,10 +124,6 @@ def change_unit_conversion(factor_length, factor_velocity, factor_mass):
     #basic_units["entr"].factor = (basic_units["pres"].factor / (basic_units["rho"].factor ** (5.0 / 3)))
     basic_units["u"].factor *= (factor_mass * (factor_velocity ** 2))
     # TODO: convert also temperature?
-
-def project_vector(v,r):
-    dist = np.sqrt((r*r).sum(axis=1))
-    return ((r*v).sum(axis=1)) / dist
 
 def make_image_dimensions_even(filename):
     """
@@ -515,21 +515,6 @@ def calculate_label_and_value(loaded_snap, value, relative_to_sink_id, central_i
         add_name_and_unit(value, "Angular momentum", "ang_mom")
 
     return loaded_snap, value
-
-def calculate_value_relative_to_vector(loaded_snap, value, vector):
-    if value not in loaded_snap.data.keys() or len(loaded_snap.data[value].shape) <= 1:
-        print("cannot compute ", value, " relative to the motion axis")
-        return
-    else:
-        print("computing ", value, "relative to ", vector)
-        vector_size = np.sqrt((vector ** 2).sum())
-        loaded_snap.data[value+"_v"] = (loaded_snap.data[value] * vector).sum(axis=1) / vector_size
-        loaded_snap.data[value+"_u"] = np.sqrt((loaded_snap.data[value] ** 2).sum(axis=1) -
-                                               loaded_snap.data[value+"_v"]**2)
-        add_name_and_unit(value+"_v", name_and_units[value].name + "_v", name_and_units[value].unit_name)
-        add_name_and_unit(value+"_u", name_and_units[value].name + "_u", name_and_units[value].unit_name)
-
-        return loaded_snap
 
 def add_computed_value_to_name_and_unit_dict(loaded_snap, value):
     if value not in name_and_units.keys():

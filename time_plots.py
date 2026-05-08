@@ -4,9 +4,10 @@ import argparse
 import numpy as np
 import pylab
 from loadmodules import *
+from vector_manipulations import *
 from BinariesICs import BinariesLoader
 from profiles_plots import set_new_fig_properties
-from make_plots import calculate_value_relative_to_vector, get_snapshot_number_list
+from make_plots import get_snapshot_number_list
 
 def calculate_particle_value_diff_rate(snapshot, particle_index, value, old_val, old_time):
     return calculate_particle_value_diff(snapshot, particle_index, value, old_val) / (snapshot.time - old_time)
@@ -137,6 +138,7 @@ def calculate_value_over_time(snapshots_number_list, snapshot_dir="output", valu
                                 snapshot.mass[cell_indices][:, None]).sum(axis=0) / snapshot.mass[cell_indices].sum()
             snapshot.data['pos'] -= center
             snapshot = calculate_value_relative_to_vector(snapshot, value, relevant_vector)
+
             snapshot.data['pos'] += center
             if relative_to_motion == 0:
                 value_to_calc = value + "_v"

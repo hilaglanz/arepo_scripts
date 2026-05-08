@@ -1,6 +1,6 @@
 import numpy as np
 from loadmodules import *
-from time_plots import *
+from vector_manipulations import calculate_value_relative_to_vector
 
 def get_obj_index(snapshot, obj_id):
     obj_index = np.where(snapshot.id == obj_id)
