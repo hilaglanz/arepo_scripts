@@ -405,7 +405,7 @@ def calculate_label_and_value(loaded_snap, value, relative_to_sink_id, central_i
 
     if value == "cum_mass":
         compute_cumulative_mass(loaded_snap, center)
-        add_name_and_unit(value, "cumulative mass", "g")
+        add_name_and_unit(value, "cumulative mass", "mass")
 
     if value == "gamma_d":
         if "cum_mass" not in loaded_snap.data:
