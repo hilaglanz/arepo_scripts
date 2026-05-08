@@ -21,7 +21,7 @@ def compute_cumulative_mass(snapshot, center):
     mcum = np.zeros(snapshot.npart)
     mcum[0] = snapshot.mass[rsort[0]]
     for i in range(1, snapshot.npart):
-        mcum[rsort[i]] = mcum[rsort[i - 1]] + snapshot.mass[rsort[i]]
+        mcum[i] = mcum[i - 1] + snapshot.mass[rsort[i]]
     snapshot.data['cum_mass'] = mcum / msol
     return
 
@@ -34,7 +34,7 @@ def compute_cumulative_unbounded_mass(snapshot, center):
     mcum = np.zeros(snapshot.npart)
     mcum[0] = snapshot.data["unbounded_mass"][rsort[0]]
     for i in range(1, snapshot.npart):
-        mcum[rsort[i]] = mcum[rsort[i - 1]] + snapshot.data["unbounded_mass"][rsort[i]]
+        mcum[i] = mcum[i - 1] + snapshot.data["unbounded_mass"][rsort[i]]
     snapshot.data['cum_unbounded_mass'] = mcum / msol
     return
 
