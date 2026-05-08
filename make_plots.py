@@ -9,6 +9,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 from loadmodules import *
 from save_sink_heatmaps import save_heatmap,save_scatter,save_stream
+from profiles_plots import compute_cumulative_mass
 
 
 species = ['n', 'p', '^{4}He', '^{11}B', '^{12}C', '^{13}C', '^{13}N', '^{14}N', '^{15}N', '^{15}O',
@@ -119,6 +120,7 @@ def change_unit_conversion(factor_length, factor_velocity, factor_mass):
     #basic_units["entr"].factor = (basic_units["pres"].factor / (basic_units["rho"].factor ** (5.0 / 3)))
     basic_units["u"].factor *= (factor_mass * (factor_velocity ** 2))
     # TODO: convert also temperature?
+
 def project_vector(v,r):
     dist = np.sqrt((r*r).sum(axis=1))
     return ((r*v).sum(axis=1)) / dist
@@ -395,6 +397,15 @@ def calculate_label_and_value(loaded_snap, value, relative_to_sink_id, central_i
 
     if "_size" in value:
         loaded_snap.data[value] = np.sqrt((loaded_snap.data[value.split('_size')[0]] ** 2).sum(axis=1))
+
+    if value == "cum_mass":
+        compute_cumulative_mass(loaded_snap, center)
+
+    if value == "gamma_d":
+        if "cum_mass" not in loaded_snap.data:
+            calculate_label_and_value(loaded_snap, "cum_mass", relative_to_sink_id, central_id, species_file)
+        loaded_snap.data["gamma_d"] = (loaded_snap.ka_r * loaded_snap.fradrr * (loaded_snap.r(center) ** 2) /
+                                       (G * loaded_snap.data["cum_mass"] * c))
 
     if "vort" in value:
         loaded_snap.data['vort_x'] = loaded_snap.data["vort"][:, 0]
