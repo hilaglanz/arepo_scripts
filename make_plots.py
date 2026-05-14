@@ -916,6 +916,13 @@ def InitParser():
 if __name__ == "__main__":
     for arg in sys.argv:
         print(arg)
+        
+    for i, arg in enumerate(sys.argv):
+        # If it looks like a negative scientific notation or number (e.g., -5e5)
+        if arg.startswith('-') and len(arg) > 1 and arg[1].isdigit():
+            # Add a space so argparse doesn't treat it as a flag
+            sys.argv[i] = ' ' + arg
+
     print(len(sys.argv))
     parser = InitParser()
     args = parser.parse_args()
