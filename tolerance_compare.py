@@ -1,3 +1,4 @@
+import argparse
 from loadmodules import *
 
 def compare_tolerance(snapshot_num, value="ka_r", output1="output-6", output2="output-8", plots_dir="plots"):

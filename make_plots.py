@@ -360,7 +360,7 @@ def get_value_at_inf(value, data):
 def calculate_label_and_value(loaded_snap, value, relative_to_sink_id, central_id=None, center=None,
                               species_file=r"..\species55.txt"):
     if center is None:
-        center = loaded_snap.center()
+        center = loaded_snap.center
 
     if "xnuc" in value:
         loaded_snap.data["rho" + value] = loaded_snap.rho * loaded_snap.data[value]
@@ -916,11 +916,9 @@ def InitParser():
 if __name__ == "__main__":
     for arg in sys.argv:
         print(arg)
-        
+
     for i, arg in enumerate(sys.argv):
-        # If it looks like a negative scientific notation or number (e.g., -5e5)
         if arg.startswith('-') and len(arg) > 1 and arg[1].isdigit():
-            # Add a space so argparse doesn't treat it as a flag
             sys.argv[i] = ' ' + arg
 
     print(len(sys.argv))
