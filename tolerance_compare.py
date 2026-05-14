@@ -97,9 +97,9 @@ def InitParser():
     parser.add_argument('--output1', type=str,  help='path to snapshot files directory of the low tolerance', default= "output-6")
     parser.add_argument('--output2', type=str,  help='path to snapshot files directory of the high tolerance', default= "output-8")
     parser.add_argument('--saving_dir', type=str,  help='path to output directory', default= "plots")
-    parser.add_argument('--value', type=str,  help='value to be plotted', default="temp")
-    parser.add_argument('--val_label', type=str,  help='value label to be plotted', default="Temperature")
-    parser.add_argument('--val_units', type=str,  help='value units to be plotted', default="[K]")
+    parser.add_argument('--value', type=str,  help='value to be plotted', default="ka_r")
+    parser.add_argument('--val_label', type=str,  help='value label to be plotted', default="Opacity (Dust)")
+    parser.add_argument('--val_units', type=str,  help='value units to be plotted', default="[cm^2/g]")
     parser.add_argument('--xrange', type=float, help='x range to plot (in Rsun)', default=1000)
     return parser
 
