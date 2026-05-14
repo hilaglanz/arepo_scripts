@@ -111,5 +111,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     compare_tolerance(snapshot_num=args.snapshot_num, output1=args.output1, output2=args.output2, xrange=args.xrange,
-                      val_label=args.val_label, val_units=args.val_units)
+                      value=args.value, val_label=args.val_label, val_units=args.val_units)
 
