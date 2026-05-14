@@ -1,9 +1,12 @@
 import argparse
 from loadmodules import *
 
-def compare_tolerance(snapshot_num, value="ka_r", output1="output-6", output2="output-8", plots_dir="plots"):
+def compare_tolerance(snapshot_num, value="ka_r", output1="output-6", output2="output-8", plots_dir="plots", xrange=700,
+                      val_label=None, val_units=""):
     run_1e6 = gadget_readsnap(snapshot_num, output1, lazy_load=True,loadonlytype=[0])
     run_1e8 = gadget_readsnap(snapshot_num, output2, lazy_load=True,loadonlytype=[0])
+    if val_label is None:
+        val_label = value
 
     r_vec6 = run_1e6.pos - run_1e6.center
     r_mag6 = np.linalg.norm(r_vec6, axis=1)
@@ -32,8 +35,8 @@ def compare_tolerance(snapshot_num, value="ka_r", output1="output-6", output2="o
 
     # 2. Extract Opacity (to see where the dust starts)
     # This helps correlate error with the dust formation region
-    prof_kappa = run_1e8.get_radprof(value, nshells=200, dr=dr_val)
-    kappa_1e8 = prof_kappa[0,:]
+    prof_value = run_1e8.get_radprof(value, nshells=200, dr=dr_val)
+    value_1e8 = prof_value[0,:]
 
     # np.interp MUST have increasing x-values
     sort_idx = np.argsort(r_1e6)
@@ -66,9 +69,9 @@ def compare_tolerance(snapshot_num, value="ka_r", output1="output-6", output2="o
 
     # Overlay Opacity (Secondary Axis) to show the Dust Zone
     ax1_tw = ax1.twinx()
-    ax1_tw.plot(r_1e8, kappa_1e8, 'g:', alpha=0.5, label='Opacity (Dust)')
+    ax1_tw.plot(r_1e8, value_1e8, 'g:', alpha=0.5, label=val_label)
     ax1_tw.set_yscale('log')
-    ax1_tw.set_ylabel('Opacity [cm^2/g]', color='g')
+    ax1_tw.set_ylabel(val_label + " " + val_units, color='g')
 
     # Bottom: Numerical Error (Residual)
     ax2.plot(r_1e8, residual * 100, color='blue', lw=1.5)
@@ -84,7 +87,7 @@ def compare_tolerance(snapshot_num, value="ka_r", output1="output-6", output2="o
 
     plt.suptitle('IDORT Tolerance Convergence Test: 1e-8 vs 1e-6', fontsize=14)
     plt.tight_layout()
-    plt.xlim(0, 700)
+    plt.xlim(0, xrange)
     savefig(plots_dir + "/Tolerance_comp_{0}_".format(snapshot_num)+"_"+value+".jpg")
     print("saved!")
 
@@ -95,6 +98,8 @@ def InitParser():
     parser.add_argument('--output2', type=str,  help='path to snapshot files directory of the high tolerance', default= "output-8")
     parser.add_argument('--saving_dir', type=str,  help='path to output directory', default= "plots")
     parser.add_argument('--value', type=str,  help='value to be plotted', default="temp")
+    parser.add_argument('--val_label', type=str,  help='value label to be plotted', default="Temperature")
+    parser.add_argument('--val_units', type=str,  help='value units to be plotted', default="[K]")
     parser.add_argument('--xrange', type=float, help='x range to plot (in Rsun)', default=1000)
     return parser
 
@@ -105,5 +110,6 @@ if __name__ == "__main__":
     parser = InitParser()
     args = parser.parse_args()
 
-    compare_tolerance(snapshot_num=args.snapshot_num, output1=args.output1, output2=args.output2)
+    compare_tolerance(snapshot_num=args.snapshot_num, output1=args.output1, output2=args.output2, xrange=args.xrange,
+                      val_label=args.val_label, val_units=args.val_units)
 
