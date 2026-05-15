@@ -429,10 +429,6 @@ def calculate_label_and_value(loaded_snap, value, relative_to_sink_id, central_i
         loaded_snap.computeMach()
         value = "sound"
 
-    if value == "vr":
-        loaded_snap["vr"] = (loaded_snap.vel * (loaded_snap.pos-center)).sum(axis=1) / loaded_snap.r(center)
-        add_name_and_unit(value, "Radial Velocity", "vel")
-
     if "grap" in value:
         loaded_snap.data['grapx'] = loaded_snap.data["grap"][:, 0]
         loaded_snap.data['grapy'] = loaded_snap.data["grap"][:, 1]
