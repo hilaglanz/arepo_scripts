@@ -92,10 +92,12 @@ def calculate_value(snapshot, value, sink_value=False, sink_id=0, ind=[]):
 
     if len(snapshot.data[value].shape) > 1:
         values = (snapshot.data[value][ind] * snapshot.mass[ind, None]).sum(axis=0) / snapshot.mass[ind].sum()
+
+        return np.sqrt((values ** 2).sum())
     else:
         values = (snapshot.data[value][ind] * snapshot.mass[ind]).sum(axis=0) / snapshot.mass[ind].sum()
 
-    return np.sqrt((values ** 2).sum())
+        return values
 
 
 def calculate_value_over_time(snapshots_number_list, snapshot_dir="output", value="mass",
