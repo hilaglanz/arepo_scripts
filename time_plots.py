@@ -63,6 +63,7 @@ def calculate_mean_value(snapshot, value, ind=[]):
             return np.sqrt((snapshot.data[value][ind] * snapshot.data[value][ind]).sum(axis=1)).mean()
 
         return snapshot.data[value][ind].mean()
+
 def calculate_max_value(snapshot, value, ind=[]):
     if len(ind) == 0:
         ind, = np.where(snapshot.data['mass'] != 0)
@@ -80,7 +81,7 @@ def calculate_value(snapshot, value, sink_value=False, sink_id=0, ind=[], center
     if value not in snapshot.data.keys():
         if "drag" in value:
             snapshot.data[value] = snapshot.data["acce"][ind] * snapshot.mass[ind,None]
-        if "mass_shell" in value:
+        if "radius_mass_shell" in value:
             try:
                 target_mass_msun = float(value.split("_")[-1])
             except ValueError:
@@ -89,7 +90,8 @@ def calculate_value(snapshot, value, sink_value=False, sink_id=0, ind=[], center
             mass = snapshot.data['mass'][ind]
             r = snapshot.r(center)[:-1]
             cumulative_mass = np.cumsum(mass[sort_indices])
-            shell_idx = np.where(cumulative_mass >= (target_mass_msun * M_sun))[0][0]
+            shell_idx = np.where(cumulative_mass >= (target_mass_msun * msol))[0][0]
+
             return r[sort_indices][shell_idx]
 
     if value == "kinetic_energy":
