@@ -6,7 +6,7 @@ import pylab
 from loadmodules import *
 from vector_manipulations import *
 from BinariesICs import BinariesLoader
-from profiles_plots import set_new_fig_properties
+from profiles_plots import set_new_fig_properties, compute_cumulative_mass
 from make_plots import get_snapshot_number_list
 
 def calculate_particle_value_diff_rate(snapshot, particle_index, value, old_val, old_time):
@@ -72,12 +72,32 @@ def calculate_max_value(snapshot, value, ind=[]):
 
         return snapshot.data[value][ind].max()
 
-def calculate_value(snapshot, value, sink_value=False, sink_id=0, ind=[]):
+def calculate_value(snapshot, value, sink_value=False, sink_id=0, ind=[], center=None):
     if len(ind) == 0:
         ind, = np.where(snapshot.data['mass'] != 0)
+    if center is None:
+        center = snapshot.center
     if value not in snapshot.data.keys():
         if "drag" in value:
             snapshot.data[value] = snapshot.data["acce"][ind] * snapshot.mass[ind,None]
+        if "mass_shell" in value:
+            try:
+                target_mass_msun = float(value.split("_")[-1])
+            except ValueError:
+                target_mass_msun = 1.0  # fallback
+            sort_indices = np.argsort(snapshot.r(center))
+            mass = snapshot.data['mass'][ind]
+            r = snapshot.r(center)[:-1]
+            cumulative_mass = np.cumsum(mass[sort_indices])
+            shell_idx = np.where(cumulative_mass >= (target_mass_msun * M_sun))[0][0]
+            return r[sort_indices][shell_idx]
+
+    if value == "kinetic_energy":
+        vel = snapshot.data['vel'][ind]
+        mass = snapshot.data['mass'][ind]
+        v_squared = (vel ** 2).sum(axis=1)
+        total_ke = 0.5 * (mass * v_squared).sum()
+        return total_ke
 
     if sink_value:
         sink_idks = np.where(snapshot.type == 5)
@@ -152,7 +172,8 @@ def calculate_value_over_time(snapshots_number_list, snapshot_dir="output", valu
             if max:
                 value_over_time.append(calculate_max_value(snapshot, value_to_calc, ind=cell_indices))
             else:
-                value_over_time.append(calculate_value(snapshot, value_to_calc, sink_value, sink_id, ind=cell_indices))
+                value_over_time.append(calculate_value(snapshot, value_to_calc, sink_value, sink_id, ind=cell_indices
+                                                       , center=center))
     print("added ", value_to_calc, " to the time evolution")
     if "diff" in value or "dot" in value:
         value_diff_over_time = []
@@ -291,4 +312,5 @@ if __name__ == "__main__":
         make_time_plots(snapshot_number_list, snapshot_dir=args.output_dir, plotting_dir=args.plotting_dir, value=args.value,
                         log=args.logplot, mean=args.mean, max=args.max, sink_value=args.sink_value, sink_id=args.sink_id,
                         along_axis_line=args.along_axis, motion_axis=args.motion_axis,
+                        around_objects=args.around_objects, object_num=0,
                         relative_to_motion=args.relative_to_motion, ignore_types=args.ignore_types)
