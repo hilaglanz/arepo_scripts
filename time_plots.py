@@ -88,7 +88,7 @@ def calculate_value(snapshot, value, sink_value=False, sink_id=0, ind=[], center
                 target_mass_msun = 1.0  # fallback
             sort_indices = np.argsort(snapshot.r(center)[ind])
             mass = snapshot.data['mass'][ind]
-            r = snapshot.r(center)[:-1]
+            r = snapshot.r(center)[ind]
             cumulative_mass = np.cumsum(mass[sort_indices])
             shell_idx = np.where(cumulative_mass >= (target_mass_msun * msol))[0][0]
 
