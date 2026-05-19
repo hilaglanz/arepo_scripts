@@ -86,7 +86,7 @@ def calculate_value(snapshot, value, sink_value=False, sink_id=0, ind=[], center
                 target_mass_msun = float(value.split("_")[-1])
             except ValueError:
                 target_mass_msun = 1.0  # fallback
-            sort_indices = np.argsort(snapshot.r(center))
+            sort_indices = np.argsort(snapshot.r(center)[ind])
             mass = snapshot.data['mass'][ind]
             r = snapshot.r(center)[:-1]
             cumulative_mass = np.cumsum(mass[sort_indices])
