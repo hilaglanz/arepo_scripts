@@ -20,8 +20,8 @@ def compare_tolerance(snapshot_num, value="ka_r", output1="output-6", output2="o
 
     # 1. Extract the radial profiles
     # We use 'vel' for the radial velocity check
-    dr_in_rsum = 5
-    dr_val = dr_in_rsum * rsol
+    dr_in_rsun = 5
+    dr_val = dr_in_rsun * rsol
     dynamic_nshells = int(xrange / dr_in_rsun) + 10
     prof8= run_1e8.get_radprof("vr", nshells=dynamic_nshells, dr=dr_val)
     r_1e8 = prof8[1,:]
