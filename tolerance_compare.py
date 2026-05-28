@@ -20,11 +20,13 @@ def compare_tolerance(snapshot_num, value="ka_r", output1="output-6", output2="o
 
     # 1. Extract the radial profiles
     # We use 'vel' for the radial velocity check
-    dr_val = 5 * rsol
-    prof8= run_1e8.get_radprof("vr", nshells=200, dr=dr_val)
+    dr_in_rsum = 5
+    dr_val = dr_in_rsum * rsol
+    dynamic_nshells = int(xrange / dr_in_rsun) + 10
+    prof8= run_1e8.get_radprof("vr", nshells=dynamic_nshells, dr=dr_val)
     r_1e8 = prof8[1,:]
     v_1e8  = prof8[0,:]
-    prof6= run_1e6.get_radprof("vr", nshells=200, dr=dr_val)
+    prof6= run_1e6.get_radprof("vr", nshells=dynamic_nshells, dr=dr_val)
     r_1e6 = prof6[1,:]
     v_1e6  = prof6[0,:]
 
@@ -35,7 +37,7 @@ def compare_tolerance(snapshot_num, value="ka_r", output1="output-6", output2="o
 
     # 2. Extract Opacity (to see where the dust starts)
     # This helps correlate error with the dust formation region
-    prof_value = run_1e8.get_radprof(value, nshells=200, dr=dr_val)
+    prof_value = run_1e8.get_radprof(value, nshells=dynamic_nshells, dr=dr_val)
     value_1e8 = prof_value[0,:]
 
     # np.interp MUST have increasing x-values
