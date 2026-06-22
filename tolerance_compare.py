@@ -2,7 +2,7 @@ import argparse
 from loadmodules import *
 
 def compute_cumulative_mass(snapshot):
-    rsort = snapshot.r(center=center).argsort()
+    rsort = snapshot.r().argsort()
 
     mcum = np.zeros(snapshot.npart)
     mcum[0] = snapshot.mass[rsort[0]]
