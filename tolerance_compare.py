@@ -1,6 +1,16 @@
 import argparse
 from loadmodules import *
 
+def compute_cumulative_mass(snapshot):
+    rsort = snapshot.r(center=center).argsort()
+
+    mcum = np.zeros(snapshot.npart)
+    mcum[0] = snapshot.mass[rsort[0]]
+    for i in range(1, snapshot.npart):
+        mcum[i] = mcum[i - 1] + snapshot.mass[rsort[i]]
+    snapshot.data['cum_mass'] = mcum
+    return
+
 def compare_tolerance(snapshot_num, value="ka_r", output1="output-6", output2="output-8", plots_dir="plots", xrange=700,
                       val_label=None, val_units=""):
     run_1e6 = gadget_readsnap(snapshot_num, output1, lazy_load=True,loadonlytype=[0])
@@ -38,6 +48,16 @@ def compare_tolerance(snapshot_num, value="ka_r", output1="output-6", output2="o
     if value == "ka_t":
         run_1e6.data["ka_t"] = run_1e6.data["ka_r"] + run_1e6.data["ka_s"]
         run_1e8.data["ka_t"] = run_1e8.data["ka_r"] + run_1e8.data["ka_s"]
+
+    if value == "gamma_d":
+        compute_cumulative_mass(run_1e6)
+        run_1e6.data["gamma_d"] = ((run_1e6.ka_r + run_1e6.ka_s) * run_1e6.fradr *
+                                       (run_1e6.r()[run_1e6.type == 0] ** 2) /
+                                       (G * run_1e6.data["cum_mass"][run_1e6.type == 0] * c))
+        compute_cumulative_mass(run_1e8)
+        run_1e8.data["gamma_d"] = ((run_1e8.ka_r + run_1e8.ka_s) * run_1e8.fradr *
+                                       (run_1e8.r()[run_1e8.type == 0] ** 2) /
+                                       (G * run_1e8.data["cum_mass"][run_1e8.type == 0] * c))
 
     # 2. Extract Opacity (to see where the dust starts)
     # This helps correlate error with the dust formation region
