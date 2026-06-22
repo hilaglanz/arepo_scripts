@@ -35,7 +35,7 @@ class UnitName:
 basic_units = {"rho":UnitConversion(r'$g/cm^3$'), "temp":UnitConversion("K"), "vel":UnitConversion("$cm/s$"),
                "mass":UnitConversion("g"), "time":UnitConversion("s"), "length": UnitConversion("cm"),
                "vol": UnitConversion(r"$cm^3$"), "acce":UnitConversion("$cm/s^2$"), "pres":UnitConversion("Ba"),
-               "force":UnitConversion("dyne"),
+               "force":UnitConversion("dyne"), "ka": UnitConversion((r"$cm^2 / g$")),
                "u":UnitConversion("erg"), "ang_mom": UnitConversion(r"$cm^2 / s$") ,"none": UnitConversion("")}
 
 name_and_units = {"rho":UnitName(r'$\rho$',"rho"), "temp":UnitName("Temperature","temp"),
@@ -44,7 +44,7 @@ name_and_units = {"rho":UnitName(r'$\rho$',"rho"), "temp":UnitName("Temperature"
                   "time":UnitName("Time", "time"), "length": UnitName("Length", "length"),
                   "pos":UnitName("Position", "length"), "vol": UnitName("Volume","vol"),
                   "acce":UnitName("Acceleration", "acce"), "pres": UnitName("Pressure", "pres"),
-                  "force": UnitName("Force", "force"),
+                  "force": UnitName("Force", "force"), "ka": UnitName("Opacity", "ka"),
                   "u": UnitName("Energy","u"), "entr": UnitName("Entropy", "none")}
 def add_name_and_unit(value, name, unit):
     if value not in name_and_units.keys():
@@ -411,11 +411,15 @@ def calculate_label_and_value(loaded_snap, value, relative_to_sink_id, central_i
         if "cum_mass" not in loaded_snap.data:
             calculate_label_and_value(loaded_snap, value="cum_mass", relative_to_sink_id=relative_to_sink_id,
                                       central_id=central_id, center=center, species_file=species_file)
-        loaded_snap.data["gamma_d"] = (loaded_snap.ka_r * loaded_snap.fradr *
+        loaded_snap.data["gamma_d"] = ((loaded_snap.ka_r + loaded_snap.ka_s) * loaded_snap.fradr *
                                        (loaded_snap.r(center)[loaded_snap.type == 0] ** 2) /
                                        (G * loaded_snap.data["cum_mass"][loaded_snap.type == 0] * c))
 
         add_name_and_unit(value, r"$\Gamma_d$", "none")
+
+    if value=="ka_t":
+        loaded_snap.data["ka_t"] = loaded_snap.ka_r + loaded_snap.ka_s
+        add_name_and_unit(value, r"$\kappa_r + \kappa_s$", "ka")
 
     if "vort" in value:
         loaded_snap.data['vort_x'] = loaded_snap.data["vort"][:, 0]
