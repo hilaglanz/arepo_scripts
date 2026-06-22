@@ -35,6 +35,10 @@ def compare_tolerance(snapshot_num, value="ka_r", output1="output-6", output2="o
     v_1e8 /= 10**5
     v_1e6 /= 10**5
 
+    if value == "ka_t":
+        run_1e6.data["ka_t"] = run_1e6.data["ka_r"] + run_1e6.data["ka_s"]
+        run_1e8.data["ka_t"] = run_1e8.data["ka_r"] + run_1e8.data["ka_s"]
+
     # 2. Extract Opacity (to see where the dust starts)
     # This helps correlate error with the dust formation region
     prof_value = run_1e8.get_radprof(value, nshells=dynamic_nshells, dr=dr_val)
