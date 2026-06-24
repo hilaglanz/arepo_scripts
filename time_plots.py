@@ -102,10 +102,10 @@ def calculate_value(snapshot, value, sink_value=False, sink_id=0, ind=[], center
         return total_ke
 
     if value=="mass_loss_rate":
-        r = snapshot.r()
+        r = snapshot.r()[s.type==0]
         dr = (3000-2000) * rsol
         snapshot.computeValueGas("vr")
-        mask = (snapshot.type ==0) & (r >= 2000 * rsol) & (r <= 3000 * rsol) & (snapshot.vr > 0)
+        mask = (r >= 2000 * rsol) & (r <= 3000 * rsol) & (snapshot.vr > 0)
         masses_in_shell = snapshot.mass[mask]
         vr_in_shell = snapshot.vr[mask]
         mass_loss_rate_cgs = (masses_in_shell * vr_in_shell).sum() / dr
