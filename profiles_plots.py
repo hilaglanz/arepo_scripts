@@ -123,7 +123,7 @@ def compute_unbounded_mass(s):
 def plot_profiles(output_dir, snapshot_name, plotting_dir, testing_value="rho", snapshot_number_array=[0, 8, 10],
                   center=False, log=True, new_fig=True, around_objects=False, around_density_peak=False,
                   line_profile=False, motion_axis=0, object_num=0, output_txt_files=False, relative_to_sink=False,
-                  max_distance=None, central_id=None):
+                  max_distance=None, central_id=None, time_average=False):
     if not os.path.exists(plotting_dir):
         os.mkdir(plotting_dir)
 
@@ -133,30 +133,82 @@ def plot_profiles(output_dir, snapshot_name, plotting_dir, testing_value="rho", 
     line_colors = pylab.rcParams['axes.prop_cycle'].by_key()['color']
     labels = []
     suffix = ""
-    for index, snapshot_number in enumerate(snapshot_number_array):
-        if line_profile:
-            p, s, suffix, testing_value = get_line_profile_for_snapshot(around_density_peak, around_objects, center,
-                                                                          motion_axis, object_num, output_dir,
-                                                                          snapshot_name, snapshot_number, testing_value,
-                                                                        relative_to_sink, max_distance=max_distance,
-                                                                        central_id=central_id)
-            suffix += "_line_" + str(motion_axis)
-        else:
-            p, s, suffix, testing_value = get_radial_profile_for_snapshot(around_density_peak, around_objects, center,
-                                                                      motion_axis, object_num, output_dir,
-                                                                      snapshot_name, snapshot_number, testing_value,
-                                                                          relative_to_sink, max_distance=max_distance,
-                                                                          central_id=central_id)
+
+    if time_average:
+        print(f"Calculating time-averaged profile across {len(snapshot_number_array)} snapshots...")
+        all_vals = []
+        r_common = None
+
+        for index, snapshot_number in enumerate(snapshot_number_array):
+            if line_profile:
+                p, s, suffix, testing_value = get_line_profile_for_snapshot(around_density_peak, around_objects, center,
+                                                                            motion_axis, object_num, output_dir,
+                                                                            snapshot_name, snapshot_number,
+                                                                            testing_value,
+                                                                            relative_to_sink, max_distance=max_distance,
+                                                                            central_id=central_id)
+                suffix += "_line_" + str(motion_axis)
+            else:
+                p, s, suffix, testing_value = get_radial_profile_for_snapshot(around_density_peak, around_objects,
+                                                                              center,
+                                                                              motion_axis, object_num, output_dir,
+                                                                              snapshot_name, snapshot_number,
+                                                                              testing_value,
+                                                                              relative_to_sink,
+                                                                              max_distance=max_distance,
+                                                                              central_id=central_id)
+
+            # Use the first snapshot's radial bins as the common grid
+            if r_common is None:
+                r_common = p[1, :]
+
+            # Interpolate onto the common grid in case dynamic box expansion shifts 'dr' slightly
+            interp_val = np.interp(r_common, p[1, :], p[0, :])
+            all_vals.append(interp_val)
+
+        # Average the data and rebuild the 'p' array
+        mean_vals = np.mean(all_vals, axis=0)
+        p_mean = np.row_stack((mean_vals, r_common))
 
         if output_txt_files:
-            write_txt_file(p, plotting_dir, snapshot_number, s.time, suffix, testing_value)
+            write_txt_file(p_mean, plotting_dir, f"{snapshot_number_array[0]}_to_{snapshot_number_array[-1]}",
+                           "time_avg", suffix, testing_value)
 
-        plot_to_figure(index, line_colors, log, p, s)
-        labels.append("snap " + str(snapshot_number) + "," + str(round(s.time, 2)) + " [s]")
-    if len(snapshot_number_array) > 1:
+        plot_to_figure(0, line_colors, log, p_mean, s)
+        labels.append(f"Time-Avg Snaps {snapshot_number_array[0]}-{snapshot_number_array[-1]}")
+
+        filename = plotting_dir + "/" + testing_value + (f"_time_avg_profile_{snapshot_number_array[0]}_to_"
+                                                         f"{snapshot_number_array[-1]}.png")
+
+    else:
+        for index, snapshot_number in enumerate(snapshot_number_array):
+            if line_profile:
+                p, s, suffix, testing_value = get_line_profile_for_snapshot(around_density_peak, around_objects, center,
+                                                                              motion_axis, object_num, output_dir,
+                                                                              snapshot_name, snapshot_number, testing_value,
+                                                                            relative_to_sink, max_distance=max_distance,
+                                                                            central_id=central_id)
+                suffix += "_line_" + str(motion_axis)
+            else:
+                p, s, suffix, testing_value = get_radial_profile_for_snapshot(around_density_peak, around_objects, center,
+                                                                          motion_axis, object_num, output_dir,
+                                                                          snapshot_name, snapshot_number, testing_value,
+                                                                              relative_to_sink, max_distance=max_distance,
+                                                                              central_id=central_id)
+
+            if output_txt_files:
+                write_txt_file(p, plotting_dir, snapshot_number, s.time, suffix, testing_value)
+
+            plot_to_figure(index, line_colors, log, p, s)
+            labels.append("snap " + str(snapshot_number) + "," + str(round(s.time, 2)) + " [s]")
+
+        filename = plotting_dir + "/" + testing_value + "_profile_" + suffix + "_".join([str(snap_num) for snap_num
+                                                                                         in
+                                                                                         snapshot_number_array]) + ".png"
+
+    if len(snapshot_number_array) > 1 or time_average:
         legend(labels)
-    filename = plotting_dir + "/" + testing_value + "_profile_" + suffix + "_".join([str(snap_num) for snap_num
-                                                                                     in snapshot_number_array]) + ".png"
+
     print("saving to: ", filename)
     savefig(filename)
     print("saved fig")
@@ -491,6 +543,9 @@ def InitParser():
     parser.add_argument('--max_distance', type=float,  help='radius around the object of interest to calculate for',
                         default=None)
     parser.add_argument('--central_id', type=int, help='id of the cell to centeralize around', default=None)
+    parser.add_argument('--time_average', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
+                        help='Average the profiles over all provided snapshot numbers',
+                        default=False)
 
     return parser
 
@@ -507,17 +562,17 @@ if __name__ == "__main__":
                       around_objects=args.around_objects, motion_axis=args.motion_axis,
                       around_density_peak=args.around_density_peak, line_profile=args.line_profile, object_num=1,
                       output_txt_files=args.output_txt_files, relative_to_sink=args.relative_to_sink,
-                      max_distance=args.max_distance, central_id=args.central_id)
+                      max_distance=args.max_distance, central_id=args.central_id, time_average=args.time_average)
         plot_profiles(output_dir=args.output_dir, snapshot_name=args.snapshot_name, plotting_dir=args.plotting_dir,
                       testing_value=args.value, snapshot_number_array=args.snapshot_nums, log=args.logplot,
                       around_objects=args.around_objects, motion_axis=args.motion_axis,
                       around_density_peak=args.around_density_peak, line_profile=args.line_profile, object_num=2,
                       output_txt_files=args.output_txt_files, new_fig=True,relative_to_sink=args.relative_to_sink,
-                      max_distance=args.max_distance, central_id=args.central_id)
+                      max_distance=args.max_distance, central_id=args.central_id, time_average=args.time_average)
     else:
         plot_profiles(output_dir=args.output_dir, snapshot_name=args.snapshot_name, plotting_dir=args.plotting_dir,
                       testing_value=args.value, snapshot_number_array=args.snapshot_nums, log=args.logplot,
                       around_objects=args.around_objects, motion_axis=args.motion_axis,
                       around_density_peak=args.around_density_peak,  line_profile=args.line_profile,
                       output_txt_files=args.output_txt_files, relative_to_sink=args.relative_to_sink,
-                      max_distance=args.max_distance, central_id=args.central_id)
+                      max_distance=args.max_distance, central_id=args.central_id, time_average=args.time_average)
