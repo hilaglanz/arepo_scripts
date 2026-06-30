@@ -98,7 +98,8 @@ def compute_value(s, testing_value, center=None):
             s.data["entr"] = s.data["pres"] / s.data["rho"] ** s.config["GAMMA"]
 
     if testing_value == "dx":
-        s.data["dx"] = (s.mass / s.rho) ** (1.0 / 3.0)
+        n_gas = len(s.rho)
+        s.data["dx"] = (s.mass[:n_gas] / s.rho) ** (1.0 / 3.0)
 
     if testing_value == "unbounded_mass":
         compute_unbounded_mass(s)
