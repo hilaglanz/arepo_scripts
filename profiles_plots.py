@@ -123,7 +123,7 @@ def compute_unbounded_mass(s):
 def plot_profiles(output_dir, snapshot_name, plotting_dir, testing_value="rho", snapshot_number_array=[0, 8, 10],
                   center=False, log=True, new_fig=True, around_objects=False, around_density_peak=False,
                   line_profile=False, motion_axis=0, object_num=0, output_txt_files=False, relative_to_sink=False,
-                  max_distance=None, central_id=None, time_average=False):
+                  max_distance=None, central_id=None, time_average=False, nshells=200):
     if not os.path.exists(plotting_dir):
         os.mkdir(plotting_dir)
 
@@ -156,7 +156,7 @@ def plot_profiles(output_dir, snapshot_name, plotting_dir, testing_value="rho", 
                                                                               testing_value,
                                                                               relative_to_sink,
                                                                               max_distance=max_distance,
-                                                                              central_id=central_id)
+                                                                              central_id=central_id, nshells=nshells)
 
             # Use the first snapshot's radial bins as the common grid
             if r_common is None:
@@ -216,7 +216,7 @@ def plot_profiles(output_dir, snapshot_name, plotting_dir, testing_value="rho", 
 
 def get_radial_profile_for_snapshot(around_density_peak, around_objects, center, motion_axis, object_num, output_dir,
                                     snapshot_name, snapshot_number, testing_value, relative_to_sink=False,
-                                    max_distance=None, central_id=None):
+                                    max_distance=None, central_id=None, nshells=200):
     suffix = ""
     if around_objects:
         s, cell_indices, center, suffix = get_relevant_plotting_parameters_around_object(around_density_peak,
@@ -252,7 +252,7 @@ def get_radial_profile_for_snapshot(around_density_peak, around_objects, center,
         sorted_ind = np.argsort(distances)
         p = np.row_stack((values[sorted_ind], distances[sorted_ind]))
     else:
-        shells = 200
+        shells = nshells
         if "cum_" in testing_value:
             shells = ceil(s.nparticlesall[0]/100)
         p = plot_snapshot_cells_around_center(cell_indices, center, s, testing_value,shells=shells)
@@ -546,6 +546,7 @@ def InitParser():
     parser.add_argument('--time_average', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
                         help='Average the profiles over all provided snapshot numbers',
                         default=False)
+    parser.add_argument('--nshells', type=int, help='Number of radial bins/shells to use', default=200)
 
     return parser
 
@@ -562,17 +563,20 @@ if __name__ == "__main__":
                       around_objects=args.around_objects, motion_axis=args.motion_axis,
                       around_density_peak=args.around_density_peak, line_profile=args.line_profile, object_num=1,
                       output_txt_files=args.output_txt_files, relative_to_sink=args.relative_to_sink,
-                      max_distance=args.max_distance, central_id=args.central_id, time_average=args.time_average)
+                      max_distance=args.max_distance, central_id=args.central_id, time_average=args.time_average,
+                      nshells=args.nshells)
         plot_profiles(output_dir=args.output_dir, snapshot_name=args.snapshot_name, plotting_dir=args.plotting_dir,
                       testing_value=args.value, snapshot_number_array=args.snapshot_nums, log=args.logplot,
                       around_objects=args.around_objects, motion_axis=args.motion_axis,
                       around_density_peak=args.around_density_peak, line_profile=args.line_profile, object_num=2,
                       output_txt_files=args.output_txt_files, new_fig=True,relative_to_sink=args.relative_to_sink,
-                      max_distance=args.max_distance, central_id=args.central_id, time_average=args.time_average)
+                      max_distance=args.max_distance, central_id=args.central_id, time_average=args.time_average,
+                      nshells=args.nshells)
     else:
         plot_profiles(output_dir=args.output_dir, snapshot_name=args.snapshot_name, plotting_dir=args.plotting_dir,
                       testing_value=args.value, snapshot_number_array=args.snapshot_nums, log=args.logplot,
                       around_objects=args.around_objects, motion_axis=args.motion_axis,
                       around_density_peak=args.around_density_peak,  line_profile=args.line_profile,
                       output_txt_files=args.output_txt_files, relative_to_sink=args.relative_to_sink,
-                      max_distance=args.max_distance, central_id=args.central_id, time_average=args.time_average)
+                      max_distance=args.max_distance, central_id=args.central_id, time_average=args.time_average,
+                      nshells=args.nshells)
