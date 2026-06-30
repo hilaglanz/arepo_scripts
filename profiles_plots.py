@@ -97,6 +97,9 @@ def compute_value(s, testing_value, center=None):
         if "GAMMA" in s.config.keys():
             s.data["entr"] = s.data["pres"] / s.data["rho"] ** s.config["GAMMA"]
 
+    if testing_value == "dx":
+        s.data["dx"] = (s.mass / s.rho) ** (1.0 / 3.0)
+
     if testing_value == "unbounded_mass":
         compute_unbounded_mass(s)
 
