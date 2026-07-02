@@ -191,7 +191,7 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
                       unit_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
                       newfig=True, axes=[0,1], modified_units = False, ignore_types=[], colorbar=True,
                       plot_xlabel=True, plot_ylabel=True, factor_value=1.0, units_value=None,
-                      factor_axes=1.0, units_axes=None, shift_axes_center=False,
+                      factor_axes_length=1.0, units_axes=None, shift_axes_center=False,
                       saving_file=None,
                       contour=False, species_file="../species55.txt"):
 
@@ -265,7 +265,7 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
     change_ticks(xaxis=False)
     '''
     original_length_unit = basic_units["length"].unit
-    format_plot_axes(factor_axes, shift_axes_center, units_axes)
+    format_plot_axes(factor_axes_length, shift_axes_center, units_axes)
 
     if plot_xlabel:
         xlabel(xlab + ' [' + basic_units["length"].unit + ']', loc="left")
@@ -275,8 +275,8 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
     basic_units["length"].unit = original_length_unit
 
 
-def format_plot_axes(factor_axes: float, shift_axes_center: bool, units_axes):
-    if shift_axes_center or factor_axes != 1.0:
+def format_plot_axes(factor_axes_length: float, shift_axes_center: bool, units_axes):
+    if shift_axes_center or factor_axes_length != 1.0:
         ax = pylab.gca()
 
         # Dynamically find the center of the plotted field of view
@@ -285,12 +285,12 @@ def format_plot_axes(factor_axes: float, shift_axes_center: bool, units_axes):
 
         def x_formatter(x, pos):
             val = x - x_center if shift_axes_center else x
-            val *= factor_axes
+            val *= factor_axes_length
             return f"{val:g}"
 
         def y_formatter(y, pos):
             val = y - y_center if shift_axes_center else y
-            val *= factor_axes
+            val *= factor_axes_length
             return f"{val:g}"
 
         # Apply the new format to the axes
@@ -749,7 +749,7 @@ def plot_range(value=['rho'], snapshotDir="output", plottingDir="plots", firstSn
                additional_points_size=30, additional_points_shape='X', additional_points_color='w', units_length='cm',
                units_velocity="$cm/s$", units_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
                axes_array=[[0, 1]], ignore_types=[], per_value_evolution=False, relative_to_motion=False,
-               factor_value=[1.0], units_value=[None], factor_axes=[1.0], units_axes=[None], shift_axes_center=False,
+               factor_value=[1.0], units_value=[None], factor_axes_length=[1.0], units_axes=[None], shift_axes_center=False,
                contour=False, snapshots_list=None,
                species_file="../species55.txt"
                , lazy_load=True):
@@ -799,7 +799,7 @@ def plot_range(value=['rho'], snapshotDir="output", plottingDir="plots", firstSn
                               plot_velocities=plot_velocities, plot_bfld=plot_bfld, axes=get_single_value(axes_array),
                               modified_units=modified_units, ignore_types=ignore_types,
                               factor_value=factor_value[0], units_value=units_value[0],
-                              factor_axes=factor_axes[0], units_axes=units_axes[0], shift_axes_center=shift_axes_center,
+                              factor_axes_length=factor_axes_length[0], units_axes=units_axes[0], shift_axes_center=shift_axes_center,
                               contour=contour, species_file=species_file, colorbar=False, newfig=False)
 
             regularize_time_units(loaded_snap)
@@ -858,7 +858,7 @@ def plot_range(value=['rho'], snapshotDir="output", plottingDir="plots", firstSn
                                   axes=get_single_value(axes_array, index), ignore_types=ignore_types,
                                   factor_value=factor_value[index % len(units_value)],
                                   units_value=units_value[index % len(units_value)],
-                                  factor_axes=factor_axes[index % len(factor_axes)],
+                                  factor_axes_length=factor_axes_length[index % len(factor_axes_length)],
                                   units_axes=units_axes[index % len(units_axes)],
                                   shift_axes_center=shift_axes_center,
                                   contour=contour,
@@ -944,7 +944,8 @@ def InitParser():
     parser.add_argument('--factor_value', nargs='+', type=float,  help='multiply value unit by this factor', default=[None])
     parser.add_argument('--units_value', nargs='+', type=str,  help='name of the value units', default=[None])
     parser.add_argument('--units_axes', nargs='+', type=str,  help='name of the axes units', default=[None])
-    parser.add_argument('--factor_axes', nargs='+', type=float,  help='multiply axes unit by this factor', default=[None])
+    parser.add_argument('--factor_axes_length', nargs='+', type=float,
+                        help='multiply axes unit by this factor according to the legnth units of the plot', default=[None])
     parser.add_argument('--shift_axes_center', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
                         help='put plot center at 0', default=False)
     parser.add_argument('--plot_contours', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
