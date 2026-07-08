@@ -269,7 +269,7 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
             # You can replace this logic with optical depth or your own specific definition
             dense_gas = np.where(loaded_snap.rho > 1e-8)[0]
             if len(dense_gas) > 0:
-                current_photo_radius = s.r()[dense_gas].max()
+                current_photo_radius = loaded_snap.r()[dense_gas].max()
             else:
                 current_photo_radius = 0  # Fallback
 
