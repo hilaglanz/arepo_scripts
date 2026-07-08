@@ -265,15 +265,51 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
         # DYNAMIC COMPUTATION: If the user passed -1, compute it for this specific snapshot
         if current_photo_radius < 0:
             print("computing photosphere according to density")
-            # Example dynamic calculation: find the maximum distance where density > 1e-8 g/cm^3
-            # You can replace this logic with optical depth or your own specific definition
-            dense_gas = np.where(loaded_snap.rho > 1e-8)[0]
-            if len(dense_gas) > 0:
-                current_photo_radius = loaded_snap.r()[dense_gas].max()
-            else:
-                current_photo_radius = 0  # Fallback
+            indgas = loaded_snap.type == 0
 
-            print(f"Dynamically computed photosphere radius: {current_photo_radius/rsol:e} rsun")
+            # 1. Get radii of all gas particles relative to the center
+            r_dist = np.sqrt(((loaded_snap.pos[indgas] - center) ** 2).sum(axis=1))
+
+            # 2. Extract rho and Rosseland mean opacity
+            rho = loaded_snap.rho[indgas]
+            # Assumes your opacity is loaded into the data dictionary
+            ka_r = loaded_snap.data['ka_r'][indgas]
+
+            # 3. Create radial bins (e.g., 500 shells from the center to the outermost particle)
+            rmax = r_dist.max()
+            num_bins = 500
+            rbins = np.linspace(0, rmax, num_bins)
+            dr = rbins[1] - rbins[0]  # Thickness of each shell
+
+            # 4. Digitize particles into their respective shells
+            bin_indices = np.digitize(r_dist, rbins)
+
+            tau = 0.0
+            found_photosphere = False
+
+            # 5. Integrate from the outside moving inwards
+            for i in range(num_bins - 1, 0, -1):
+                in_bin = (bin_indices == i)
+
+                if np.any(in_bin):
+                    # Average density and opacity in this shell
+                    mean_rho = np.mean(rho[in_bin])
+                    mean_kappa = np.mean(ka_r[in_bin])
+
+                    # d(tau) = kappa * rho * dr
+                    dtau = mean_kappa * mean_rho * dr
+                    tau += dtau
+
+                # Check if we hit the photosphere threshold
+                if tau >= (2.0 / 3.0):
+                    current_photo_radius = rbins[i]
+                    found_photosphere = True
+                    break
+
+            if not found_photosphere:
+                current_photo_radius = 0  # Fallback if the whole box is optically thin
+
+            print(f"Dynamically computed tau=2/3 Photosphere radius: {current_photo_radius/rsol :e} Rsun")
 
         if current_photo_radius > 0:
             # Scale the radius to match the plot's current length unit (e.g., Rsun)
