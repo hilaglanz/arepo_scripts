@@ -264,6 +264,7 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
         current_photo_radius = photosphere_radius
         # DYNAMIC COMPUTATION: If the user passed -1, compute it for this specific snapshot
         if current_photo_radius < 0:
+            print("computing photosphere according to density")
             # Example dynamic calculation: find the maximum distance where density > 1e-8 g/cm^3
             # You can replace this logic with optical depth or your own specific definition
             dense_gas = np.where(loaded_snap.rho > 1e-8)[0]
@@ -272,7 +273,7 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
             else:
                 current_photo_radius = 0  # Fallback
 
-            print(f"Dynamically computed photosphere radius: {current_photo_radius:e} cm")
+            print(f"Dynamically computed photosphere radius: {current_photo_radius/rsol:e} rsun")
 
         if current_photo_radius > 0:
             # Scale the radius to match the plot's current length unit (e.g., Rsun)
