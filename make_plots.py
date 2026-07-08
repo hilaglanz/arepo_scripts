@@ -193,7 +193,7 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
                       plot_xlabel=True, plot_ylabel=True, factor_value=1.0, units_value=None,
                       factor_axes_length=1.0, units_axes=None, shift_axes_center=False,
                       saving_file=None,
-                      contour=False, species_file="../species55.txt"):
+                      contour=False, photosphere_radius=None, species_file="../species55.txt"):
 
     if box == False:
         box = [loaded_snap.boxsize, loaded_snap.boxsize]
@@ -259,6 +259,34 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
                     gca().add_patch(circ)
 
                     save_scatter(axes, loaded_snap, point_pos, basic_units["length"].factor, saving_file)
+
+    if photosphere_radius is not None:
+        current_photo_radius = photosphere_radius
+        # DYNAMIC COMPUTATION: If the user passed -1, compute it for this specific snapshot
+        if current_photo_radius < 0:
+            # Example dynamic calculation: find the maximum distance where density > 1e-8 g/cm^3
+            # You can replace this logic with optical depth or your own specific definition
+            dense_gas = np.where(loaded_snap.rho > 1e-8)[0]
+            if len(dense_gas) > 0:
+                # Calculate distance of all dense gas from the center
+                r_dist = np.sqrt(((loaded_snap.pos[dense_gas] - center) ** 2).sum(axis=1))
+                current_photo_radius = r_dist.max()
+            else:
+                current_photo_radius = 0  # Fallback
+
+            print(f"Dynamically computed photosphere radius: {current_photo_radius:e} cm")
+
+        if current_photo_radius > 0:
+            # Scale the radius to match the plot's current length unit (e.g., Rsun)
+            radius_scaled = current_photo_radius * basic_units["length"].factor
+
+            # Create the dashed circle patch
+            circ = Circle((center[axes[0]], center[axes[1]]), radius_scaled,
+                          fill=False, color='gray', linestyle='dashed', linewidth=2.5)
+            # Add it to the plot
+            pylab.gca().add_patch(circ)
+            print(f"Plotted photosphere circle at radius {radius_scaled} (plot units)")
+
     '''
     regularize_length_units(max(box))
     change_ticks(xaxis=True)
@@ -784,7 +812,7 @@ def plot_range(value=['rho'], snapshotDir="output", plottingDir="plots", firstSn
                units_velocity="$cm/s$", units_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
                axes_array=[[0, 1]], ignore_types=[], per_value_evolution=False, relative_to_motion=False,
                factor_value=[1.0], units_value=[None], factor_axes_length=[1.0], units_axes=[None], shift_axes_center=False,
-               contour=False, snapshots_list=None,
+               contour=False, photosphere_radius=None, snapshots_list=None,
                species_file="../species55.txt"
                , lazy_load=True):
     if per_value_evolution:
@@ -834,7 +862,8 @@ def plot_range(value=['rho'], snapshotDir="output", plottingDir="plots", firstSn
                               modified_units=modified_units, ignore_types=ignore_types,
                               factor_value=factor_value[0], units_value=units_value[0],
                               factor_axes_length=factor_axes_length[0], units_axes=units_axes[0], shift_axes_center=shift_axes_center,
-                              contour=contour, species_file=species_file, colorbar=False, newfig=False)
+                              contour=contour, photosphere_radius=photosphere_radius,
+                              species_file=species_file, colorbar=False, newfig=False)
 
             regularize_time_units(loaded_snap)
             ax.set_title('time : {:.2g}'.format(loaded_snap.time * basic_units["time"].factor) +
@@ -985,6 +1014,8 @@ def InitParser():
     parser.add_argument('--plot_contours', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
                         help='should plot contours?',
                         default=False)
+    parser.add_argument('--photosphere_radius', type=float,
+                        help='radius of the photosphere in cm (or -1 to compute dynamically) None to not plot it', default=None)
     parser.add_argument('--snapshot_list', nargs='+', type=int,  help='list of snapshots to plot for '
                                                                       '(currently only for evolution)', default=[None])
     parser.add_argument('--species_file', type=str,  help='path to species file used in the simulation',
@@ -1041,4 +1072,5 @@ if __name__ == "__main__":
                factor_value=args.factor_value, units_value=args.units_value,
                factor_axes_length=args.factor_axes_length, units_axes=args.units_axes,
                shift_axes_center=args.shift_axes_center, contour=args.plot_contours,
+               photosphere_radius=args.photosphere_radius,
                snapshots_list=snapshots_list, species_file=args.species_file, lazy_load=args.lazy_load)
