@@ -114,7 +114,16 @@ def calculate_value(snapshot, value, sink_value=False, sink_id=0, ind=[], center
 
         return mass_loss_rate
 
-    if value == "grav_accel_on_core" or value == "core_com_offset":
+    if value in ("grav_accel_on_core", "core_com_offset",
+                 "grav_accel_on_core_x", "grav_accel_on_core_y", "grav_accel_on_core_z"):
+        # Direct-summation gravitational acceleration felt by the core
+        # particle (type==1) due to all gas cells (type==0), in cgs (cm/s^2).
+        # Also: offset between core position and gas center of mass (cm),
+        # via value=="core_com_offset"; and individual vector components
+        # via the _x/_y/_z suffixes, to track whether the acceleration
+        # DIRECTION is stable over time (fixed direction => systematic/
+        # numerical cause; wandering direction => consistent with genuine
+        # stochastic recoil from asymmetric mass ejection).
         indgas = snapshot.type == 0
         gas_pos = snapshot.pos[indgas].astype('f8')  # cm (cgs unit system)
         gas_mass = snapshot.mass[indgas].astype('f8')  # g
@@ -132,9 +141,17 @@ def calculate_value(snapshot, value, sink_value=False, sink_id=0, ind=[], center
 
         dr = gas_pos - core_pos[None, :]
         r2 = (dr * dr).sum(axis=1)
+        # avoid blow-up from any cell coincident with the core position
         r2[r2 == 0] = np.inf
         inv_r3 = r2 ** (-1.5)
         a_vec = G * (gas_mass[:, None] * dr * inv_r3[:, None]).sum(axis=0)
+
+        if value == "grav_accel_on_core_x":
+            return a_vec[0]
+        if value == "grav_accel_on_core_y":
+            return a_vec[1]
+        if value == "grav_accel_on_core_z":
+            return a_vec[2]
 
         return np.sqrt((a_vec ** 2).sum())
 
