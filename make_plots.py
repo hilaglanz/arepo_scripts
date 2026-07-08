@@ -5,7 +5,7 @@ import argparse
 import pickle
 import pylab
 from PIL import Image
-from matplotlib.ticker import FuncFormatter
+from matplotlib.ticker import FuncFormatter, MaxNLocator
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 from loadmodules import *
@@ -279,21 +279,55 @@ def format_plot_axes(factor_axes_length: float, shift_axes_center: bool, units_a
     if shift_axes_center or factor_axes_length != 1.0:
         ax = pylab.gca()
 
-        # Dynamically find the center of the plotted field of view
-        x_center = sum(ax.get_xlim()) / 2.0
-        y_center = sum(ax.get_ylim()) / 2.0
+        # 1. Get current viewport boundaries in original simulation units
+        xlim = ax.get_xlim()
+        ylim = ax.get_ylim()
 
+        # Dynamically find the center of the plotted field of view
+        x_center = sum(xlim) / 2.0 if shift_axes_center else 0.0
+        y_center = sum(ylim) / 2.0 if shift_axes_center else 0.0
+
+        # 2. Convert original boundaries to the new transformed unit space (e.g., Rsun)
+        new_xmin = (xlim[0] - x_center) * factor_axes_length
+        new_xmax = (xlim[1] - x_center) * factor_axes_length
+        new_ymin = (ylim[0] - y_center) * factor_axes_length
+        new_ymax = (ylim[1] - y_center) * factor_axes_length
+
+        # 3. Use MaxNLocator to automatically find "nice, clean, round" intervals on the Rsun scale
+        # symmetric=True forces 0 to be perfectly centered if the plot boundaries are symmetric
+        locator = MaxNLocator(nbins=7, symmetric=shift_axes_center)
+        new_xticks = locator.tick_values(new_xmin, new_xmax)
+        new_yticks = locator.tick_values(new_ymin, new_ymax)
+
+        # 4. Map those clean Rsun ticks back to original units, filtering out any out-of-bounds ticks
+        orig_xticks = []
+        for tick in new_xticks:
+            orig_val = (tick / factor_axes_length) + x_center
+            if min(xlim) <= orig_val <= max(xlim):
+                orig_xticks.append(orig_val)
+
+        orig_yticks = []
+        for tick in new_yticks:
+            orig_val = (tick / factor_axes_length) + y_center
+            if min(ylim) <= orig_val <= max(ylim):
+                orig_yticks.append(orig_val)
+
+        # 5. Tell Matplotlib to place ticks at these custom locations
+        ax.set_xticks(orig_xticks)
+        ax.set_yticks(orig_yticks)
+
+        # 6. Cleanly format the text, rounding off floating-point arithmetic noise (e.g., 1000.0000002 -> 1000)
         def x_formatter(x, pos):
             val = x - x_center if shift_axes_center else x
             val *= factor_axes_length
-            return f"{val:g}"
+            return f"{round(val, 4):g}"
 
         def y_formatter(y, pos):
             val = y - y_center if shift_axes_center else y
             val *= factor_axes_length
-            return f"{val:g}"
+            return f"{round(val, 4):g}"
 
-        # Apply the new format to the axes
+        # Apply the clean text formatting
         ax.xaxis.set_major_formatter(FuncFormatter(x_formatter))
         ax.yaxis.set_major_formatter(FuncFormatter(y_formatter))
 
