@@ -923,7 +923,7 @@ def plot_range(value=['rho'], snapshotDir="output", plottingDir="plots", firstSn
                                   factor_axes_length=factor_axes_length[index % len(factor_axes_length)],
                                   units_axes=units_axes[index % len(units_axes)],
                                   shift_axes_center=shift_axes_center,
-                                  contour=contour,
+                                  contour=contour, photosphere_radius=photosphere_radius,
                                   species_file=species_file, colorbar=False)
 
                 # --- INSET COLORBAR LOGIC PER SUBPLOT ---
