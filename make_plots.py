@@ -1004,5 +1004,7 @@ if __name__ == "__main__":
                units_length=args.units_length, units_velocity=args.units_velocity, units_density= args.units_density,
                plot_velocities=args.plot_velocities, plot_bfld= args.plot_bfld, axes_array=axes_array,
                ignore_types=args.ignore_types, per_value_evolution=args.plot_per_value_evolution,
-               factor_value=args.factor_value, units_value=args.units_value, contour=args.plot_contours,
+               factor_value=args.factor_value, units_value=args.units_value,
+               factor_axes_length=args.factor_axes_length, units_axes=args.units_axes,
+               shift_axes_center=args.shift_axes_center, contour=args.plot_contours,
                snapshots_list=snapshots_list, species_file=args.species_file, lazy_load=args.lazy_load)
