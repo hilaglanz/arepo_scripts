@@ -114,6 +114,30 @@ def calculate_value(snapshot, value, sink_value=False, sink_id=0, ind=[], center
 
         return mass_loss_rate
 
+    if value == "grav_accel_on_core" or value == "core_com_offset":
+        indgas = snapshot.type == 0
+        gas_pos = snapshot.pos[indgas].astype('f8')  # cm (cgs unit system)
+        gas_mass = snapshot.mass[indgas].astype('f8')  # g
+
+        core_idxs, = np.where(snapshot.type == 1)
+        if len(core_idxs) == 0:
+            raise RuntimeError("No core particle (type==1) found in this snapshot")
+        core_idx = core_idxs[0]
+        core_pos = snapshot.pos[core_idx].astype('f8')  # cm
+
+        if value == "core_com_offset":
+            gas_com = (gas_mass[:, None] * gas_pos).sum(axis=0) / gas_mass.sum()
+            offset = gas_com - core_pos
+            return np.sqrt((offset ** 2).sum())
+
+        dr = gas_pos - core_pos[None, :]
+        r2 = (dr * dr).sum(axis=1)
+        r2[r2 == 0] = np.inf
+        inv_r3 = r2 ** (-1.5)
+        a_vec = G * (gas_mass[:, None] * dr * inv_r3[:, None]).sum(axis=0)
+
+        return np.sqrt((a_vec ** 2).sum())
+
     if sink_value:
         sink_idks = np.where(snapshot.type == 5)
         sink_idk = sink_idks[0][sink_id]
