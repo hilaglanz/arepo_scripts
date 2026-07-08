@@ -139,10 +139,16 @@ def calculate_value(snapshot, value, sink_value=False, sink_id=0, ind=[], center
             offset = gas_com - core_pos
             return np.sqrt((offset ** 2).sum())
 
+        # Softening to match AREPO's actual gravity solver: without this, a single
+        # gas cell passing close to the core (entirely normal in a dynamic run)
+        # can dominate the unsoftened 1/r^2 sum and produce huge, sign-flipping,
+        # non-physical spikes -- AREPO itself never lets this happen because its
+        # gravity solver always applies softening. From param-dust-lr-core.txt:
+        # SofteningComovingType1 (core) = 1.87322595e+11 cm. Using that directly
+        # as a Plummer-equivalent softening length here.
+        SOFTENING_CM = 1.87322595e+11
         dr = gas_pos - core_pos[None, :]
-        r2 = (dr * dr).sum(axis=1)
-        # avoid blow-up from any cell coincident with the core position
-        r2[r2 == 0] = np.inf
+        r2 = (dr * dr).sum(axis=1) + SOFTENING_CM ** 2
         inv_r3 = r2 ** (-1.5)
         a_vec = G * (gas_mass[:, None] * dr * inv_r3[:, None]).sum(axis=0)
 
