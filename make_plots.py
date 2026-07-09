@@ -265,51 +265,90 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
         # DYNAMIC COMPUTATION: If the user passed -1, compute it for this specific snapshot
         if current_photo_radius < 0:
             print("computing photosphere according to optical depth")
-            indgas = loaded_snap.type == 0
+            # DYNAMIC ASYMMETRIC PHOTOSPHERE COMPUTATION
+            if current_photo_radius < 0:
+                indgas = loaded_snap.type == 0
 
-            # 1. Get radii of all gas particles relative to the center
-            r_dist = np.sqrt(((loaded_snap.pos[indgas] - center) ** 2).sum(axis=1))
+                # 1. Identify plot axes and the perpendicular "slice" axis
+                ax_x, ax_y = axes[0], axes[1]
+                ax_z = 3 - (ax_x + ax_y)  # Magic math to find the 3rd axis (0, 1, 2)
 
-            # 2. Extract rho and Rosseland mean opacity
-            rho = loaded_snap.rho
-            # Assumes your opacity is loaded into the data dictionary
-            ka_r = loaded_snap.data['ka_r']
+                # 2. Get coordinates relative to the center
+                dx = loaded_snap.pos[indgas, ax_x] - center[ax_x]
+                dy = loaded_snap.pos[indgas, ax_y] - center[ax_y]
+                dz = loaded_snap.pos[indgas, ax_z] - center[ax_z]
 
-            # 3. Create radial bins (e.g., 500 shells from the center to the outermost particle)
-            rmax = r_dist.max()
-            num_bins = 500
-            rbins = np.linspace(0, rmax, num_bins)
-            dr = rbins[1] - rbins[0]  # Thickness of each shell
+                r_dist = np.sqrt(dx ** 2 + dy ** 2)
+                phi = np.arctan2(dy, dx)  # Angle from -pi to pi
 
-            # 4. Digitize particles into their respective shells
-            bin_indices = np.digitize(r_dist, rbins)
+                # 3. Filter for particles close to the plot plane
+                # (So dense gas high above the pole doesn't ruin the equator's calculation)
+                rmax = r_dist.max()
+                slice_mask = np.abs(dz) < (0.05 * rmax)  # only look at a 5% thickness slice
 
-            tau = 0.0
-            found_photosphere = False
+                r_slice = r_dist[slice_mask]
+                phi_slice = phi[slice_mask]
+                rho_slice = loaded_snap.rho[slice_mask]
+                ka_r_slice = loaded_snap.data['ka_r'][slice_mask]
 
-            # 5. Integrate from the outside moving inwards
-            for i in range(num_bins - 1, 0, -1):
-                in_bin = (bin_indices == i)
+                # 4. Setup angular (azimuthal) and radial bins
+                num_phi_bins = 100  # Shoot 100 rays in a circle
+                num_r_bins = 300
 
-                if np.any(in_bin):
-                    # Average density and opacity in this shell
-                    mean_rho = np.mean(rho[in_bin])
-                    mean_kappa = np.mean(ka_r[in_bin])
+                phi_bins = np.linspace(-np.pi, np.pi, num_phi_bins + 1)
+                r_bins = np.linspace(0, rmax, num_r_bins)
+                dr = r_bins[1] - r_bins[0]
 
-                    # d(tau) = kappa * rho * dr
-                    dtau = mean_kappa * mean_rho * dr
-                    tau += dtau
+                photo_x = []
+                photo_y = []
 
-                # Check if we hit the photosphere threshold
-                if tau >= (2.0 / 3.0):
-                    current_photo_radius = rbins[i]
-                    found_photosphere = True
-                    break
+                # 5. Ray-trace inwards for each of the 100 angles
+                for i in range(num_phi_bins):
+                    wedge_mask = (phi_slice >= phi_bins[i]) & (phi_slice < phi_bins[i + 1])
 
-            if not found_photosphere:
-                current_photo_radius = 0  # Fallback if the whole box is optically thin
+                    r_wedge = r_slice[wedge_mask]
+                    rho_wedge = rho_slice[wedge_mask]
+                    ka_r_wedge = ka_r_slice[wedge_mask]
 
-            print(f"Dynamically computed tau=2/3 Photosphere radius: {current_photo_radius/rsol :e} Rsun")
+                    # Sort particles in this angular wedge into radial bins
+                    bin_indices = np.digitize(r_wedge, r_bins)
+
+                    tau = 0.0
+                    photo_r = 0.0
+
+                    # Integrate outside-in for this specific angle
+                    for j in range(num_r_bins - 1, 0, -1):
+                        in_bin = (bin_indices == j)
+
+                        if np.any(in_bin):
+                            # Local average in this specific (r, phi) coordinate
+                            mean_rho = np.mean(rho_wedge[in_bin])
+                            mean_kappa = np.mean(ka_r_wedge[in_bin])
+
+                            tau += mean_kappa * mean_rho * dr
+
+                        if tau >= (2.0 / 3.0):
+                            photo_r = r_bins[j]
+                            break
+
+                    # Convert this specific radius back to Cartesian coordinates
+                    mid_phi = 0.5 * (phi_bins[i] + phi_bins[i + 1])
+                    radius_scaled = photo_r * basic_units["length"].factor
+
+                    photo_x.append(center[ax_x] + radius_scaled * np.cos(mid_phi))
+                    photo_y.append(center[ax_y] + radius_scaled * np.sin(mid_phi))
+
+                # 6. Close the loop by connecting the last point to the first point
+                photo_x.append(photo_x[0])
+                photo_y.append(photo_y[0])
+
+                pylab.plot(photo_x, photo_y, color='gray', linestyle='dashed', linewidth=2.5)
+                print("Plotted asymmetric photosphere contour.")
+
+                # Set to 0 so the old perfect circle code (if still there) doesn't run on top of it
+                current_photo_radius = 0
+
+            #print(f"Dynamically computed tau=2/3 Photosphere radius: {current_photo_radius/rsol :e} Rsun")
 
         if current_photo_radius > 0:
             # Scale the radius to match the plot's current length unit (e.g., Rsun)
