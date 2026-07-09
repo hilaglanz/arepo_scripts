@@ -264,16 +264,16 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
         current_photo_radius = photosphere_radius
         # DYNAMIC COMPUTATION: If the user passed -1, compute it for this specific snapshot
         if current_photo_radius < 0:
-            print("computing photosphere according to density")
+            print("computing photosphere according to optical depth")
             indgas = loaded_snap.type == 0
 
             # 1. Get radii of all gas particles relative to the center
             r_dist = np.sqrt(((loaded_snap.pos[indgas] - center) ** 2).sum(axis=1))
 
             # 2. Extract rho and Rosseland mean opacity
-            rho = loaded_snap.rho[indgas]
+            rho = loaded_snap.rho
             # Assumes your opacity is loaded into the data dictionary
-            ka_r = loaded_snap.data['ka_r'][indgas]
+            ka_r = loaded_snap.data['ka_r']
 
             # 3. Create radial bins (e.g., 500 shells from the center to the outermost particle)
             rmax = r_dist.max()
