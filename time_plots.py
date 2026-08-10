@@ -101,18 +101,33 @@ def calculate_value(snapshot, value, sink_value=False, sink_id=0, ind=[], center
         total_ke = 0.5 * (mass * v_squared).sum()
         return total_ke
 
-    if value=="mass_loss_rate":
+    if "mass_loss_rate" in value:
+        try:
+            splitted=value.split("_")
+            inner_shell = float(splitted[-2])
+            outer_shell = float(splitted[-1])
+        except ValueError:
+            print("no shells provided, using 2000 - 3000 Rsun")
+            inner_shell = 2000
+            outer_shell = 3000
+        sort_indices = np.argsort(snapshot.r(center)[ind])
         indgas = snapshot.type == 0
         r = snapshot.r()[indgas]
-        dr = (3000-2000) * rsol
+        dr = (outer_shell-inner_shell) * rsol
         snapshot.computeValueGas("vr")
-        mask = (r >= 2000 * rsol) & (r <= 3000 * rsol) & (snapshot.vr > 0)
+        mask = (r >= inner_shell * rsol) & (r <= outer_shell * rsol) & (snapshot.vr > 0)
         masses_in_shell = snapshot.mass[indgas][mask]
         vr_in_shell = snapshot.vr[mask]
         mass_loss_rate_cgs = (masses_in_shell * vr_in_shell).sum() / dr
         mass_loss_rate = mass_loss_rate_cgs / (msol/yr)
 
         return mass_loss_rate
+
+    if value=="unbound_mass":
+        return snapshot.calculateUnboundMass()
+
+    if value =="unbound_mass_internal":
+        return snapshot.calculateUnboundMassInternal()
 
     if value in ("grav_accel_on_core", "core_com_offset",
                  "grav_accel_on_core_x", "grav_accel_on_core_y", "grav_accel_on_core_z"):
