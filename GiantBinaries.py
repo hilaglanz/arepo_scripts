@@ -80,4 +80,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     AddPointMassToFile(args.giant_snapshot_file, new_file_name=args.ic_file_name,
-                           separation=args.orbital_separation, point_mass=args.point_mass * msol, rlof_factor=arg.rlof_factor)
+                           separation=args.orbital_separation, point_mass=args.point_mass * msol, rlof_factor=args.rlof_factor)
