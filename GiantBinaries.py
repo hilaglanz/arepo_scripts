@@ -54,6 +54,7 @@ def AddPointMassToFile(snapshot_file, new_file_name, point_mass, separation, rlo
     print("Roche factor = ", rlof_factor)
     if separation > new_size/100:
         new_size *= 100
+    rlof_factor *= (giant.get_radius()/giant_radius)
     binary = MultipleSystem(newsize=new_size,
                             reset_dm_ids=True, ndir=32, grid_xnuc=snapshot.data['xnuc'][0],
                             grid_rho=min([snapshot.rho.min(), 1e-20]),
