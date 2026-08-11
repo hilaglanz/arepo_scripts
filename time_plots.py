@@ -124,10 +124,10 @@ def calculate_value(snapshot, value, sink_value=False, sink_id=0, ind=[], center
         return mass_loss_rate
 
     if value=="unbound_mass":
-        return snapshot.calculateUnboundMass()
+        return snapshot.computeUnboundMass()
 
     if value =="unbound_mass_internal":
-        return snapshot.calculateUnboundMassInternal()
+        return snapshot.computeUnboundMassInternal()
 
     if value in ("grav_accel_on_core", "core_com_offset",
                  "grav_accel_on_core_x", "grav_accel_on_core_y", "grav_accel_on_core_z"):
