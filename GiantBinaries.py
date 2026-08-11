@@ -32,7 +32,7 @@ def copy_old_data(snapshot):
 
     return data
 
-def AddPointMassToFile(snapshot_file, new_file_name, point_mass, separation, rlof_factor=1.0):
+def AddPointMassToFile(snapshot_file, new_file_name, point_mass, separation, rlof_factor=1.0, giant_radius=None):
     snapshot=gadget_readsnapname(snapshot_file)
     new_size = snapshot.boxsize
 
@@ -40,7 +40,9 @@ def AddPointMassToFile(snapshot_file, new_file_name, point_mass, separation, rlo
     companion = PointMassComponent(mass=point_mass)
     companion.data['type'] = [5]
     q = giant.mass / point_mass
-    current_rlof = (giant.get_radius() / rsol) / roche_distance(q)
+    if giant_radius is None:
+        giant_radius = giant.get_radius() / rsol
+    current_rlof = (giant_radius / rsol) / roche_distance(q)
     print("current Roche lobe size= ", current_rlof, " Rsun")
     if separation is None:
         print("calculating separation from Roche Lobe")
@@ -67,6 +69,8 @@ def InitParser():
                                                                   'should also load type 1 or 5', default=[0,1])
     parser.add_argument('--orbital_separation', type=float,
                         help='initial binary separation in Rsun', default=None)
+    parser.add_argument('--giant_radius', type=float,
+                        help='initial giant radius in Rsun', default=None)
     parser.add_argument('--point_mass', type=float, help='new object mass in msun', default=1)
     parser.add_argument('--rlof_factor', type=float, help='if relative to RL, by what factor?', default=1)
     parser.add_argument('--ic_file_name', type=str, help='path to save the ic file', default="tce.ic.dat")
@@ -81,4 +85,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     AddPointMassToFile(args.giant_snapshot_file, new_file_name=args.ic_file_name,
-                           separation=args.orbital_separation, point_mass=args.point_mass * msol, rlof_factor=args.rlof_factor)
+                           separation=args.orbital_separation, point_mass=args.point_mass * msol,
+                       rlof_factor=args.rlof_factor, giant_radius=args.giant_radius)
