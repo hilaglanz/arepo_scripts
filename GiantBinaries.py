@@ -35,12 +35,7 @@ def copy_old_data(snapshot):
 def AddPointMassToFile(snapshot_file, new_file_name, point_mass, separation, rlof_factor=1.0):
     snapshot=gadget_readsnapname(snapshot_file)
     new_size = snapshot.boxsize
-    if separation > new_size/100:
-        new_size *= 100
-    binary = MultipleSystem(newsize=new_size,
-                            reset_dm_ids=True, ndir=32, grid_xnuc=snapshot.data['xnuc'][0],
-                            grid_rho=min([snapshot.rho.min(), 1e-20]),
-                            grid_u=min([snapshot.data['u'].min(), 1e10]))
+
     giant = SnapshotComponent.from_snapshot_name(snapshot_file)
     companion = PointMassComponent(mass=point_mass)
     companion.data['type'] = [5]
@@ -55,6 +50,12 @@ def AddPointMassToFile(snapshot_file, new_file_name, point_mass, separation, rlo
         rlof_factor = separation / current_rlof
 
     print("Roche factor = ", rlof_factor)
+    if separation > new_size/100:
+        new_size *= 100
+    binary = MultipleSystem(newsize=new_size,
+                            reset_dm_ids=True, ndir=32, grid_xnuc=snapshot.data['xnuc'][0],
+                            grid_rho=min([snapshot.rho.min(), 1e-20]),
+                            grid_u=min([snapshot.data['u'].min(), 1e10]))
     binary.add_components_as_binary(giant, companion, distance_fraction_rlof=rlof_factor)
     binary.create_ics(model=new_file_name)
 
@@ -67,7 +68,7 @@ def InitParser():
     parser.add_argument('--orbital_separation', type=float,
                         help='initial binary separation in Rsun', default=None)
     parser.add_argument('--point_mass', type=float, help='new object mass in msun', default=1)
-    parser.add_argument('--rlof_factor', type=float, help='if relative to RL, by what factor?', default=2)
+    parser.add_argument('--rlof_factor', type=float, help='if relative to RL, by what factor?', default=1)
     parser.add_argument('--ic_file_name', type=str, help='path to save the ic file', default="tce.ic.dat")
     return parser
 
