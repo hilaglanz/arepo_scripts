@@ -38,15 +38,17 @@ def AddPointMassToFile(snapshot_file, new_file_name, point_mass, separation, rlo
 
     giant = SnapshotComponent.from_snapshot_name(snapshot_file)
     companion = PointMassComponent(mass=point_mass)
-    companion.data['type'] = 5
+    companion.data['type'] = np.array([5])
     q = giant.mass / point_mass
     if giant_radius is None:
         giant_radius = giant.get_radius() / rsol
-    current_rlof = (giant_radius / rsol) / roche_distance(q)
+        print("calculated radius=", giant_radius)
+    current_rlof = giant_radius  / roche_distance(q)
     print("current Roche lobe size= ", current_rlof, " Rsun")
     if separation is None:
         print("calculating separation from Roche Lobe")
         separation = current_rlof * rlof_factor
+        print("separation= ", separation)
     else:
         print("using given separation of ", separation, "Rsun")
         rlof_factor = separation / current_rlof
@@ -54,7 +56,7 @@ def AddPointMassToFile(snapshot_file, new_file_name, point_mass, separation, rlo
     print("Roche factor = ", rlof_factor)
     if separation > new_size/100:
         new_size *= 100
-    rlof_factor *= (giant.get_radius()/giant_radius)
+    rlof_factor *= ((giant.get_radius() / rsol) /giant_radius)
     binary = MultipleSystem(newsize=new_size,
                             reset_dm_ids=True, ndir=32, grid_xnuc=snapshot.data['xnuc'][0],
                             grid_rho=min([snapshot.rho.min(), 1e-20]),
