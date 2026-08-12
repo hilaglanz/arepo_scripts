@@ -38,7 +38,7 @@ def AddPointMassToFile(snapshot_file, new_file_name, point_mass, separation, rlo
 
     giant = SnapshotComponent.from_snapshot_name(snapshot_file)
     companion = PointMassComponent(mass=point_mass)
-    companion.data['type'] = [5]
+    companion.data['type'] = 5
     q = giant.mass / point_mass
     if giant_radius is None:
         giant_radius = giant.get_radius() / rsol
