@@ -32,19 +32,41 @@ def copy_old_data(snapshot):
 
     return data
 
-def AddPointMassToFile(snapshot_file, new_file_name, point_mass, separation, rlof_factor=1.0, giant_radius=None):
+def remove_bulk_velocity(data):
+    """Remove COM velocity while preserving all relative velocities."""
+    bulk = np.einsum("i,ij->j", data["mass"], data["vel"]) / data["mass"].sum()
+    data["vel"] -= bulk
+
+    return bulk
+
+def enclosing_boxsize(components, minimum_size, padding):
+    """Size of a COM-centered cube enclosing all particle centers."""
+    half_extent = 0.0
+    for component in components:
+        pos = component.get_position()
+        lower = pos.min(axis=0) + component.offset
+        upper = pos.max(axis=0) + component.offset
+        half_extent = max(
+            half_extent,
+            np.abs(lower).max(),
+            np.abs(upper).max(),
+        )
+    return max(minimum_size, 2.0 * (half_extent + padding))
+
+def AddPointMassToFile(snapshot_file, new_file_name, point_mass, separation, rlof_factor=1.0, giant_radius_rsol=None, padding_cm=0):
     snapshot=gadget_readsnapname(snapshot_file)
     new_size = snapshot.boxsize
-
-    giant = SnapshotComponent.from_snapshot_name(snapshot_file)
+    
+    giant = SnapshotComponent(data=snapshot.data, boxsize=snapshot.boxsize, radius=giant_radius_rsol)
+    remove_bulk_velocity(giant.data)
     companion = PointMassComponent(mass=point_mass)
     companion.data['type'] = np.array([5])
     q = giant.mass / point_mass
-    if giant_radius is None:
-        giant_radius = giant.get_radius() / rsol
-        print("calculated radius=", giant_radius)
-    current_rlof = giant_radius  / roche_distance(q)
-    print("current Roche lobe size= ", current_rlof, " Rsun")
+    if giant_radius_rsol is None:
+        giant_radius_rsol = giant.get_radius() / rsol
+        print("calculated radius=", giant_radius_rsol)
+    current_rlof = giant_radius_rsol  / roche_distance(q)
+    print("Roche-filling separation= ", current_rlof, " Rsun")
     if separation is None:
         print("calculating separation from Roche Lobe")
         separation = current_rlof * rlof_factor
@@ -54,15 +76,14 @@ def AddPointMassToFile(snapshot_file, new_file_name, point_mass, separation, rlo
         rlof_factor = separation / current_rlof
 
     print("Roche factor = ", rlof_factor)
-    if separation > new_size/100:
-        new_size *= 100
-    rlof_factor *= (giant_radius * rsol / giant.get_radius())
+    rlof_factor *= (giant_radius_rsol * rsol / giant.get_radius())
     print("rlof_factor according to radius calculation = ", rlof_factor)
     binary = MultipleSystem(newsize=new_size,
                             reset_dm_ids=True, ndir=32, grid_xnuc=snapshot.data['xnuc'][0],
                             grid_rho=min([snapshot.rho.min(), 1e-20]),
                             grid_u=min([snapshot.data['u'].min(), 1e10]))
-    binary.add_components_as_binary(giant, companion, distance_fraction_rlof=rlof_factor)
+    binary.add_components_as_binary(giant, companion, distance_fraction_rlof=rlof_factor, corotating_at_rlof=False, corotation_factor=0.0, e=0.0)
+    binary.newsize = enclosing_boxsize((giant, companion), snapshot.boxsize, padding_cm)
     binary.create_ics(model=new_file_name)
 
 def InitParser():
@@ -77,6 +98,7 @@ def InitParser():
                         help='initial giant radius in Rsun', default=None)
     parser.add_argument('--point_mass', type=float, help='new object mass in msun', default=1)
     parser.add_argument('--rlof_factor', type=float, help='if relative to RL, by what factor?', default=1)
+    parser.add_argument("--box_padding_rsun", type=float, help="Clearance beyond current retained particle centers, in solar radii", default=0.0)
     parser.add_argument('--ic_file_name', type=str, help='path to save the ic file', default="tce.ic.dat")
     return parser
 
@@ -90,4 +112,4 @@ if __name__ == "__main__":
 
     AddPointMassToFile(args.giant_snapshot_file, new_file_name=args.ic_file_name,
                            separation=args.orbital_separation, point_mass=args.point_mass * msol,
-                       rlof_factor=args.rlof_factor, giant_radius=args.giant_radius)
+                       rlof_factor=args.rlof_factor, giant_radius_rsol=args.giant_radius, padding_cm=args.box_padding_rsun * rsol)
