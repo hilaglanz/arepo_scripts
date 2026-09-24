@@ -84,6 +84,7 @@ def AddPointMassToFile(snapshot_file, new_file_name, point_mass, separation, rlo
                             grid_u=min([snapshot.data['u'].min(), 1e10]))
     binary.add_components_as_binary(giant, companion, distance_fraction_rlof=rlof_factor, corotating_at_rlof=False, corotation_factor=0.0, e=0.0)
     binary.newsize = enclosing_boxsize((giant, companion), snapshot.boxsize, padding_cm)
+    print(f"Use BoxSize {binary.newsize:.17g} in the AREPO parameter file")
     binary.create_ics(model=new_file_name)
 
 def InitParser():
