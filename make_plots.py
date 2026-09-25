@@ -6,6 +6,7 @@ import pickle
 import pylab
 from PIL import Image
 from matplotlib.ticker import FuncFormatter, MaxNLocator
+from matplotlib.patches import Circle
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 from loadmodules import *
@@ -166,14 +167,266 @@ def save_even_tight_fig(fig, filename, dpi=300):
 
         # 4. Write the final perfect image to the hard drive
         img.save(filename)
-from matplotlib.patches import Circle
+
+def add_photosphere_overlay(loaded_snap, center, axes, photosphere_radius):
+    if not isinstance(center, (list, np.ndarray)):
+        center = loaded_snap.center
+    current_photo_radius = photosphere_radius
+        # DYNAMIC COMPUTATION: If the user passed -1, compute it for this specific snapshot
+    if current_photo_radius < 0:
+        print("computing photosphere according to optical depth")
+            # DYNAMIC ASYMMETRIC PHOTOSPHERE COMPUTATION
+        if current_photo_radius < 0:
+            indgas = loaded_snap.type == 0
+
+                # 1. Identify plot axes and the perpendicular "slice" axis
+            ax_x, ax_y = axes[0], axes[1]
+            ax_z = 3 - (ax_x + ax_y)  # Magic math to find the 3rd axis (0, 1, 2)
+
+                # 2. Get coordinates relative to the center
+            dx = loaded_snap.pos[indgas, ax_x] - center[ax_x]
+            dy = loaded_snap.pos[indgas, ax_y] - center[ax_y]
+            dz = loaded_snap.pos[indgas, ax_z] - center[ax_z]
+
+            r_dist = np.sqrt(dx ** 2 + dy ** 2)
+            phi = np.arctan2(dy, dx)  # Angle from -pi to pi
+
+                # 3. Filter for particles close to the plot plane
+                # (So dense gas high above the pole doesn't ruin the equator's calculation)
+            rmax = r_dist.max()
+            slice_mask = np.abs(dz) < (0.05 * rmax)  # only look at a 5% thickness slice
+
+            r_slice = r_dist[slice_mask]
+            phi_slice = phi[slice_mask]
+            rho_slice = loaded_snap.rho[slice_mask]
+            ka_r_slice = loaded_snap.data['ka_r'][slice_mask]
+
+                # 4. Setup angular (azimuthal) and radial bins
+            num_phi_bins = 100  # Shoot 100 rays in a circle
+            num_r_bins = 300
+
+            phi_bins = np.linspace(-np.pi, np.pi, num_phi_bins + 1)
+            r_bins = np.linspace(0, rmax, num_r_bins)
+            dr = r_bins[1] - r_bins[0]
+
+            photo_x = []
+            photo_y = []
+
+                # 5. Ray-trace inwards for each of the 100 angles
+            for i in range(num_phi_bins):
+                wedge_mask = (phi_slice >= phi_bins[i]) & (phi_slice < phi_bins[i + 1])
+
+                r_wedge = r_slice[wedge_mask]
+                rho_wedge = rho_slice[wedge_mask]
+                ka_r_wedge = ka_r_slice[wedge_mask]
+
+                    # Sort particles in this angular wedge into radial bins
+                bin_indices = np.digitize(r_wedge, r_bins)
+
+                tau = 0.0
+                photo_r = 0.0
+
+                    # Integrate outside-in for this specific angle
+                for j in range(num_r_bins - 1, 0, -1):
+                    in_bin = (bin_indices == j)
+
+                    if np.any(in_bin):
+                            # Local average in this specific (r, phi) coordinate
+                        mean_rho = np.mean(rho_wedge[in_bin])
+                        mean_kappa = np.mean(ka_r_wedge[in_bin])
+
+                        tau += mean_kappa * mean_rho * dr
+
+                    if tau >= (2.0 / 3.0):
+                        photo_r = r_bins[j]
+                        break
+
+                    # Convert this specific radius back to Cartesian coordinates
+                mid_phi = 0.5 * (phi_bins[i] + phi_bins[i + 1])
+                radius_scaled = photo_r * basic_units["length"].factor
+
+                photo_x.append(center[ax_x] + radius_scaled * np.cos(mid_phi))
+                photo_y.append(center[ax_y] + radius_scaled * np.sin(mid_phi))
+
+                # 6. Close the loop by connecting the last point to the first point
+            photo_x.append(photo_x[0])
+            photo_y.append(photo_y[0])
+
+            pylab.plot(photo_x, photo_y, color='gray', linestyle='dashed', linewidth=2.5)
+            print("Plotted asymmetric photosphere contour.")
+
+                # Set to 0 so the old perfect circle code (if still there) doesn't run on top of it
+            current_photo_radius = 0
+
+            #print(f"Dynamically computed tau=2/3 Photosphere radius: {current_photo_radius/rsol :e} Rsun")
+
+    if current_photo_radius > 0:
+            # Scale the radius to match the plot's current length unit (e.g., Rsun)
+        radius_scaled = current_photo_radius * basic_units["length"].factor
+
+            # Create the dashed circle patch
+        circ = Circle((center[axes[0]], center[axes[1]]), radius_scaled,
+                          fill=False, color='gray', linestyle='dashed', linewidth=2.5)
+            # Add it to the plot
+        pylab.gca().add_patch(circ)
+        print(f"Plotted photosphere circle at radius {radius_scaled} (plot units)")
+
+def add_roche_equipotential(donor_position, companion_position,
+                           relative_velocity, donor_to_companion_mass_ratio,
+                           slice_axes, slice_center, resolution=384):
+    """
+    Draw the critical Roche equipotential through L1.
+
+    L1 is the inner Lagrange point between the stars.
+    Positions use the current plot units.
+    Scaled coordinates/distances are measured in binary separations.
+    """
+    separation_vector = companion_position - donor_position
+    binary_separation = np.linalg.norm(separation_vector)
+    direction_to_companion = separation_vector / binary_separation
+
+    # Construct the orbital coordinate system.
+    orbital_normal = np.cross(direction_to_companion, relative_velocity)
+    normal_magnitude = np.linalg.norm(orbital_normal)
+    relative_speed = np.linalg.norm(relative_velocity)
+
+    if (not np.isfinite(normal_magnitude)
+            or normal_magnitude <= 1e-12 * relative_speed):
+        raise ValueError("Cannot determine the orbital plane")
+
+    orbital_normal /= normal_magnitude
+    orbital_tangent = np.cross(orbital_normal, direction_to_companion)
+
+    # Normalize the total binary mass to one.
+    donor_mass_fraction = (
+        donor_to_companion_mass_ratio
+        / (1.0 + donor_to_companion_mass_ratio)
+    )
+    companion_mass_fraction = 1.0 / (1.0 + donor_to_companion_mass_ratio)
+
+    # Find L1 along the line from donor (0) to companion (1).
+    lower_l1_bound, upper_l1_bound = 0.0, 1.0
+
+    for _ in range(60):
+        trial_position = (lower_l1_bound + upper_l1_bound) / 2
+        potential_gradient = (
+            donor_mass_fraction / trial_position**2
+            - companion_mass_fraction / (1 - trial_position)**2
+            - (trial_position - companion_mass_fraction)
+        )
+        if potential_gradient > 0:
+            lower_l1_bound = trial_position
+        else:
+            upper_l1_bound = trial_position
+
+    scaled_l1_distance = (lower_l1_bound + upper_l1_bound) / 2
+    potential_at_l1 = (
+        -donor_mass_fraction / scaled_l1_distance
+        - companion_mass_fraction / (1 - scaled_l1_distance)
+        - 0.5 * (scaled_l1_distance - companion_mass_fraction)**2
+    )
+
+    plot_axes = pylab.gca()
+    horizontal_limits = plot_axes.get_xlim()
+    vertical_limits = plot_axes.get_ylim()
+
+    # Each closed lobe fits inside a sphere reaching from its star to L1.
+    donor_bounding_radius = binary_separation * scaled_l1_distance
+    companion_bounding_radius = binary_separation * (1 - scaled_l1_distance)
+
+    lower_lobe_bounds = np.minimum(
+        donor_position - donor_bounding_radius,
+        companion_position - companion_bounding_radius,
+    )
+    upper_lobe_bounds = np.maximum(
+        donor_position + donor_bounding_radius,
+        companion_position + companion_bounding_radius,
+    )
+
+    # Sample only the visible region containing the lobes.
+    lower_sample_bounds = np.maximum(
+        lower_lobe_bounds[list(slice_axes)],
+        [min(horizontal_limits), min(vertical_limits)],
+    )
+    upper_sample_bounds = np.minimum(
+        upper_lobe_bounds[list(slice_axes)],
+        [max(horizontal_limits), max(vertical_limits)],
+    )
+    if np.any(lower_sample_bounds >= upper_sample_bounds):
+        return
+
+    horizontal_grid, vertical_grid = np.meshgrid(
+        np.linspace(lower_sample_bounds[0], upper_sample_bounds[0], resolution),
+        np.linspace(lower_sample_bounds[1], upper_sample_bounds[1], resolution),
+    )
+
+    # Fix the omitted coordinate at the actual slice position.
+    slice_positions = np.empty(horizontal_grid.shape + (3,))
+    slice_positions[:] = slice_center
+    slice_positions[..., slice_axes[0]] = horizontal_grid
+    slice_positions[..., slice_axes[1]] = vertical_grid
+
+    scaled_positions = (slice_positions - donor_position) / binary_separation
+    coordinate_toward_companion = scaled_positions @ direction_to_companion
+    coordinate_along_tangent = scaled_positions @ orbital_tangent
+    coordinate_above_orbit = scaled_positions @ orbital_normal
+
+    scaled_donor_distance = np.sqrt(
+        coordinate_toward_companion**2
+        + coordinate_along_tangent**2
+        + coordinate_above_orbit**2
+    )
+    scaled_companion_distance = np.sqrt(
+        (coordinate_toward_companion - 1)**2
+        + coordinate_along_tangent**2
+        + coordinate_above_orbit**2
+    )
+
+    with np.errstate(divide="ignore", invalid="ignore"):
+        effective_potential = (
+            -donor_mass_fraction / scaled_donor_distance
+            - companion_mass_fraction / scaled_companion_distance
+            - 0.5 * (
+                (coordinate_toward_companion - companion_mass_fraction)**2
+                + coordinate_along_tangent**2
+            )
+        )
+
+    # Exclude the disconnected outer centrifugal contour.
+    outside_both_lobes = (
+        (scaled_donor_distance > scaled_l1_distance)
+        & (scaled_companion_distance > 1 - scaled_l1_distance)
+    )
+    effective_potential = np.ma.masked_where(
+        outside_both_lobes | ~np.isfinite(effective_potential),
+        effective_potential,
+    )
+
+    if (effective_potential.count()
+            and effective_potential.min() < potential_at_l1
+            < effective_potential.max()):
+        roche_contour = plot_axes.contour(
+            horizontal_grid, vertical_grid, effective_potential,
+            levels=[potential_at_l1],
+            colors=["cyan"], linewidths=2,
+            linestyles="solid", zorder=11,
+        )
+        if any(len(segment) > 1 for segment in roche_contour.allsegs[0]):
+            plot_axes.plot(
+                [], [], color="cyan", linewidth=2,
+                label="Roche L1 contour (circular model)",
+            )
+
+    plot_axes.set_xlim(horizontal_limits)
+    plot_axes.set_ylim(vertical_limits)
 
 def add_radius_overlays(snapshot, axes, dust_radius=None, roche_mass_ratio=None,
-                        core_id=1000000000, companion_id=None):
+                        core_id=1000000000, companion_id=None, roche_mode="eggleton", center=False):
     if dust_radius is None and roche_mass_ratio is None:
         return
     
-    core_pos = snapshot.pos[np.flatnonzero(snapshot.id == core_id)[0]]
+    core_index = np.flatnonzero(snapshot.id == core_id)[0]
+    core_pos = snapshot.pos[core_index]
     circles = []
 
     if dust_radius is not None:
@@ -194,40 +447,41 @@ def add_radius_overlays(snapshot, axes, dust_radius=None, roche_mass_ratio=None,
         q = roche_mass_ratio
         if not np.isfinite(q) or q <= 0:
             raise ValueError("roche_mass_ratio must be finite and positive")
+        if roche_mode not in ("eggleton", "equipotential", "both"):
+            raise ValueError("Unknown Roche plotting mode")
 
-        # With no ID supplied, require exactly one type-5 companion.
-        mask = (
-            snapshot.type == 5 if companion_id is None
-            else snapshot.id == companion_id
-        )
-        companion_pos = snapshot.pos[np.flatnonzero(((snapshot.type ==5) & (companion_id  is None)) | 
-                                              (snapshot.id == companion_id))[0]]
+        companion_mask = (snapshot.type == 5 if companion_id is None else snapshot.id == companion_id)
+        companion_index = np.flatnonzero(companion_mask)[0]
+        companion_pos = snapshot.pos[companion_index]
+
         separation = np.linalg.norm(companion_pos - core_pos)
         if not np.isfinite(separation) or separation <= 0:
-            raise ValueError("Invalid core–companion separation")
+            raise ValueError("Invalid core-companion separation")
 
-        q1_3 = np.cbrt(q)
-        radius = separation * (
-            0.49 * q1_3**2 / (0.6 * q1_3**2 + np.log1p(q1_3))
-        )
-        # Separation already uses plot coordinates: no extra conversion.
-        circles.append((
-            radius, "cyan", "--", "Eggleton Roche radius"
-        ))
+        if roche_mode in ("eggleton", "both"):
+            q13 = np.cbrt(q)
+            radius = separation * (
+                0.49 * q13**2 / (0.6 * q13**2 + np.log1p(q13))
+            )
+            circles.append((
+                radius, "cyan", "--", "Eggleton Roche radius"
+            ))
+
+        if roche_mode in ("equipotential", "both"):
+            relative_velocity = (snapshot.vel[companion_index] - snapshot.vel[core_index])
+            slice_center = (center if isinstance(center, (list, np.ndarray)) else snapshot.center)
+            add_roche_equipotential(core_pos, companion_pos, relative_velocity, q, axes, slice_center)
 
     ax = pylab.gca()
     xlim, ylim = ax.get_xlim(), ax.get_ylim()
 
     for radius, color, style, label in circles:
-        ax.add_patch(Circle(
-            core_pos[list(axes)], radius,
-            fill=False, edgecolor=color, linestyle=style,
-            linewidth=2.0, zorder=10, label=label
-        ))
-
+        ax.add_patch(Circle(core_pos[list(axes)], radius, fill=False, edgecolor=color, linestyle=style,
+                            linewidth=2.0, zorder=10, label=label))
     ax.set_xlim(xlim)
     ax.set_ylim(ylim)
-    ax.legend(loc="upper right", fontsize=14)
+    if ax.get_legend_handles_labels()[0]:
+        ax.legend(loc="upper right", fontsize=14)
 
 def plot_stream(loaded_snap, value='vel', xlab='x', ylab='y', axes=[0,1], box=False, res=1024, numthreads=1, center=None,
                 saving_file=None):
@@ -323,108 +577,10 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
                     save_scatter(axes, loaded_snap, point_pos, basic_units["length"].factor, saving_file)
 
     if photosphere_radius is not None:
-        current_photo_radius = photosphere_radius
-        # DYNAMIC COMPUTATION: If the user passed -1, compute it for this specific snapshot
-        if current_photo_radius < 0:
-            print("computing photosphere according to optical depth")
-            # DYNAMIC ASYMMETRIC PHOTOSPHERE COMPUTATION
-            if current_photo_radius < 0:
-                indgas = loaded_snap.type == 0
-
-                # 1. Identify plot axes and the perpendicular "slice" axis
-                ax_x, ax_y = axes[0], axes[1]
-                ax_z = 3 - (ax_x + ax_y)  # Magic math to find the 3rd axis (0, 1, 2)
-
-                # 2. Get coordinates relative to the center
-                dx = loaded_snap.pos[indgas, ax_x] - center[ax_x]
-                dy = loaded_snap.pos[indgas, ax_y] - center[ax_y]
-                dz = loaded_snap.pos[indgas, ax_z] - center[ax_z]
-
-                r_dist = np.sqrt(dx ** 2 + dy ** 2)
-                phi = np.arctan2(dy, dx)  # Angle from -pi to pi
-
-                # 3. Filter for particles close to the plot plane
-                # (So dense gas high above the pole doesn't ruin the equator's calculation)
-                rmax = r_dist.max()
-                slice_mask = np.abs(dz) < (0.05 * rmax)  # only look at a 5% thickness slice
-
-                r_slice = r_dist[slice_mask]
-                phi_slice = phi[slice_mask]
-                rho_slice = loaded_snap.rho[slice_mask]
-                ka_r_slice = loaded_snap.data['ka_r'][slice_mask]
-
-                # 4. Setup angular (azimuthal) and radial bins
-                num_phi_bins = 100  # Shoot 100 rays in a circle
-                num_r_bins = 300
-
-                phi_bins = np.linspace(-np.pi, np.pi, num_phi_bins + 1)
-                r_bins = np.linspace(0, rmax, num_r_bins)
-                dr = r_bins[1] - r_bins[0]
-
-                photo_x = []
-                photo_y = []
-
-                # 5. Ray-trace inwards for each of the 100 angles
-                for i in range(num_phi_bins):
-                    wedge_mask = (phi_slice >= phi_bins[i]) & (phi_slice < phi_bins[i + 1])
-
-                    r_wedge = r_slice[wedge_mask]
-                    rho_wedge = rho_slice[wedge_mask]
-                    ka_r_wedge = ka_r_slice[wedge_mask]
-
-                    # Sort particles in this angular wedge into radial bins
-                    bin_indices = np.digitize(r_wedge, r_bins)
-
-                    tau = 0.0
-                    photo_r = 0.0
-
-                    # Integrate outside-in for this specific angle
-                    for j in range(num_r_bins - 1, 0, -1):
-                        in_bin = (bin_indices == j)
-
-                        if np.any(in_bin):
-                            # Local average in this specific (r, phi) coordinate
-                            mean_rho = np.mean(rho_wedge[in_bin])
-                            mean_kappa = np.mean(ka_r_wedge[in_bin])
-
-                            tau += mean_kappa * mean_rho * dr
-
-                        if tau >= (2.0 / 3.0):
-                            photo_r = r_bins[j]
-                            break
-
-                    # Convert this specific radius back to Cartesian coordinates
-                    mid_phi = 0.5 * (phi_bins[i] + phi_bins[i + 1])
-                    radius_scaled = photo_r * basic_units["length"].factor
-
-                    photo_x.append(center[ax_x] + radius_scaled * np.cos(mid_phi))
-                    photo_y.append(center[ax_y] + radius_scaled * np.sin(mid_phi))
-
-                # 6. Close the loop by connecting the last point to the first point
-                photo_x.append(photo_x[0])
-                photo_y.append(photo_y[0])
-
-                pylab.plot(photo_x, photo_y, color='gray', linestyle='dashed', linewidth=2.5)
-                print("Plotted asymmetric photosphere contour.")
-
-                # Set to 0 so the old perfect circle code (if still there) doesn't run on top of it
-                current_photo_radius = 0
-
-            #print(f"Dynamically computed tau=2/3 Photosphere radius: {current_photo_radius/rsol :e} Rsun")
-
-        if current_photo_radius > 0:
-            # Scale the radius to match the plot's current length unit (e.g., Rsun)
-            radius_scaled = current_photo_radius * basic_units["length"].factor
-
-            # Create the dashed circle patch
-            circ = Circle((center[axes[0]], center[axes[1]]), radius_scaled,
-                          fill=False, color='gray', linestyle='dashed', linewidth=2.5)
-            # Add it to the plot
-            pylab.gca().add_patch(circ)
-            print(f"Plotted photosphere circle at radius {radius_scaled} (plot units)")
+        add_photosphere_overlay(loaded_snap, center, axes, photosphere_radius)
 
     if radius_overlays:
-        add_radius_overlays(loaded_snap, axes, **radius_overlays)
+        add_radius_overlays(loaded_snap, axes, center=center, **radius_overlays)
         
     '''
     regularize_length_units(max(box))
@@ -440,7 +596,6 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
         ylabel(ylab + ' [' + basic_units["length"].unit + ']')
 
     basic_units["length"].unit = original_length_unit
-
 
 def format_plot_axes(factor_axes_length: float, shift_axes_center: bool, units_axes):
     if shift_axes_center or factor_axes_length != 1.0:
@@ -1161,6 +1316,8 @@ def InitParser():
                         help='radius of the photosphere in cm (or -1 to compute dynamically) None to not plot it', default=None)
     parser.add_argument("--dust_radius", type=float, default=None, help="Dust reference radius in solar radii")
     parser.add_argument("--roche_mass_ratio", type=float, default=None, help="Total donor mass / companion mass; enables Roche circle")
+    parser.add_argument("--roche_mode", choices=["eggleton", "equipotential", "both"], default="eggleton", 
+                        help="Roche overlay representation")
     parser.add_argument("--overlay_core_id", type=int, default=1000000000)
     parser.add_argument("--overlay_companion_id", type=int, default=None, help="Default: select the unique type-5 particle")
     parser.add_argument('--snapshot_list', nargs='+', type=int,  help='list of snapshots to plot for '
@@ -1204,7 +1361,7 @@ if __name__ == "__main__":
     else:
         snapshots_list = args.snapshot_list
 
-    radius_overlays=dict(dust_radius=args.dust_radius, roche_mass_ratio=args.roche_mass_ratio,
+    radius_overlays=dict(dust_radius=args.dust_radius, roche_mass_ratio=args.roche_mass_ratio, roche_mode=args.roche_mode,
                          core_id=args.overlay_core_id, companion_id=args.overlay_companion_id)
     
     change_unit_conversion(args.factor_length, args.factor_velocity, args.factor_mass)
