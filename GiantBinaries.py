@@ -53,6 +53,25 @@ def enclosing_boxsize(components, minimum_size, padding):
         )
     return max(minimum_size, 2.0 * (half_extent + padding))
 
+class BinarySystemWithLogIDs(MultipleSystem):
+    def write_ics(self, filename=None):
+        if self.parameters.get("binary_log_ids", False):
+            types = self.data["type"]
+            ids = self.data["id"]
+            core, sink = types == 1, types == 5
+
+            if np.count_nonzero(core) != 1 or np.count_nonzero(sink) != 1:
+                raise ValueError("Binary-log IDs require one core and one sink")
+
+            reserved = (ids == 1000000000) | (ids == 1000000001)
+            if np.any(reserved & ~(core | sink)):
+                raise ValueError("A requested binary ID belongs to another particle")
+
+            ids[core] = 1000000000
+            ids[sink] = 1000000001
+
+        return super().write_ics(filename=filename)
+    
 def AddPointMassToFile(snapshot_file, new_file_name, point_mass, separation, rlof_factor=1.0, giant_radius_rsol=None, padding_cm=0):
     snapshot=gadget_readsnapname(snapshot_file)
     new_size = snapshot.boxsize
@@ -78,10 +97,9 @@ def AddPointMassToFile(snapshot_file, new_file_name, point_mass, separation, rlo
     print("Roche factor = ", rlof_factor)
     rlof_factor *= (giant_radius_rsol * rsol / giant.get_radius())
     print("rlof_factor according to radius calculation = ", rlof_factor)
-    binary = MultipleSystem(newsize=new_size,
-                            reset_dm_ids=True, ndir=32, grid_xnuc=snapshot.data['xnuc'][0],
-                            grid_rho=min([snapshot.rho.min(), 1e-20]),
-                            grid_u=min([snapshot.data['u'].min(), 1e10]))
+    binary = BinarySystemWithLogIDs(newsize=new_size, reset_dm_ids=True, binary_log_ids=True, ndir=32, 
+                                    grid_xnuc=snapshot.data['xnuc'][0], grid_rho=min(snapshot.rho.min(), 1e-20), 
+                                    grid_u=min(snapshot.data['u'].min(), 1e10))
     binary.add_components_as_binary(giant, companion, distance_fraction_rlof=rlof_factor, corotating_at_rlof=False, corotation_factor=0.0, e=0.0)
     binary.newsize = enclosing_boxsize((giant, companion), snapshot.boxsize, padding_cm)
     print(f"Use BoxSize {binary.newsize:.17g} in the AREPO parameter file")
