@@ -16,14 +16,13 @@ def set_new_fig_properties():
 
 
 def compute_cumulative_mass(snapshot, center):
-    rsort = snapshot.r(center=center).argsort()
-
-    mcum = np.zeros(snapshot.npart)
-    mcum[0] = snapshot.mass[rsort[0]]
-    for i in range(1, snapshot.npart):
-        mcum[i] = mcum[i - 1] + snapshot.mass[rsort[i]]
-    snapshot.data['cum_mass'] = mcum
-    return
+    radial_order = snapshot.r(center=center).argsort()
+    enclosed_mass = np.empty_like(snapshot.mass, dtype=np.float64)
+    enclosed_mass[radial_order] = np.cumsum(
+        snapshot.mass[radial_order], dtype=np.float64
+    )
+    
+    return enclosed_mass
 
 def compute_cumulative_unbounded_mass(snapshot, center):
     if "unbounded_mass" not in snapshot.data:
@@ -82,7 +81,7 @@ def compute_value(s, testing_value, center=None):
 
     if testing_value == "cum_mass":
         print("adding cummulative nass")
-        compute_cumulative_mass(s, center)
+        s.data["cum_mass"] = compute_cumulative_mass(s, center)
 
     if testing_value == "mach":
         print("adding mach")
