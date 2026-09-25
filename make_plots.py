@@ -168,6 +168,25 @@ def save_even_tight_fig(fig, filename, dpi=300):
         # 4. Write the final perfect image to the hard drive
         img.save(filename)
 
+def add_overlay_legend(fig):
+    overlay_entries = {}
+
+    for ax in fig.axes:
+        handles, labels = ax.get_legend_handles_labels()
+        overlay_entries.update(zip(labels, handles))
+
+    if overlay_entries:
+        fig.axes[0].legend(
+            list(overlay_entries.values()),
+            list(overlay_entries),
+            loc="upper right",
+            fontsize=14,
+            facecolor="0.15",
+            edgecolor="0.7",
+            labelcolor="white",
+            framealpha=0.9,
+        )
+
 def add_photosphere_overlay(loaded_snap, center, axes, photosphere_radius):
     if not isinstance(center, (list, np.ndarray)):
         center = loaded_snap.center
@@ -252,7 +271,7 @@ def add_photosphere_overlay(loaded_snap, center, axes, photosphere_radius):
             photo_x.append(photo_x[0])
             photo_y.append(photo_y[0])
 
-            pylab.plot(photo_x, photo_y, color='gray', linestyle='dashed', linewidth=2.5)
+            pylab.plot(photo_x, photo_y, color='gray', linestyle='dashed', linewidth=2.5, label="Photosphere")
             print("Plotted asymmetric photosphere contour.")
 
                 # Set to 0 so the old perfect circle code (if still there) doesn't run on top of it
@@ -266,7 +285,7 @@ def add_photosphere_overlay(loaded_snap, center, axes, photosphere_radius):
 
             # Create the dashed circle patch
         circ = Circle((center[axes[0]], center[axes[1]]), radius_scaled,
-                          fill=False, color='gray', linestyle='dashed', linewidth=2.5)
+                          fill=False, color='gray', linestyle='dashed', linewidth=2.5, label="Photosphere")
             # Add it to the plot
         pylab.gca().add_patch(circ)
         print(f"Plotted photosphere circle at radius {radius_scaled} (plot units)")
@@ -420,13 +439,12 @@ def add_roche_equipotential(donor_position, companion_position,
     plot_axes.set_xlim(horizontal_limits)
     plot_axes.set_ylim(vertical_limits)
 
-def add_radius_overlays(snapshot, axes, dust_radius=None, roche_mass_ratio=None,
-                        core_id=1000000000, companion_id=None, roche_mode="eggleton", center=False):
-    if dust_radius is None and roche_mass_ratio is None:
+def add_radius_overlays(snapshot, axes, dust_radius=None, core_id=1000000000, companion_id=None, roche_mode="eggleton", center=False):
+    if dust_radius is None and roche_mode == "off":
         return
-    
     core_index = np.flatnonzero(snapshot.id == core_id)[0]
     core_pos = snapshot.pos[core_index]
+    
     circles = []
 
     if dust_radius is not None:
@@ -443,17 +461,20 @@ def add_radius_overlays(snapshot, axes, dust_radius=None, roche_mass_ratio=None,
             rf"Dust reference: {dust_radius:g} $R_\odot$"
         ))
 
-    if roche_mass_ratio is not None:
-        q = roche_mass_ratio
-        if not np.isfinite(q) or q <= 0:
-            raise ValueError("roche_mass_ratio must be finite and positive")
-        if roche_mode not in ("eggleton", "equipotential", "both"):
-            raise ValueError("Unknown Roche plotting mode")
-
+    
+    if roche_mode != "off":
         companion_mask = (snapshot.type == 5 if companion_id is None else snapshot.id == companion_id)
         companion_index = np.flatnonzero(companion_mask)[0]
         companion_pos = snapshot.pos[companion_index]
 
+        donor_mass = snapshot.mass[core_index] + snapshot.mass[snapshot.type == 0].sum()
+        companion_mass = snapshot.mass[companion_index]
+        q = donor_mass / companion_mass
+        if not np.isfinite(q) or q <= 0:
+            raise ValueError("roche_mass_ratio must be finite and positive")
+        if roche_mode not in ("eggleton", "equipotential", "both"):
+            raise ValueError("Unknown Roche plotting mode")
+        
         separation = np.linalg.norm(companion_pos - core_pos)
         if not np.isfinite(separation) or separation <= 0:
             raise ValueError("Invalid core-companion separation")
@@ -480,8 +501,6 @@ def add_radius_overlays(snapshot, axes, dust_radius=None, roche_mass_ratio=None,
                             linewidth=2.0, zorder=10, label=label))
     ax.set_xlim(xlim)
     ax.set_ylim(ylim)
-    if ax.get_legend_handles_labels()[0]:
-        ax.legend(loc="upper right", fontsize=14)
 
 def plot_stream(loaded_snap, value='vel', xlab='x', ylab='y', axes=[0,1], box=False, res=1024, numthreads=1, center=None,
                 saving_file=None):
@@ -570,7 +589,8 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
                           loaded_snap.parameters['SinkFormationRadius']*basic_units["length"].factor)
                     circ = Circle((point_pos[axes[0]], point_pos[axes[1]]),
                                   loaded_snap.parameters['SinkFormationRadius']*basic_units["length"].factor
-                                  , fill=False, color='white', linestyle='dashed', linewidth=3.0)
+                                  , fill=False, color='white', linestyle='dashed', linewidth=3.0, 
+                                  label="Sink accretion radius")
                     print(circ)
                     gca().add_patch(circ)
 
@@ -793,16 +813,18 @@ def calculate_label_and_value(loaded_snap, value, relative_to_sink_id, central_i
         loaded_snap.data[value] = np.sqrt((loaded_snap.data[value.split('_size')[0]] ** 2).sum(axis=1))
 
     if value == "cum_mass":
-        compute_cumulative_mass(loaded_snap, center)
+        loaded_snap.data["cum_mass"] = compute_cumulative_mass(loaded_snap, center)
         add_name_and_unit(value, "cumulative mass", "mass")
 
     if value == "gamma_d":
-        if "cum_mass" not in loaded_snap.data:
-            calculate_label_and_value(loaded_snap, value="cum_mass", relative_to_sink_id=relative_to_sink_id,
-                                      central_id=central_id, center=center, species_file=species_file)
-        loaded_snap.data["gamma_d"] = ((loaded_snap.ka_r + loaded_snap.ka_s) * loaded_snap.fradr *
-                                       (loaded_snap.r(center)[loaded_snap.type == 0] ** 2) /
-                                       (G * loaded_snap.data["cum_mass"][loaded_snap.type == 0] * c))
+        if 10**9 in loaded_snap.id:
+            core_pos = loaded_snap.pos[np.flatnonzero(loaded_snap.id == 10**9)[0]]
+        else:
+            core_pos = center
+        enclosed_mass = compute_cumulative_mass(loaded_snap, core_pos)
+        gas = loaded_snap.type == 0
+        loaded_snap.data["gamma_d"] = ((loaded_snap.ka_r + loaded_snap.ka_s) * loaded_snap.fradr 
+                                       * loaded_snap.r(center=core_pos)[gas]**2 / (G * enclosed_mass[gas] * c))
 
         add_name_and_unit(value, r"$\Gamma_d$", "none")
 
@@ -1093,6 +1115,7 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir="output", plottingDi
 
         filename = plottingDir + "/Aslice_" + val_name + "_" + "_".join([str(s) for s in snapshots_list]) + ".png"
         print("saving to: ", filename)
+        add_overlay_legend(fig)
         save_even_tight_fig(pylab.gcf(), filename, dpi=300)
         print("saved fig")
         pylab.close('all')
@@ -1182,6 +1205,7 @@ def plot_range(value=['rho'], snapshotDir="output", plottingDir="plots", firstSn
 
             filename = plottingDir + "/Aslice_" + val + "_{0}.png".format(snap)
             print("saving to: ", filename)
+            add_overlay_legend(fig)
             save_even_tight_fig(pylab.gcf(), filename, dpi=300)
             print("saved fig")
 
@@ -1253,6 +1277,7 @@ def plot_range(value=['rho'], snapshotDir="output", plottingDir="plots", firstSn
 
             filename = plottingDir + "/Aslice_" + "_".join(value) + "_{0}.png".format(snap)
             print("saving to: ", filename)
+            add_overlay_legend(fig)
             save_even_tight_fig(pylab.gcf(), filename, dpi=300)
             print("saved fig")
 
@@ -1315,8 +1340,7 @@ def InitParser():
     parser.add_argument('--photosphere_radius', type=float,
                         help='radius of the photosphere in cm (or -1 to compute dynamically) None to not plot it', default=None)
     parser.add_argument("--dust_radius", type=float, default=None, help="Dust reference radius in solar radii")
-    parser.add_argument("--roche_mass_ratio", type=float, default=None, help="Total donor mass / companion mass; enables Roche circle")
-    parser.add_argument("--roche_mode", choices=["eggleton", "equipotential", "both"], default="eggleton", 
+    parser.add_argument("--roche_mode", choices=["off", "eggleton", "equipotential", "both"], default="off", 
                         help="Roche overlay representation")
     parser.add_argument("--overlay_core_id", type=int, default=1000000000)
     parser.add_argument("--overlay_companion_id", type=int, default=None, help="Default: select the unique type-5 particle")
@@ -1361,8 +1385,8 @@ if __name__ == "__main__":
     else:
         snapshots_list = args.snapshot_list
 
-    radius_overlays=dict(dust_radius=args.dust_radius, roche_mass_ratio=args.roche_mass_ratio, roche_mode=args.roche_mode,
-                         core_id=args.overlay_core_id, companion_id=args.overlay_companion_id)
+    radius_overlays = dict(dust_radius=args.dust_radius, roche_mode=args.roche_mode, 
+                           core_id=args.overlay_core_id, companion_id=args.overlay_companion_id)
     
     change_unit_conversion(args.factor_length, args.factor_velocity, args.factor_mass)
     #TODO: add conversion to temperature
