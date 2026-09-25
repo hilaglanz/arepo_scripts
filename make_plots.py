@@ -166,6 +166,68 @@ def save_even_tight_fig(fig, filename, dpi=300):
 
         # 4. Write the final perfect image to the hard drive
         img.save(filename)
+from matplotlib.patches import Circle
+
+def add_radius_overlays(snapshot, axes, dust_radius=None, roche_mass_ratio=None,
+                        core_id=1000000000, companion_id=None):
+    if dust_radius is None and roche_mass_ratio is None:
+        return
+    
+    core_pos = snapshot.pos[np.flatnonzero(snapshot.id == core_id)[0]]
+    circles = []
+
+    if dust_radius is not None:
+        if not np.isfinite(dust_radius) or dust_radius < 0:
+            raise ValueError("dust_radius must be finite and nonnegative")
+
+        # Convert physical cm into the plot's coordinate units.
+        cm_to_plot = (
+            basic_units["length"].factor
+            / float(snapshot.parameters["UnitLength_in_cm"])
+        )
+        circles.append((dust_radius * rsol * cm_to_plot,
+            "gold", ":",
+            rf"Dust reference: {dust_radius:g} $R_\odot$"
+        ))
+
+    if roche_mass_ratio is not None:
+        q = roche_mass_ratio
+        if not np.isfinite(q) or q <= 0:
+            raise ValueError("roche_mass_ratio must be finite and positive")
+
+        # With no ID supplied, require exactly one type-5 companion.
+        mask = (
+            snapshot.type == 5 if companion_id is None
+            else snapshot.id == companion_id
+        )
+        companion_pos = snapshot.pos[np.flatnonzero(((snapshot.type ==5) & (companion_id  is None)) | 
+                                              (snapshot.id == companion_id))[0]]
+        separation = np.linalg.norm(companion_pos - core_pos)
+        if not np.isfinite(separation) or separation <= 0:
+            raise ValueError("Invalid core–companion separation")
+
+        q1_3 = np.cbrt(q)
+        radius = separation * (
+            0.49 * q1_3**2 / (0.6 * q1_3**2 + np.log1p(q1_3))
+        )
+        # Separation already uses plot coordinates: no extra conversion.
+        circles.append((
+            radius, "cyan", "--", "Eggleton Roche radius"
+        ))
+
+    ax = pylab.gca()
+    xlim, ylim = ax.get_xlim(), ax.get_ylim()
+
+    for radius, color, style, label in circles:
+        ax.add_patch(Circle(
+            core_pos[list(axes)], radius,
+            fill=False, edgecolor=color, linestyle=style,
+            linewidth=2.0, zorder=10, label=label
+        ))
+
+    ax.set_xlim(xlim)
+    ax.set_ylim(ylim)
+    ax.legend(loc="upper right", fontsize=14)
 
 def plot_stream(loaded_snap, value='vel', xlab='x', ylab='y', axes=[0,1], box=False, res=1024, numthreads=1, center=None,
                 saving_file=None):
@@ -192,7 +254,7 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
                       newfig=True, axes=[0,1], modified_units = False, ignore_types=[], colorbar=True,
                       plot_xlabel=True, plot_ylabel=True, factor_value=1.0, units_value=None,
                       factor_axes_length=1.0, units_axes=None, shift_axes_center=False,
-                      saving_file=None,
+                      radius_overlays=False, saving_file=None,
                       contour=False, photosphere_radius=None, species_file="../species55.txt"):
 
     if box == False:
@@ -361,6 +423,9 @@ def plot_single_value(loaded_snap, value='rho', cmap="hot", box=False, vrange=Fa
             pylab.gca().add_patch(circ)
             print(f"Plotted photosphere circle at radius {radius_scaled} (plot units)")
 
+    if radius_overlays:
+        add_radius_overlays(loaded_snap, axes, **radius_overlays)
+        
     '''
     regularize_length_units(max(box))
     change_ticks(xaxis=True)
@@ -759,7 +824,7 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir="output", plottingDi
                                  units_velocity="$cm/s$", units_density=r'$g/cm^3$', plot_velocities=False,
                                  plot_bfld=False,
                                  axes_array=[[0, 1]], ignore_types=[], horizontal=True, relative_to_motion=False,
-                                 snapshots_list=None,
+                                 snapshots_list=None, radius_overlays=False,
                                  species_file="../species55.txt", lazy_load=True):
     if not os.path.exists(plottingDir):
         os.mkdir(plottingDir)
@@ -817,6 +882,7 @@ def plot_single_value_evolutions(value=['rho'], snapshotDir="output", plottingDi
                               unit_velocity=units_velocity, unit_density=units_density,
                               plot_velocities=plot_velocities, plot_bfld=plot_bfld, newfig=False,
                               axes=get_single_value(axes_array, index), ignore_types=ignore_types, colorbar=False,
+                              radius_overlays=radius_overlays,
                               plot_xlabel=is_leftmost,
                               plot_ylabel=is_leftmost,
                               species_file=species_file)
@@ -886,7 +952,7 @@ def plot_range(value=['rho'], snapshotDir="output", plottingDir="plots", firstSn
                units_velocity="$cm/s$", units_density=r'$g/cm^3$', plot_velocities=False, plot_bfld=False,
                axes_array=[[0, 1]], ignore_types=[], per_value_evolution=False, relative_to_motion=False,
                factor_value=[1.0], units_value=[None], factor_axes_length=[1.0], units_axes=[None], shift_axes_center=False,
-               contour=False, photosphere_radius=None, snapshots_list=None,
+               contour=False, photosphere_radius=None, radius_overlays=False, snapshots_list=None,
                species_file="../species55.txt"
                , lazy_load=True):
     if per_value_evolution:
@@ -898,7 +964,7 @@ def plot_range(value=['rho'], snapshotDir="output", plottingDir="plots", firstSn
                                             units_length,
                                             units_velocity, units_density, plot_velocities, plot_bfld,
                                             axes_array, ignore_types, snapshots_list=snapshots_list,
-                                            lazy_load=lazy_load)
+                                            lazy_load=lazy_load, radius_overlays=radius_overlays)
 
     if not os.path.exists(plottingDir):
         os.mkdir(plottingDir)
@@ -935,8 +1001,10 @@ def plot_range(value=['rho'], snapshotDir="output", plottingDir="plots", firstSn
                               plot_velocities=plot_velocities, plot_bfld=plot_bfld, axes=get_single_value(axes_array),
                               modified_units=modified_units, ignore_types=ignore_types,
                               factor_value=factor_value[0], units_value=units_value[0],
-                              factor_axes_length=factor_axes_length[0], units_axes=units_axes[0], shift_axes_center=shift_axes_center,
+                              factor_axes_length=factor_axes_length[0], units_axes=units_axes[0], 
+                              shift_axes_center=shift_axes_center,
                               contour=contour, photosphere_radius=photosphere_radius,
+                              radius_overlays=radius_overlays,
                               species_file=species_file, colorbar=False, newfig=False)
 
             regularize_time_units(loaded_snap)
@@ -999,6 +1067,7 @@ def plot_range(value=['rho'], snapshotDir="output", plottingDir="plots", firstSn
                                   units_axes=units_axes[index % len(units_axes)],
                                   shift_axes_center=shift_axes_center,
                                   contour=contour, photosphere_radius=photosphere_radius,
+                                  radius_overlays=radius_overlays,
                                   species_file=species_file, colorbar=False)
 
                 # --- INSET COLORBAR LOGIC PER SUBPLOT ---
@@ -1082,7 +1151,7 @@ def InitParser():
     parser.add_argument('--units_value', nargs='+', type=str,  help='name of the value units', default=[None])
     parser.add_argument('--units_axes', nargs='+', type=str,  help='name of the axes units', default=[None])
     parser.add_argument('--factor_axes_length', nargs='+', type=float,
-                        help='multiply axes unit by this factor according to the legnth units of the plot', default=[None])
+                        help='multiply axes unit by this factor according to the legnth units of the plot', default=[1.0])
     parser.add_argument('--shift_axes_center', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
                         help='put plot center at 0', default=False)
     parser.add_argument('--plot_contours', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
@@ -1090,6 +1159,10 @@ def InitParser():
                         default=False)
     parser.add_argument('--photosphere_radius', type=float,
                         help='radius of the photosphere in cm (or -1 to compute dynamically) None to not plot it', default=None)
+    parser.add_argument("--dust_radius", type=float, default=None, help="Dust reference radius in solar radii")
+    parser.add_argument("--roche_mass_ratio", type=float, default=None, help="Total donor mass / companion mass; enables Roche circle")
+    parser.add_argument("--overlay_core_id", type=int, default=1000000000)
+    parser.add_argument("--overlay_companion_id", type=int, default=None, help="Default: select the unique type-5 particle")
     parser.add_argument('--snapshot_list', nargs='+', type=int,  help='list of snapshots to plot for '
                                                                       '(currently only for evolution)', default=[None])
     parser.add_argument('--species_file', type=str,  help='path to species file used in the simulation',
@@ -1131,6 +1204,9 @@ if __name__ == "__main__":
     else:
         snapshots_list = args.snapshot_list
 
+    radius_overlays=dict(dust_radius=args.dust_radius, roche_mass_ratio=args.roche_mass_ratio,
+                         core_id=args.overlay_core_id, companion_id=args.overlay_companion_id)
+    
     change_unit_conversion(args.factor_length, args.factor_velocity, args.factor_mass)
     #TODO: add conversion to temperature
 
@@ -1146,5 +1222,5 @@ if __name__ == "__main__":
                factor_value=args.factor_value, units_value=args.units_value,
                factor_axes_length=args.factor_axes_length, units_axes=args.units_axes,
                shift_axes_center=args.shift_axes_center, contour=args.plot_contours,
-               photosphere_radius=args.photosphere_radius,
+               photosphere_radius=args.photosphere_radius, radius_overlays=radius_overlays,
                snapshots_list=snapshots_list, species_file=args.species_file, lazy_load=args.lazy_load)
