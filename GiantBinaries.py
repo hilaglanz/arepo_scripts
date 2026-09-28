@@ -53,6 +53,44 @@ def enclosing_boxsize(components, minimum_size, padding):
         )
     return max(minimum_size, 2.0 * (half_extent + padding))
 
+def energy_for_standard_arepo_ic(snapshot):
+    required = {"EOS_OPAL", "IRT_STAR_PH_EOS_SWITCH"}
+    unsupported = {"EOS_NO_RAD", "EOS_SUBTRACT_RAD"}
+
+    if (not required.issubset(snapshot.config)
+            or unsupported.intersection(snapshot.config)):
+        raise ValueError(
+            "This correction requires a donor evolved with switched OPAL EOS, "
+            "without EOS_NO_RAD or EOS_SUBTRACT_RAD."
+        )
+
+    units = (
+        snapshot.UnitLength_in_cm,
+        snapshot.UnitMass_in_g,
+        snapshot.UnitVelocity_in_cm_per_s,
+    )
+    if units != (1.0, 1.0, 1.0):
+        raise ValueError("This correction currently supports CGS unit=1 snapshots only.")
+
+    if (snapshot.parameters.get("ComovingIntegrationOn") != 0
+            or snapshot.hubbleparam != 1.0):
+        raise ValueError("This correction requires non-cosmological snapshot data.")
+    density = np.asarray(snapshot.data["rho"], dtype=np.float64)
+    temperature = np.asarray(snapshot.data["temp"], dtype=np.float64)
+    photosphere_density = snapshot.parameters["IrtStarPhDensity"]
+
+    retained_fraction = np.clip(
+        (density / photosphere_density - 0.1) / 9.9, 0.0, 1.0
+    )
+    # Match the constants used in AREPO's opal_eos.h.
+    radiation_constant = 4.0 * 5.67051e-5 / 2.9979245e10
+
+    return (
+        snapshot.data["u"]
+        + (1.0 - retained_fraction)
+        * radiation_constant * temperature**4 / density
+    )
+
 class BinarySystemWithLogIDs(MultipleSystem):
     def write_ics(self, filename=None):
         if self.parameters.get("binary_log_ids", False):
@@ -72,11 +110,14 @@ class BinarySystemWithLogIDs(MultipleSystem):
 
         return super().write_ics(filename=filename)
     
-def AddPointMassToFile(snapshot_file, new_file_name, point_mass, separation, rlof_factor=1.0, giant_radius_rsol=None, padding_cm=0):
+def AddPointMassToFile(snapshot_file, new_file_name, point_mass, separation, rlof_factor=1.0, giant_radius_rsol=None,
+                       padding_cm=0, restore_eos_radiation=False):
     snapshot=gadget_readsnapname(snapshot_file)
     new_size = snapshot.boxsize
     
     giant = SnapshotComponent(data=snapshot.data, boxsize=snapshot.boxsize, radius=giant_radius_rsol)
+    if restore_eos_radiation:
+        giant.data["u"] = energy_for_standard_arepo_ic(snapshot)
     remove_bulk_velocity(giant.data)
     companion = PointMassComponent(mass=point_mass)
     companion.data['type'] = np.array([5])
@@ -117,7 +158,10 @@ def InitParser():
                         help='initial giant radius in Rsun', default=None)
     parser.add_argument('--point_mass', type=float, help='new object mass in msun', default=1)
     parser.add_argument('--rlof_factor', type=float, help='if relative to RL, by what factor?', default=1)
-    parser.add_argument("--box_padding_rsun", type=float, help="Clearance beyond current retained particle centers, in solar radii", default=0.0)
+    parser.add_argument("--box_padding_rsun", type=float,
+                        help="Clearance beyond current retained particle centers, in solar radii", default=0.0)
+    parser.add_argument("--restore_eos_radiation", action="store_true",
+                        help="Prepare evolved switched-OPAL energies for normal AREPO IC startup.")
     parser.add_argument('--ic_file_name', type=str, help='path to save the ic file', default="tce.ic.dat")
     return parser
 
@@ -131,4 +175,5 @@ if __name__ == "__main__":
 
     AddPointMassToFile(args.giant_snapshot_file, new_file_name=args.ic_file_name,
                            separation=args.orbital_separation, point_mass=args.point_mass * msol,
-                       rlof_factor=args.rlof_factor, giant_radius_rsol=args.giant_radius, padding_cm=args.box_padding_rsun * rsol)
+                       rlof_factor=args.rlof_factor, giant_radius_rsol=args.giant_radius,
+                       padding_cm=args.box_padding_rsun * rsol, restore_eos_radiation=args.restore_eos_radiation)
