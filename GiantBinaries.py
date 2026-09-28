@@ -160,8 +160,8 @@ def InitParser():
     parser.add_argument('--rlof_factor', type=float, help='if relative to RL, by what factor?', default=1)
     parser.add_argument("--box_padding_rsun", type=float,
                         help="Clearance beyond current retained particle centers, in solar radii", default=0.0)
-    parser.add_argument("--restore_eos_radiation", action="store_true",
-                        help="Prepare evolved switched-OPAL energies for normal AREPO IC startup.")
+    parser.add_argument("--restore_eos_radiation", action=argparse.BooleanOptionalAction,
+                        help="Prepare evolved switched-OPAL energies for normal AREPO IC startup.", default = True)
     parser.add_argument('--ic_file_name', type=str, help='path to save the ic file', default="tce.ic.dat")
     return parser
 
