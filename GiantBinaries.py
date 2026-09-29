@@ -53,7 +53,32 @@ def enclosing_boxsize(components, minimum_size, padding):
         )
     return max(minimum_size, 2.0 * (half_extent + padding))
 
-def energy_for_standard_arepo_ic(snapshot):
+def filter_donor_background(component, density_cut=1e-20):
+    """Filter a CGS SnapshotComponent in place, preserving all nongas particles."""
+    if density_cut is None or density_cut == 0:
+        return None
+
+    data = component.data
+    keep_gas = data["rho"] >= density_cut
+    keep_particles = np.ones(len(data["type"]), dtype=bool)
+    keep_particles[data["type"] == 0] = keep_gas
+    removed_mass = data["mass"][~keep_particles].sum()
+    gas_mass = data["mass"][data["type"] == 0].sum()
+    for key, values in data.items():
+        if not np.isscalar(values):
+            mask = keep_gas if len(values) == keep_gas.size else keep_particles
+            data[key] = values[mask]
+    data.update(count=int(keep_particles.sum()), boxsize=component.boxsize)
+
+    component._mass = component.get_mass()  # Refresh the constructor's cached mass.
+    component.recenter()
+    print(f"Removed {np.count_nonzero(~keep_gas)} donor gas cells: "
+          f"{removed_mass / msol:.6e} Msun, "
+          f"{removed_mass / gas_mass:.6e} of donor gas mass")
+    return keep_gas
+
+
+def energy_for_standard_arepo_ic(snapshot, keep_gas=None):
     required = {"EOS_OPAL", "IRT_STAR_PH_EOS_SWITCH"}
     unsupported = {"EOS_NO_RAD", "EOS_SUBTRACT_RAD"}
 
@@ -75,8 +100,9 @@ def energy_for_standard_arepo_ic(snapshot):
     if (snapshot.parameters.get("ComovingIntegrationOn") != 0
             or snapshot.hubbleparam != 1.0):
         raise ValueError("This correction requires non-cosmological snapshot data.")
-    density = np.asarray(snapshot.data["rho"], dtype=np.float64)
-    temperature = np.asarray(snapshot.data["temp"], dtype=np.float64)
+    selection = slice(None) if keep_gas is None else keep_gas
+    density = np.asarray(snapshot.data["rho"][selection], dtype=np.float64)
+    temperature = np.asarray(snapshot.data["temp"][selection], dtype=np.float64)
     photosphere_density = snapshot.parameters["IrtStarPhDensity"]
 
     retained_fraction = np.clip(
@@ -86,7 +112,7 @@ def energy_for_standard_arepo_ic(snapshot):
     radiation_constant = 4.0 * 5.67051e-5 / 2.9979245e10
 
     return (
-        snapshot.data["u"]
+        snapshot.data["u"][selection]
         + (1.0 - retained_fraction)
         * radiation_constant * temperature**4 / density
     )
@@ -111,13 +137,25 @@ class BinarySystemWithLogIDs(MultipleSystem):
         return super().write_ics(filename=filename)
     
 def AddPointMassToFile(snapshot_file, new_file_name, point_mass, separation, rlof_factor=1.0, giant_radius_rsol=None,
-                       padding_cm=0, restore_eos_radiation=False):
+                       padding_cm=0, restore_eos_radiation=False,
+                       donor_density_cut=1e-20):
     snapshot=gadget_readsnapname(snapshot_file)
     new_size = snapshot.boxsize
-    
+
     giant = SnapshotComponent(data=snapshot.data, boxsize=snapshot.boxsize, radius=giant_radius_rsol)
+    keep_gas = filter_donor_background(giant, donor_density_cut)
+    # Set ambient properties from retained material before radiation restoration.
+    grid_xnuc = giant.data["xnuc"][0].copy()
+    grid_u = min(float(giant.data["u"].min()), 1e10)
+    grid_rho = min(float(giant.data["rho"].min()), 1e-20)
+    if donor_density_cut is not None:
+        if grid_rho < donor_density_cut:
+            print("rho cut is higher than min density, using rho_cut for grid rho")
+        grid_rho = max(grid_rho, donor_density_cut)
+
     if restore_eos_radiation:
-        giant.data["u"] = energy_for_standard_arepo_ic(snapshot)
+        giant.data["u"] = energy_for_standard_arepo_ic(snapshot, keep_gas)
+    del keep_gas
     remove_bulk_velocity(giant.data)
     companion = PointMassComponent(mass=point_mass)
     companion.data['type'] = np.array([5])
@@ -139,8 +177,8 @@ def AddPointMassToFile(snapshot_file, new_file_name, point_mass, separation, rlo
     rlof_factor *= (giant_radius_rsol * rsol / giant.get_radius())
     print("rlof_factor according to radius calculation = ", rlof_factor)
     binary = BinarySystemWithLogIDs(newsize=new_size, reset_dm_ids=True, binary_log_ids=True, ndir=32, 
-                                    grid_xnuc=snapshot.data['xnuc'][0], grid_rho=min(snapshot.rho.min(), 1e-20), 
-                                    grid_u=min(snapshot.data['u'].min(), 1e10))
+                                    grid_xnuc=grid_xnuc, grid_rho=grid_rho,
+                                    grid_u=grid_u)
     binary.add_components_as_binary(giant, companion, distance_fraction_rlof=rlof_factor, corotating_at_rlof=False, corotation_factor=0.0, e=0.0)
     binary.newsize = enclosing_boxsize((giant, companion), snapshot.boxsize, padding_cm)
     print(f"Use BoxSize {binary.newsize:.17g} in the AREPO parameter file")
@@ -162,6 +200,9 @@ def InitParser():
                         help="Clearance beyond current retained particle centers, in solar radii", default=0.0)
     parser.add_argument("--restore_eos_radiation", action=argparse.BooleanOptionalAction,
                         help="Prepare evolved switched-OPAL energies for normal AREPO IC startup.", default = True)
+    parser.add_argument("--donor_density_cut", type=float, default=1e-20,
+                        help="Remove donor gas below this density [g/cm^3]; also the minimum added "
+                             "background density. Default: %(default)s; 0 disables filtering.")
     parser.add_argument('--ic_file_name', type=str, help='path to save the ic file', default="tce.ic.dat")
     return parser
 
@@ -176,4 +217,5 @@ if __name__ == "__main__":
     AddPointMassToFile(args.giant_snapshot_file, new_file_name=args.ic_file_name,
                            separation=args.orbital_separation, point_mass=args.point_mass * msol,
                        rlof_factor=args.rlof_factor, giant_radius_rsol=args.giant_radius,
-                       padding_cm=args.box_padding_rsun * rsol, restore_eos_radiation=args.restore_eos_radiation)
+                       padding_cm=args.box_padding_rsun * rsol, restore_eos_radiation=args.restore_eos_radiation,
+                       donor_density_cut=args.donor_density_cut)
