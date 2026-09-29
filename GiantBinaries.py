@@ -199,8 +199,9 @@ def InitParser():
     parser.add_argument("--box_padding_rsun", type=float,
                         help="Clearance beyond current retained particle centers, in solar radii", default=0.0)
     parser.add_argument("--restore_eos_radiation", action=argparse.BooleanOptionalAction,
-                        help="Prepare evolved switched-OPAL energies for normal AREPO IC startup.", default = True)
-    parser.add_argument("--donor_density_cut", type=float, default=1e-20,
+                        help="Prepare evolved switched-OPAL energies for normal AREPO IC startup (off by default).",
+                        default=False)
+    parser.add_argument("--donor_density_cut", type=float, default=0,
                         help="Remove donor gas below this density [g/cm^3]; also the minimum added "
                              "background density. Default: %(default)s; 0 disables filtering.")
     parser.add_argument('--ic_file_name', type=str, help='path to save the ic file', default="tce.ic.dat")
