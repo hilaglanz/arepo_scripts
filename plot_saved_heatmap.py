@@ -57,6 +57,10 @@ def InitParser():
     parser.add_argument('--center_y', type=float, help='point on y axis to be the center of the plot', default=16)
     parser.add_argument('--center_z', type=float, help='point on z axis to be the center of the plot', default=16)
     parser.add_argument('--relative_to_sink_id', nargs='+', type=int,  help='id of sink particle to use as a reference point', default= None)
+    parser.add_argument("--dust_radius", type=float, default=None, help="Dust reference radius in solar radii")
+    parser.add_argument("--roche_mass_ratio", type=float, default=None, help="Total donor mass / companion mass; enables Roche circle")
+    parser.add_argument("--overlay_core_id", type=int, default=1000000000)
+    parser.add_argument("--overlay_companion_id", type=int, default=None, help="Default: select the unique type-5 particle")
     parser.add_argument('--units_length', type=str,  help='name of the length units', default= "Ra")
     parser.add_argument('--units_velocity', type=str,  help='name of the velocity units default is cgs', default= "cs")
     parser.add_argument('--species_file', type=str, help='path to species file used in the simulation',
@@ -81,6 +85,8 @@ if __name__ == "__main__":
         plot_from_pickle(saving_file, saving_file+"_stream", saving_file+"_scatter", args.vmin,
                          args.vmax, args.cmap, args.logplot)
     else:
+        radius_overlays=dict(dust_radius=args.dust_radius, roche_mass_ratio=args.roche_mass_ratio,
+                                 core_id=args.overlay_core_id, companion_id=args.overlay_companion_id)
         plot_single_value(loaded_snap, value=val, cmap=args.cmap, box=[args.boxsize,args.boxsize,args.boxsize],
                           vrange=[args.vmin, args.vmax], logplot=args.logplot, res=args.res,
                           numthreads=args.numthreads, center=[args.center_x,args.center_y,args.center_z],
@@ -89,7 +95,7 @@ if __name__ == "__main__":
                           unit_length=args.units_length,
                           unit_velocity=args.units_velocity, unit_density=None,
                           plot_velocities=True, axes=[args.axes0,args.axes1], saving_file=saving_file,
-                          species_file=args.species_file)
+                          radius_overlays=radius_overlays, species_file=args.species_file)
 
     regularize_time_units(loaded_snap)
     title('time : {:.2g}'.format(loaded_snap.time * basic_units["time"].factor) +
