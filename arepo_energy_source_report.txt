@@ -1,0 +1,282 @@
+AREPO-SNAP-UTIL SOURCE SEARCH (read only)
+Directory: C:\Users\hila\GitRepository\arepo-snap-util
+Review definitions, units and dependencies; names alone do not identify a heating rate.
+
+FILE: def_calibration.py
+LINES 310-315 (long functions capped at 180 lines)
+310:     def enuc(self):
+311:         """Specific energy release in the Nuclear burning (i.e. from initial X
+312:         to final X) in erg/g"""
+313:         if self._enuc is None:
+314:             self._enuc = self._calculate_energy_release()
+315:         return self._enuc
+
+LINES 387-391 (long functions capped at 180 lines)
+387:     def _calculate_energy_release(self):
+388:         """Energy release utility routine"""
+389: 
+390:         return masses.calc_enuc(self.masses, self.final.X,
+391:                                 xnuc_initial=self.initial.X)
+
+LINES 859-874 (long functions capped at 180 lines)
+859:     def _check_enuc_consistency(self,reltol=0.05):
+860: 
+861:         absdiff = (self.enuc_rec - self.enuc_pred)
+862:         reldiff = absdiff / self.enuc_rec
+863: 
+864:         logger.warning(
+865:             "Predicted energy release deviates from reconstructed " +
+866:             "one by more than {:.1f} per cent in {:d} cells".format(
+867:                 reltol * 1e2, np.sum(np.fabs(reldiff) > reltol)))
+868:         logger.info("Maximum relative deviation: {:e}".format(
+869:             np.fabs(reldiff).max()))
+870:         logger.info("Maximum absolute deviation: {:e}".format(
+871:             np.max(absdiff)))
+872:         logger.info(
+873:             "Absolute deviation at maximum relative deviation: {:e}".format(
+874:                 absdiff[np.argmax(np.fabs(reldiff))]))
+
+FILE: leafs_calibration.py
+LINES 303-308 (long functions capped at 180 lines)
+303:     def enuc(self):
+304:         """Specific energy release in the Nuclear burning (i.e. from initial X
+305:         to final X) in erg/g"""
+306:         if self._enuc is None:
+307:             self._enuc = self._calculate_energy_release()
+308:         return self._enuc
+
+LINES 329-333 (long functions capped at 180 lines)
+329:     def _calculate_energy_release(self):
+330:         """Energy release utility routine"""
+331: 
+332:         return masses.calc_enuc(self.masses, self.final.X,
+333:                                 xnuc_initial=self.initial.X)
+
+LINES 1046-1093 (long functions capped at 180 lines)
+1046:     def _check_enuc_consistency(self, reltol=0.05, adjust=False):
+1047: 
+1048:         absdiff = (self.enuc_rec - self.enuc_pred)
+1049:         reldiff = absdiff / self.enuc_rec
+1050: 
+1051:         logger.warning(
+1052:             "Predicted energy release deviates from reconstructed " +
+1053:             "one by more than {:.1f} per cent in {:d} cells".format(
+1054:                 reltol * 1e2, np.sum(np.fabs(reldiff) > reltol)))
+1055:         logger.info("Maximum relative deviation: {:e}".format(
+1056:             np.fabs(reldiff).max()))
+1057:         logger.info("Maximum absolute deviation: {:e}".format(
+1058:             np.max(absdiff)))
+1059:         logger.info(
+1060:             "Absolute deviation at maximum relative deviation: {:e}".format(
+1061:                 absdiff[np.argmax(np.fabs(reldiff))]))
+1062: 
+1063:         if adjust:
+1064:             dQ = (self.q_sndd["NSE"] - self.q_sndd["IME"])
+1065:             dIME = absdiff / dQ
+1066: 
+1067:             Xred_new_IME = np.where(reldiff > reltol,
+1068:                                     self.Xred_rec["IME"] - dIME,
+1069:                                     self.Xred_rec["IME"])
+1070:             Xred_new_NSE = np.where(reldiff > reltol,
+1071:                                     self.Xred_rec["NSE"] + dIME,
+1072:                                     self.Xred_rec["NSE"])
+1073: 
+1074:             self.Xred_rec_nonad = {}
+1075:             self.Xred_rec_nonad["He"] = self.Xred_rec["He"]
+1076:             self.Xred_rec_nonad["C"] = self.Xred_rec["C"]
+1077:             self.Xred_rec_nonad["O"] = self.Xred_rec["O"]
+1078:             self.Xred_rec_nonad["IME"] = self.Xred_rec["IME"]
+1079:             self.Xred_rec_nonad["NSE"] = self.Xred_rec["NSE"]
+1080: 
+1081:             self.Xred_rec["IME"] = Xred_new_IME
+1082:             self.Xred_rec["NSE"] = Xred_new_NSE
+1083: 
+1084:             X_He = 1. - self.c_in_he
+1085:             X_C = self.c_in_he
+1086: 
+1087:             self.enuc_pred_nonad = self.enuc_pred
+1088:             self.enuc_pred = (((X_He - self.Xred_rec["He"]) * self.q_sndd["He"] +
+1089:                                (X_C - self.Xred_rec["C"]) * self.q_sndd["C"] +
+1090:                                (0. - self.Xred_rec["O"]) * self.q_sndd["O"] +
+1091:                                (0. - Xred_new_IME) * self.q_sndd["IME"] +
+1092:                                (0. - Xred_new_NSE) * self.q_sndd["NSE"]) *
+1093:                                (-1.))
+
+FILE: leafs_ddt3d_analyser.py
+LINES 281-336 (long functions capped at 180 lines)
+281:     def check_energy_balance(self):
+282: 
+283:         Etot = self.protocol.ene + self.protocol.egrav - self.protocol.enuc
+284: 
+285:         fig = plt.figure()
+286:         ax1 = fig.add_subplot(211)
+287:         ax2 = fig.add_subplot(212)
+288: 
+289:         ax1.plot(self.protocol.time,
+290:                  1.e-51 * (self.protocol.ene-self.protocol.ekin),
+291:                  label=r"$E_{\mathrm{int}}$")
+292:         ax1.plot(self.protocol.time,
+293:                  1.e-51 * self.protocol.ekin,
+294:                  label=r"$E_{\mathrm{kin}}$")
+295:         ax1.plot(self.protocol.time,
+296:                  1.e-51 * self.protocol.egrav,
+297:                  label=r"$E_{\mathrm{grav}}$")
+298:         ax1.plot(self.protocol.time,
+299:                  1.e-51 * self.protocol.enuc, label=r"$E_{\mathrm{nuc}}$")
+300:         ax1.plot(self.protocol.time,
+301:                  1.e-51 * Etot, label=r"$E_{\mathrm{tot}}$")
+302: 
+303:         ax1.legend(frameon=False)
+304: 
+305:         ax2.plot(self.protocol.time,
+306:                  100. * (Etot - Etot[0]) / np.fabs(Etot[0]))
+307:         ax2.axhline(y=0, ls="dashed", color="grey")
+308: 
+309:         ax1.set_xscale("log")
+310:         ax1.set_xticklabels([])
+311:         ax1.set_ylabel(r"$E$ $[10^{51}\,\mathrm{erg}]$")
+312:         ax2.set_xlabel(r"$t$ [s]")
+313:         ax2.set_ylabel(r"relative energy change [%]")
+314:         ax2.set_xscale("log")
+315:         ax1.set_title(
+316:             r"{:s}: Energy balance".format(self.label))
+317: 
+318:         fig.subplots_adjust(hspace=0.05)
+319: 
+320:         fig.savefig(os.path.join(
+321:             self.analysis_dir,
+322:             "{:s}_energy_balance_check.pdf".format(self.label)))
+323: 
+324:         f = open(
+325:             os.path.join(
+326:                 self.info_dir, "{:s}_energy_balance.tex".format(self.label)),
+327:             "w")
+328:         f.write(r"$E_{{\mathrm{{tot}}}}(t=0)$ & {:.4f} \\".format(
+329:             Etot[0] * 1e-51) + " \n")
+330:         f.write(r"$E_{{\mathrm{{tot}}}}(t={:.2f}\,\mathrm{{s}})$ & {:.4f} \\".format(
+331:             self.protocol.time[-1], Etot[-1] * 1e-51) + " \n")
+332:         f.write(r"$\Delta E_{{\mathrm{{tot}}}}$ & {:.4f} \\".format(
+333:             (Etot[-1] - Etot[0]) * 1e-51) + " \n")
+334:         f.write(r"$\Delta E_{{\mathrm{{tot}}}}/E_{{\mathrm{{tot}}}}(t=0)$ & {:.4f} \\".format(
+335:             (Etot[-1] / np.fabs(Etot[0]) - np.sign(Etot[0]))) + " \n")
+336:         f.close()
+
+LINES 338-366 (long functions capped at 180 lines)
+338:     def check_yann_energy_release(self):
+339: 
+340:         enuc = ms.calc_enuc(self.masses, self.yann_tracer.xnuc,
+341:                             xC12=self.XCini, xO16=self.XOini)
+342:         enuc = enuc * self.yann_tracer.masses
+343: 
+344:         fig = plt.figure()
+345:         ax = fig.add_subplot(111)
+346: 
+347:         ax.semilogx(self.protocol.time, self.protocol.enuc * 1e-51,
+348:                     label="LEAFS")
+349:         ax.axhline(y=enuc.sum() * 1e-51, ls="dashed", color="grey",
+350:                    label="YANN")
+351:         xlim = ax.get_xlim()
+352:         ax.set_xlim([xlim[0], 1e2])
+353:         ax.legend(frameon=False)
+354:         ax.set_xlabel(r"$t$ [s]")
+355:         ax.set_ylabel(r"$E_{\mathrm{nuc}}$ $[10^{51}\,\mathrm{erg}]$")
+356:         ax.set_title(r"{:s}: Nuclear energy release".format(self.label))
+357:         fig.savefig(os.path.join(
+358:             self.analysis_dir, "{:s}_enuc_leafs_yann.pdf".format(self.label)))
+359: 
+360:         f = open(os.path.join(
+361:             self.info_dir, "{:s}_protocol_info.tex".format(self.label)), "w")
+362:         f.write(r"$E_{{\mathrm{{nuc}}}}^{{\mathrm{{LEAFS}}}}$ & {:.4f} \\".format(
+363:             self.protocol.enuc[-1] * 1e-51) + " \n")
+364:         f.write(r"$E_{{\mathrm{{nuc}}}}^{{\mathrm{{YANN}}}}$ & {:.4f} \\".format(
+365:             enuc.sum() * 1e-51) + " \n")
+366:         f.close()
+
+FILE: leafs_old_calibration.py
+LINES 515-521 (long functions capped at 180 lines)
+515:     def calculate_yann_enuc(self):
+516: 
+517:         X_initial = np.zeros(self.yann_tracer.xnuc.shape)
+518:         X_initial[:, self.i_he] = np.ones(self.yann_tracer.xnuc.shape[0])
+519: 
+520:         self.yann_enuc = masses.calc_enuc(self.masses, self.yann_tracer.xnuc,
+521:                                           xnuc_initial=X_initial)
+
+FILE: masses.py
+LINES 63-79 (long functions capped at 180 lines)
+63: def calc_enuc( masses, xnuc, xHe4=0., xC12=0.5, xO16=0.5, xnuc_initial=None ):
+64:     sp = masses.sp
+65:     if xnuc_initial is None:
+66:         xnuc_initial = np.zeros( sp['count'] )
+67:         names = sp['names']
+68:         if 'he4' in names:
+69:             xnuc_initial[ names.index( 'he4' ) ] = xHe4
+70: 
+71:         if 'c12' in names:
+72:              xnuc_initial[ names.index( 'c12' ) ] = xC12
+73: 
+74:         if 'o16' in names:
+75:              xnuc_initial[ names.index( 'o16' ) ] = xO16
+76: 
+77:     enuc = - ((xnuc - xnuc_initial) * masses.masses).sum(axis=1) * 1.602177e-12 * 1.0e3 * 6.0221367e23
+78: 
+79:     return enuc
+
+LINES 81-98 (long functions capped at 180 lines)
+81: def calc_enuc2( masses, xnuc, xHe4=0., xC12=0.5, xO16=0.5, xnuc_initial=None ):
+82:     sp = masses.sp
+83:     if xnuc_initial is None:
+84:         xnuc_initial = np.zeros( sp['count'] )
+85:         names = sp['names']
+86:         if 'he4' in names:
+87:             xnuc_initial[ names.index( 'he4' ) ] = xHe4
+88: 
+89:         if 'c12' in names:
+90:              xnuc_initial[ names.index( 'c12' ) ] = xC12
+91: 
+92:         if 'o16' in names:
+93:              xnuc_initial[ names.index( 'o16' ) ] = xO16
+94: 
+95:     enuc =  ((xnuc - xnuc_initial) * masses.bindingenergy).sum(axis=1) * 1.602177e-12 * 1.0e3 * 6.0221367e23
+96: 
+97: 
+98:     return enuc
+
+FILE: mesa.py
+LINES 747-781 (long functions capped at 180 lines)
+747:     def energy_profile(self,ixaxis):
+748:         """
+749:             Plot radial profile of key energy generations eps_nuc,
+750:             eps_neu etc.
+751: 
+752:             Parameters
+753:             ----------
+754:             ixaxis : 'mass' or 'radius'
+755:         """
+756: 
+757:         mass = self.get('mass')
+758:         radius = self.get('radius') * ast.rsun_cm
+759:         eps_nuc = self.get('eps_nuc')
+760:         eps_neu = self.get('non_nuc_neu')
+761: 
+762:         if ixaxis == 'mass':
+763:             xaxis = mass
+764:             xlab = 'Mass / M$_\odot$'
+765:         else:
+766:             xaxis = old_div(radius, 1.e8) # Mm
+767:             xlab = 'radius / Mm'
+768: 
+769:         pl.plot(xaxis, np.log10(eps_nuc),
+770:                 'k-',
+771:                 label='$\epsilon_\mathrm{nuc}>0$')
+772:         pl.plot(xaxis, np.log10(-eps_nuc),
+773:                 'k--',
+774:                 label='$\epsilon_\mathrm{nuc}<0$')
+775:         pl.plot(xaxis, np.log10(eps_neu),
+776:                 'r-',
+777:                 label='$\epsilon_\\nu$')
+778: 
+779:         pl.xlabel(xlab)
+780:         pl.ylabel('$\log(\epsilon_\mathrm{nuc},\epsilon_\\nu)$')
+781:         pl.legend(loc='best').draw_frame(False)
+

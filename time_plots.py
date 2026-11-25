@@ -200,7 +200,11 @@ def calculate_value(snapshot, value, sink_value=False, sink_id=0, ind=[], center
 def calculate_value_over_time(snapshots_number_list, snapshot_dir="output", value="mass",
                     mean=False, max=False, sink_value=False, sink_id=0, around_objects=False, around_density_peak=False,
                               object_num=0, motion_axis=0, along_axis_line=False, relative_to_motion=None,
-                              loadonlytype=[0,5]):
+                               loadonlytype=[0,5], center_on_id=None):
+    if center_on_id is not None and (not value.startswith("radius_mass_shell_") or around_objects or along_axis_line
+                                    or mean or max or sink_value or relative_to_motion is not None):
+        raise ValueError("--center_on_id requires a full-sphere radius_mass_shell_<mass> calculation.")
+
     value_over_time = []
     times = []
     value_to_calc = value
@@ -219,6 +223,12 @@ def calculate_value_over_time(snapshots_number_list, snapshot_dir="output", valu
             cell_indices, = np.where(snapshot.data['mass'] != 0)
             suffix = ""
             center = snapshot.center
+            if center_on_id is not None:
+                center_indices = np.flatnonzero(snapshot.id == center_on_id)
+                if center_indices.size != 1:
+                    raise ValueError(f"Snapshot {snapshot_num}: expected one loaded particle with ID {center_on_id}, "
+                                     f"found {center_indices.size}. Check the ID and --ignore_types.")
+                center = snapshot.pos[center_indices[0]]
         times.append(snapshot.time)
         if "dot" in value:
             print("plotting time different")
@@ -274,14 +284,15 @@ def calculate_value_over_time(snapshots_number_list, snapshot_dir="output", valu
 
 def make_time_plots(snapshots_number_list, snapshot_dir="output", plotting_dir="times_plots", value="mass", log=False,
                     mean=False, max=False,sink_value=False, sink_id=0, around_objects=False, motion_axis=0, object_num=0,
-                    along_axis_line=False, relative_to_motion=None, ignore_types=[2]):
+                     along_axis_line=False, relative_to_motion=None, ignore_types=[2], center_on_id=None):
     loadonlytypes = [t for t in range(6) if t not in ignore_types]
     value_over_time, times = calculate_value_over_time(snapshots_number_list,
                                                        snapshot_dir, value, mean, max,
                                                        sink_value, sink_id, around_objects=around_objects,
                                                        object_num=object_num, motion_axis=motion_axis,
                                                        along_axis_line=along_axis_line,
-                                                       relative_to_motion=relative_to_motion, loadonlytype=loadonlytypes)
+                                                        relative_to_motion=relative_to_motion, loadonlytype=loadonlytypes,
+                                                        center_on_id=center_on_id)
     plot_vs_time(value, value_over_time, times, log)
     if object_num != 0:
         suffix = str(object_num)
@@ -294,6 +305,8 @@ def make_time_plots(snapshots_number_list, snapshot_dir="output", plotting_dir="
             suffix += "_u"
     if along_axis_line:
         suffix += "_along_" + chr(ord('x') + motion_axis)
+    if center_on_id is not None:
+        suffix += f"_center_id_{center_on_id}"
 
     filename = get_times_filename(snapshots_number_list, plotting_dir, value, suffix)
     savefig(filename)
@@ -337,6 +350,8 @@ def InitParser():
     parser.add_argument('--skipStep', type=int, help='number of steps to skip', default=1)
     parser.add_argument('--plotting_dir', type=str, help='diretory to plot to', default="plots")
     parser.add_argument('--value', type=str, help='value to plot and compare profile', default="rho")
+    parser.add_argument('--center_on_id', type=int, default=None, metavar='ID',
+                        help='Center radius_mass_shell_<mass> on this particle ID (default: box center)')
     parser.add_argument('--logplot', type=lambda x: (str(x).lower() in ['true', '1', 'yes']), help='logplot',
                         default=True)
     parser.add_argument('--mean', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
@@ -379,15 +394,18 @@ if __name__ == "__main__":
                         log=args.logplot, mean=args.mean, max=args.max, sink_value=args.sink_value, sink_id=args.sink_id,
                         around_objects=args.around_objects, along_axis_line=args.along_axis,
                         motion_axis=args.motion_axis, object_num=1,
-                        relative_to_motion=args.relative_to_motion, ignore_types=args.ignore_types)
+                        relative_to_motion=args.relative_to_motion, ignore_types=args.ignore_types,
+                        center_on_id=args.center_on_id)
         make_time_plots(snapshot_number_list, snapshot_dir=args.output_dir, plotting_dir=args.plotting_dir, value=args.value,
                         log=args.logplot, mean=args.mean, max=args.max, sink_value=args.sink_value, sink_id=args.sink_id,
                         around_objects=args.around_objects, along_axis_line=args.along_axis,
                         motion_axis=args.motion_axis, object_num=2,
-                        relative_to_motion=args.relative_to_motion, ignore_types=args.ignore_types)
+                        relative_to_motion=args.relative_to_motion, ignore_types=args.ignore_types,
+                        center_on_id=args.center_on_id)
     else:
         make_time_plots(snapshot_number_list, snapshot_dir=args.output_dir, plotting_dir=args.plotting_dir, value=args.value,
                         log=args.logplot, mean=args.mean, max=args.max, sink_value=args.sink_value, sink_id=args.sink_id,
                         along_axis_line=args.along_axis, motion_axis=args.motion_axis,
                         around_objects=args.around_objects, object_num=0,
-                        relative_to_motion=args.relative_to_motion, ignore_types=args.ignore_types)
+                        relative_to_motion=args.relative_to_motion, ignore_types=args.ignore_types,
+                        center_on_id=args.center_on_id)
