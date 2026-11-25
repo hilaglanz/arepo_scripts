@@ -1,0 +1,34 @@
+[
+    {
+        "path":  "src\\allvars.h",
+        "sha256":  "17A669F275A78303772700A65B493F01CCD885DA4EE530328766062D5182D6D9"
+    },
+    {
+        "path":  "src\\parameters.c",
+        "sha256":  "6F2B85AE818FD8B02D1A03B9BFE80D87B15A559DE1FF90A3E6A28317D08355AA"
+    },
+    {
+        "path":  "src\\restart.c",
+        "sha256":  "1B9ADAFE8ED3EE4D057918EF74F6287225B1C4673B37357638BF81BFA5D15CAE"
+    },
+    {
+        "path":  "src\\mesa_opacity.c",
+        "sha256":  "3CFB00CA184B18EF14554CEC5ACB983D538FA498819E1F680AAE4B0AFED00F3A"
+    },
+    {
+        "path":  "src\\mesa_opacity.h",
+        "sha256":  "79803F363CA10B2D9907F9D85B678592EB978667475F7B3DF514D2CE89F5C16D"
+    },
+    {
+        "path":  "src\\init.c",
+        "sha256":  "81BB05B4418FA152CDE938C36486C5703082D0F43A98CDADCC7D0DE3C6474124"
+    },
+    {
+        "path":  "src\\idort\\IDORT_run.c",
+        "sha256":  "7644D48725C0C419CD79A0ED53B2ACDFD76AE8819165F85AA3371C3D181F2315"
+    },
+    {
+        "path":  "src\\read_ic.c",
+        "sha256":  "573946943B7B2B6CA01E651B96609611A35564519224B907F48185F76AB1D7B8"
+    }
+]

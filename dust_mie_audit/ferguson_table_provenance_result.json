@@ -1,0 +1,18 @@
+﻿{
+    "Archive":  "C:\\Users\\hila\\Dropbox\\RMHD\\IDORT\\AGB\\f05.gs98.tar.gz",
+    "ArchiveMember":  "g98.7.02.tron",
+    "RossTable":  "C:\\Users\\hila\\Dropbox\\RMHD\\IDORT\\RSGg_m10lgl4.6_res6ib03n3s_r6s_new4_kap\\RSGg_m10lgl4.6_res6ib03n3s_r6s_new4_kap\\gs98_z0.02_x0.7_ma_ross.data",
+    "ArchiveHeader":  "Grevesse \u0026 Sauval 1998 with X= 0.700000 and Z= 0.020000",
+    "RossHeader":  "fixed metal distribution -- based on Ferguson, Alexander, et al (2005) with GS98 photospheric metals",
+    "ArchiveTemperatureRows":  85,
+    "SharedTemperatureValues":  37,
+    "SharedCells":  703,
+    "ExactMatches":  703,
+    "MaximumAbsoluteDifference":  0,
+    "LowTemperatureLimitLogT":  3.5,
+    "LowTemperatureSharedCells":  323,
+    "LowTemperatureExactMatches":  323,
+    "ArchiveSHA256":  "F8F840CE018215B93BA1E7168D8E2216FDBE93C6783A00D26A69A02BBAFBFA19",
+    "RossTableSHA256":  "9955A6987ED80BC373910DB5F12003BA5E8E4DDC18C53187F88E88797D51FAB5",
+    "Scope":  "Only these accessible local files were compared. No current cluster-copy hashes or Planck generation provenance were verified."
+}

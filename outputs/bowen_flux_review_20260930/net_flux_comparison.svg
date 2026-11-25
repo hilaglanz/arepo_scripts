@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE svg
+  PUBLIC '-//W3C//DTD SVG 1.0//EN'
+  'http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd'>
+<svg width="850" height="755" preserveAspectRatio="xMinYMin meet" viewBox="0 0 850 755" xmlns="http://www.w3.org/2000/svg" version="1.0" fill-rule="evenodd" xmlns:xlink="http://www.w3.org/1999/xlink">
+	<title>...</title>
+	<desc>...</desc>
+	<clipPath id="clip">
+		<rect x="0" y="0" width="850" height="755"/>
+	</clipPath>
+	<g id="group" transform="scale(1,-1) translate(0,-755)" style="clip-path: url(#clip)">
+		<g transform="">
+			<rect x="0" y="0" width="850" height="755" style="stroke: none; stroke-linecap: butt; stroke-width: 1; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="55" y="723" style="font-family: Helvetica-Bold; font-size: 18px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,1446) scale(1,-1)">Net mass transport with and without Bowen opacity</text>
+			<text x="55" y="701" style="font-family: Helvetica; font-size: 11px;fill: rgb(26%,26%,26%); stroke:none;" transform="translate(0,1402) scale(1,-1)">Shared later interval: 7.14-10.29 yr; positive = outward, negative = inward</text>
+			<path d="M 55,678 L 80,678 Z" style="stroke: rgb(0%,44%,69%); stroke-linecap: butt; stroke-width: 2.5;"/>
+			<text x="88" y="674" style="font-family: Helvetica; font-size: 11px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,1348) scale(1,-1)">Tables + Bowen</text>
+			<path d="M 270,678 L 295,678 Z" style="stroke: rgb(83%,36%,0%); stroke-linecap: butt; stroke-width: 2.5;"/>
+			<text x="303" y="674" style="font-family: Helvetica; font-size: 11px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,1348) scale(1,-1)">Tables only</text>
+			<g transform="">
+				<g transform="">
+					<g transform="">
+						<path d="M 92,487 L 785,487 Z" style="stroke: rgb(46%,46%,46%); stroke-linecap: butt; stroke-width: 1;"/>
+					</g>
+					<g transform="">
+						<path d="M 113.323077,487 L 113.323077,482 Z" style="stroke: rgb(46%,46%,46%); stroke-linecap: butt; stroke-width: 1;"/>
+						<path d="M 241.261538,487 L 241.261538,482 Z" style="stroke: rgb(46%,46%,46%); stroke-linecap: butt; stroke-width: 1;"/>
+						<path d="M 369.2,487 L 369.2,482 Z" style="stroke: rgb(46%,46%,46%); stroke-linecap: butt; stroke-width: 1;"/>
+						<path d="M 497.138462,487 L 497.138462,482 Z" style="stroke: rgb(46%,46%,46%); stroke-linecap: butt; stroke-width: 1;"/>
+						<path d="M 625.076923,487 L 625.076923,482 Z" style="stroke: rgb(46%,46%,46%); stroke-linecap: butt; stroke-width: 1;"/>
+						<path d="M 753.015385,487 L 753.015385,482 Z" style="stroke: rgb(46%,46%,46%); stroke-linecap: butt; stroke-width: 1;"/>
+					</g>
+					<g transform="">
+						<g transform=" matrix(1,0,0,1,113.323077,482)">
+							<text x="-6.950000000000001" y="-10.0" style="font-family: Helvetica; font-size: 10px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,-20) scale(1,-1)">7.2</text>
+						</g>
+						<g transform=" matrix(1,0,0,1,241.261538,482)">
+							<text x="-6.950000000000001" y="-10.0" style="font-family: Helvetica; font-size: 10px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,-20) scale(1,-1)">7.8</text>
+						</g>
+						<g transform=" matrix(1,0,0,1,369.2,482)">
+							<text x="-6.950000000000001" y="-10.0" style="font-family: Helvetica; font-size: 10px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,-20) scale(1,-1)">8.4</text>
+						</g>
+						<g transform=" matrix(1,0,0,1,497.138462,482)">
+							<text x="-6.950000000000001" y="-10.0" style="font-family: Helvetica; font-size: 10px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,-20) scale(1,-1)">9.0</text>
+						</g>
+						<g transform=" matrix(1,0,0,1,625.076923,482)">
+							<text x="-6.950000000000001" y="-10.0" style="font-family: Helvetica; font-size: 10px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,-20) scale(1,-1)">9.6</text>
+						</g>
+						<g transform=" matrix(1,0,0,1,753.015385,482)">
+							<text x="-9.73" y="-10.0" style="font-family: Helvetica; font-size: 10px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,-20) scale(1,-1)">10.2</text>
+						</g>
+					</g>
+				</g>
+				<g transform="">
+					<g transform="">
+						<path d="M 92,487 L 92,631 Z" style="stroke: rgb(46%,46%,46%); stroke-linecap: butt; stroke-width: 1;"/>
+					</g>
+					<g transform="">
+						<path d="M 92,493 L 87,493 Z" style="stroke: rgb(46%,46%,46%); stroke-linecap: butt; stroke-width: 1;"/>
+						<path d="M 92,523 L 87,523 Z" style="stroke: rgb(46%,46%,46%); stroke-linecap: butt; stroke-width: 1;"/>
+						<path d="M 92,553 L 87,553 Z" style="stroke: rgb(46%,46%,46%); stroke-linecap: butt; stroke-width: 1;"/>
+						<path d="M 92,583 L 87,583 Z" style="stroke: rgb(46%,46%,46%); stroke-linecap: butt; stroke-width: 1;"/>
+						<path d="M 92,613 L 87,613 Z" style="stroke: rgb(46%,46%,46%); stroke-linecap: butt; stroke-width: 1;"/>
+					</g>
+					<g transform="">
+						<g transform=" matrix(1,0,0,1,87,493)">
+							<text x="-14.450000000000001" y="-4.0" style="font-family: Helvetica; font-size: 10px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,-8) scale(1,-1)">-15</text>
+						</g>
+						<g transform=" matrix(1,0,0,1,87,523)">
+							<text x="-14.450000000000001" y="-4.0" style="font-family: Helvetica; font-size: 10px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,-8) scale(1,-1)">-10</text>
+						</g>
+						<g transform=" matrix(1,0,0,1,87,553)">
+							<text x="-8.89" y="-4.0" style="font-family: Helvetica; font-size: 10px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,-8) scale(1,-1)">-5</text>
+						</g>
+						<g transform=" matrix(1,0,0,1,87,583)">
+							<text x="-5.5600000000000005" y="-4.0" style="font-family: Helvetica; font-size: 10px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,-8) scale(1,-1)">0</text>
+						</g>
+						<g transform=" matrix(1,0,0,1,87,613)">
+							<text x="-5.5600000000000005" y="-4.0" style="font-family: Helvetica; font-size: 10px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,-8) scale(1,-1)">5</text>
+						</g>
+					</g>
+				</g>
+				<path d="M 113.323077,487 L 113.323077,631 Z" style="stroke: rgb(90%,90%,90%); stroke-linecap: butt; stroke-width: 0.25;"/>
+				<path d="M 241.261538,487 L 241.261538,631 Z" style="stroke: rgb(90%,90%,90%); stroke-linecap: butt; stroke-width: 0.25;"/>
+				<path d="M 369.2,487 L 369.2,631 Z" style="stroke: rgb(90%,90%,90%); stroke-linecap: butt; stroke-width: 0.25;"/>
+				<path d="M 497.138462,487 L 497.138462,631 Z" style="stroke: rgb(90%,90%,90%); stroke-linecap: butt; stroke-width: 0.25;"/>
+				<path d="M 625.076923,487 L 625.076923,631 Z" style="stroke: rgb(90%,90%,90%); stroke-linecap: butt; stroke-width: 0.25;"/>
+				<path d="M 753.015385,487 L 753.015385,631 Z" style="stroke: rgb(90%,90%,90%); stroke-linecap: butt; stroke-width: 0.25;"/>
+				<path d="M 92,493 L 785,493 Z" style="stroke: rgb(90%,90%,90%); stroke-linecap: butt; stroke-width: 0.25;"/>
+				<path d="M 92,523 L 785,523 Z" style="stroke: rgb(90%,90%,90%); stroke-linecap: butt; stroke-width: 0.25;"/>
+				<path d="M 92,553 L 785,553 Z" style="stroke: rgb(90%,90%,90%); stroke-linecap: butt; stroke-width: 0.25;"/>
+				<path d="M 92,583 L 785,583 Z" style="stroke: rgb(90%,90%,90%); stroke-linecap: butt; stroke-width: 0.25;"/>
+				<path d="M 92,613 L 785,613 Z" style="stroke: rgb(90%,90%,90%); stroke-linecap: butt; stroke-width: 0.25;"/>
+				<g transform="">
+					<polyline points="99.91276 492.4221, 99.92061 492.4233, 104.3506 493.0801, 108.7619 493.9323, 113.1919 494.3299, 117.6218 495.0956, 122.0331 495.4776, 126.4631 496.075, 130.8931 496.7318, 135.3044 497.2801, 139.7344 497.9648, 144.1643 498.6111, 148.5756 499.0689, 153.0056 499.9109, 157.4356 500.6529, 161.8469 501.3199, 166.2768 502.1261, 170.7068 502.6615, 175.1368 503.26, 179.5481 503.7514, 183.9781 504.3131, 188.4081 504.9922, 192.8193 505.525, 197.2493 506.1544, 201.6793 506.6958, 206.0906 506.8973, 210.5206 507.2097, 214.9505 507.5328, 219.3618 508.1636, 223.7918 508.5401, 228.2218 509.0927, 232.6331 509.6048, 237.0631 510.1774, 241.493 511.0846, 245.9043 511.3016, 250.3343 511.7615, 254.7643 512.3433, 259.1756 512.6515, 263.6056 513.0662, 268.0355 513.5378, 272.4468 513.9886, 276.8768 514.3754, 281.3068 515.0087, 285.7181 515.0668, 290.148 515.5366, 294.578 516.2138, 299.008 516.6569, 303.4193 517.3318, 307.8493 517.7783, 312.2793 518.378, 316.6905 518.9161, 321.1205 519.4062, 325.5505 519.8738, 329.9618 520.7205, 334.3918 521.2105, 338.8217 521.8032, 343.233 522.1973, 347.663 522.7911, 352.093 523.4676, 356.5043 523.7819, 360.9343 524.2754, 365.3642 524.5605, 369.7755 525.0929, 374.2055 525.3663, 378.6355 525.9299, 383.0468 526.4208, 387.4768 527.016, 391.9067 527.5659, 396.318 527.9468, 400.748 528.4, 405.178 528.716, 409.5893 529.1621, 414.0192 529.7155, 418.4492 530.1991, 422.8792 530.7771, 427.2905 531.4372, 431.7205 531.652, 436.1505 532.2322, 440.5617 532.6987, 444.9917 532.9156, 449.4217 533.494, 453.833 534.0293, 458.263 534.3637, 462.6929 534.6655, 467.1042 535.1706, 471.5342 535.5624, 475.9642 536.0354, 480.3755 536.5394, 484.8055 536.9908, 489.2354 537.3707, 493.6467 537.6302, 498.0767 537.9499, 502.5067 538.5354, 506.918 538.9155, 511.348 539.2143, 515.7779 539.5044, 520.1892 539.8046, 524.6192 540.0944, 529.0492 540.5019, 533.4792 540.8993, 537.8904 541.2451, 542.3204 541.621, 546.7504 541.8308, 551.1617 542.0646, 555.5917 542.541, 560.0217 543, 564.4329 543.3529, 568.8629 543.6822, 573.2929 544.1023, 577.7042 544.4528, 582.1342 544.8272, 586.5641 545.1619, 590.9754 545.3784, 595.4054 545.7371, 599.8354 545.995, 604.2467 546.4074, 608.6767 546.7809, 613.1066 547.1261, 617.5179 547.489, 621.9479 547.7894, 626.3779 548.3056, 630.7892 548.6617, 635.2192 548.896, 639.6491 549.1065, 644.0604 549.5096, 648.4904 549.8722, 652.9204 550.0492, 657.3504 550.4678, 661.7616 550.7779, 666.1916 551.0295, 670.6216 551.3641, 675.0329 551.5067, 679.4629 551.9314, 683.8929 552.2519, 688.3041 552.5614, 692.7341 552.9548, 697.1641 553.1279, 701.5754 553.4245, 706.0054 553.717, 710.4353 554.1466, 714.8466 554.4692, 719.2766 554.8355, 723.7093 555.0792, 728.1176 555.3248, 732.5503 555.6517, 736.983 555.9701, 741.3913 556.2597, 745.824 556.4936, 750.2567 556.8226, 754.665 557.0276, 759.0977 557.2333, 763.5304 557.4463, 767.9388 557.6907, 772.3628 557.9367" style="stroke: rgb(0%,44%,69%); stroke-linecap: round; stroke-width: 2; fill: None; fill-rule: evenodd;"/>
+					<polyline points="99.91276 495.4426, 113.1995 498.2842, 126.4674 500.8936, 139.7354 503.2022, 153.0033 505.3704, 166.2713 507.3989, 179.558 509.3503, 192.8259 510.9191, 206.0983 512.9866, 219.3822 514.9256, 232.6339 516.1734, 245.9178 517.9786, 259.2018 521.5744, 272.4534 528.7058, 285.7373 539.4015, 299.0213 552.733, 312.2729 566.0339, 325.5568 578.8521, 338.8085 590.7304, 352.0924 599.8749, 365.3764 607.0263, 378.628 612.0989, 391.9119 615.999, 405.1959 617.5462, 418.4475 616.9125, 431.7314 614.739, 444.9831 611.1998, 458.267 606.8815, 471.551 601.7322, 484.8026 596.2785, 498.0865 591.0896, 511.3705 586.2789, 524.6221 581.7777, 537.906 578.1299, 551.1577 574.6113, 564.4416 572.6741, 577.7256 570.896, 590.9772 569.3071, 604.2611 566.7191, 617.5451 564.6551, 630.7967 562.2176, 644.0807 560.1457, 657.3323 557.9224, 670.6162 556.1675, 683.9002 554.4044, 688.3282 553.6864, 692.7561 553.1287, 697.1518 552.5551, 701.5798 552.1604, 706.0078 551.7123, 710.4357 551.386, 714.8637 551.0052, 719.2917 550.6351, 723.7197 550.3104, 728.1477 549.6809, 732.5433 549.3263, 736.9713 548.9811, 741.3993 548.6192, 745.8273 548.1773, 750.2553 547.9156, 754.6832 547.5349, 759.1112 547.1577, 763.5392 546.8398, 767.9349 546.622, 772.3628 546.405" style="stroke: rgb(83%,36%,0%); stroke-linecap: round; stroke-width: 2; fill: None; fill-rule: evenodd;"/>
+				</g>
+			</g>
+			<path d="M 92,583 L 785,583 Z" style="stroke: rgb(26%,26%,26%); stroke-linecap: butt; stroke-width: 0.6; stroke-dasharray: 3, 3;"/>
+			<text x="92" y="643" style="font-family: Helvetica-Bold; font-size: 12px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,1286) scale(1,-1)">1000-1500 solar radii</text>
+			<text x="25" y="531.0" style="font-family: Helvetica; font-size: 10px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,1062) scale(1,-1)">Net flux</text>
+			<g transform="">
+				<g transform="">
+					<g transform="">
+						<path d="M 92,297 L 785,297 Z" style="stroke: rgb(46%,46%,46%); stroke-linecap: butt; stroke-width: 1;"/>
+					</g>
+					<g transform="">
+						<path d="M 113.323077,297 L 113.323077,292 Z" style="stroke: rgb(46%,46%,46%); stroke-linecap: butt; stroke-width: 1;"/>
+						<path d="M 241.261538,297 L 241.261538,292 Z" style="stroke: rgb(46%,46%,46%); stroke-linecap: butt; stroke-width: 1;"/>
+						<path d="M 369.2,297 L 369.2,292 Z" style="stroke: rgb(46%,46%,46%); stroke-linecap: butt; stroke-width: 1;"/>
+						<path d="M 497.138462,297 L 497.138462,292 Z" style="stroke: rgb(46%,46%,46%); stroke-linecap: butt; stroke-width: 1;"/>
+						<path d="M 625.076923,297 L 625.076923,292 Z" style="stroke: rgb(46%,46%,46%); stroke-linecap: butt; stroke-width: 1;"/>
+						<path d="M 753.015385,297 L 753.015385,292 Z" style="stroke: rgb(46%,46%,46%); stroke-linecap: butt; stroke-width: 1;"/>
+					</g>
+					<g transform="">
+						<g transform=" matrix(1,0,0,1,113.323077,292)">
+							<text x="-6.950000000000001" y="-10.0" style="font-family: Helvetica; font-size: 10px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,-20) scale(1,-1)">7.2</text>
+						</g>
+						<g transform=" matrix(1,0,0,1,241.261538,292)">
+							<text x="-6.950000000000001" y="-10.0" style="font-family: Helvetica; font-size: 10px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,-20) scale(1,-1)">7.8</text>
+						</g>
+						<g transform=" matrix(1,0,0,1,369.2,292)">
+							<text x="-6.950000000000001" y="-10.0" style="font-family: Helvetica; font-size: 10px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,-20) scale(1,-1)">8.4</text>
+						</g>
+						<g transform=" matrix(1,0,0,1,497.138462,292)">
+							<text x="-6.950000000000001" y="-10.0" style="font-family: Helvetica; font-size: 10px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,-20) scale(1,-1)">9.0</text>
+						</g>
+						<g transform=" matrix(1,0,0,1,625.076923,292)">
+							<text x="-6.950000000000001" y="-10.0" style="font-family: Helvetica; font-size: 10px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,-20) scale(1,-1)">9.6</text>
+						</g>
+						<g transform=" matrix(1,0,0,1,753.015385,292)">
+							<text x="-9.73" y="-10.0" style="font-family: Helvetica; font-size: 10px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,-20) scale(1,-1)">10.2</text>
+						</g>
+					</g>
+				</g>
+				<g transform="">
+					<g transform="">
+						<path d="M 92,297 L 92,441 Z" style="stroke: rgb(46%,46%,46%); stroke-linecap: butt; stroke-width: 1;"/>
+					</g>
+					<g transform="">
+						<path d="M 92,297 L 87,297 Z" style="stroke: rgb(46%,46%,46%); stroke-linecap: butt; stroke-width: 1;"/>
+						<path d="M 92,325.8 L 87,325.8 Z" style="stroke: rgb(46%,46%,46%); stroke-linecap: butt; stroke-width: 1;"/>
+						<path d="M 92,354.6 L 87,354.6 Z" style="stroke: rgb(46%,46%,46%); stroke-linecap: butt; stroke-width: 1;"/>
+						<path d="M 92,383.4 L 87,383.4 Z" style="stroke: rgb(46%,46%,46%); stroke-linecap: butt; stroke-width: 1;"/>
+						<path d="M 92,412.2 L 87,412.2 Z" style="stroke: rgb(46%,46%,46%); stroke-linecap: butt; stroke-width: 1;"/>
+						<path d="M 92,441 L 87,441 Z" style="stroke: rgb(46%,46%,46%); stroke-linecap: butt; stroke-width: 1;"/>
+					</g>
+					<g transform="">
+						<g transform=" matrix(1,0,0,1,87,297)">
+							<text x="-8.89" y="-4.0" style="font-family: Helvetica; font-size: 10px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,-8) scale(1,-1)">-4</text>
+						</g>
+						<g transform=" matrix(1,0,0,1,87,325.8)">
+							<text x="-8.89" y="-4.0" style="font-family: Helvetica; font-size: 10px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,-8) scale(1,-1)">-3</text>
+						</g>
+						<g transform=" matrix(1,0,0,1,87,354.6)">
+							<text x="-8.89" y="-4.0" style="font-family: Helvetica; font-size: 10px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,-8) scale(1,-1)">-2</text>
+						</g>
+						<g transform=" matrix(1,0,0,1,87,383.4)">
+							<text x="-8.89" y="-4.0" style="font-family: Helvetica; font-size: 10px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,-8) scale(1,-1)">-1</text>
+						</g>
+						<g transform=" matrix(1,0,0,1,87,412.2)">
+							<text x="-5.5600000000000005" y="-4.0" style="font-family: Helvetica; font-size: 10px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,-8) scale(1,-1)">0</text>
+						</g>
+						<g transform=" matrix(1,0,0,1,87,441)">
+							<text x="-5.5600000000000005" y="-4.0" style="font-family: Helvetica; font-size: 10px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,-8) scale(1,-1)">1</text>
+						</g>
+					</g>
+				</g>
+				<path d="M 113.323077,297 L 113.323077,441 Z" style="stroke: rgb(90%,90%,90%); stroke-linecap: butt; stroke-width: 0.25;"/>
+				<path d="M 241.261538,297 L 241.261538,441 Z" style="stroke: rgb(90%,90%,90%); stroke-linecap: butt; stroke-width: 0.25;"/>
+				<path d="M 369.2,297 L 369.2,441 Z" style="stroke: rgb(90%,90%,90%); stroke-linecap: butt; stroke-width: 0.25;"/>
+				<path d="M 497.138462,297 L 497.138462,441 Z" style="stroke: rgb(90%,90%,90%); stroke-linecap: butt; stroke-width: 0.25;"/>
+				<path d="M 625.076923,297 L 625.076923,441 Z" style="stroke: rgb(90%,90%,90%); stroke-linecap: butt; stroke-width: 0.25;"/>
+				<path d="M 753.015385,297 L 753.015385,441 Z" style="stroke: rgb(90%,90%,90%); stroke-linecap: butt; stroke-width: 0.25;"/>
+				<path d="M 92,325.8 L 785,325.8 Z" style="stroke: rgb(90%,90%,90%); stroke-linecap: butt; stroke-width: 0.25;"/>
+				<path d="M 92,354.6 L 785,354.6 Z" style="stroke: rgb(90%,90%,90%); stroke-linecap: butt; stroke-width: 0.25;"/>
+				<path d="M 92,383.4 L 785,383.4 Z" style="stroke: rgb(90%,90%,90%); stroke-linecap: butt; stroke-width: 0.25;"/>
+				<path d="M 92,412.2 L 785,412.2 Z" style="stroke: rgb(90%,90%,90%); stroke-linecap: butt; stroke-width: 0.25;"/>
+				<path d="M 92,441 L 785,441 Z" style="stroke: rgb(90%,90%,90%); stroke-linecap: butt; stroke-width: 0.25;"/>
+				<g transform="">
+					<polyline points="99.91276 314.5804, 99.92061 314.5781, 104.3506 314.3238, 108.7619 314.4601, 113.1919 314.7029, 117.6218 313.592, 122.0331 313.6608, 126.4631 313.1588, 130.8931 312.5563, 135.3044 313.37, 139.7344 313.4468, 144.1643 312.9209, 148.5756 312.1429, 153.0056 311.8928, 157.4356 310.4884, 161.8469 310.3334, 166.2768 309.6858, 170.7068 310.2355, 175.1368 309.1896, 179.5481 309.0935, 183.9781 308.7804, 188.4081 307.149, 192.8193 306.8572, 197.2493 306.7922, 201.6793 306.7262, 206.0906 307.8248, 210.5206 308.175, 214.9505 309.3135, 219.3618 309.6757, 223.7918 309.906, 228.2218 310.1441, 232.6331 310.3068, 237.0631 310.1783, 241.493 309.3582, 245.9043 309.8361, 250.3343 309.5613, 254.7643 309.7609, 259.1756 311.1187, 263.6056 309.3168, 268.0355 309.8163, 272.4468 310.4802, 276.8768 311.5302, 281.3068 311.6186, 285.7181 313.2081, 290.148 313.2137, 294.578 313.1767, 299.008 313.1577, 303.4193 312.7998, 307.8493 312.9374, 312.2793 313.1894, 316.6905 313.8671, 321.1205 313.8567, 325.5505 314.3815, 329.9618 313.8209, 334.3918 314.0229, 338.8217 314.1453, 343.233 314.9131, 347.663 315.4699, 352.093 315.7767, 356.5043 317.086, 360.9343 317.8084, 365.3642 319.1023, 369.7755 319.8762, 374.2055 320.6232, 378.6355 321.1608, 383.0468 321.4761, 387.4768 321.2564, 391.9067 321.8666, 396.318 323.1308, 400.748 324.311, 405.178 324.1901, 409.5893 324.9506, 414.0192 324.696, 418.4492 325.3588, 422.8792 325.5696, 427.2905 325.9096, 431.7205 327.4261, 436.1505 327.157, 440.5617 326.9318, 444.9917 328.2305, 449.4217 328.9758, 453.833 328.2734, 458.263 329.3759, 462.6929 330.2924, 467.1042 330.2385, 471.5342 330.9912, 475.9642 331.5687, 480.3755 331.9185, 484.8055 332.1345, 489.2354 333.0944, 493.6467 334.0944, 498.0767 335.0466, 502.5067 335.1976, 506.918 335.2974, 511.348 336.186, 515.7779 337.4301, 520.1892 338.5994, 524.6192 339.4259, 529.0492 340.1993, 533.4792 340.567, 537.8904 341.12, 542.3204 341.3115, 546.7504 342.5675, 551.1617 343.3868, 555.5917 343.5541, 560.0217 343.7624, 564.4329 344.1984, 568.8629 345.5488, 573.2929 346.4348, 577.7042 347.2763, 582.1342 348.0233, 586.5641 348.9647, 590.9754 350.323, 595.4054 350.9132, 599.8354 352.2662, 604.2467 352.8456, 608.6767 353.3346, 613.1066 354.0174, 617.5179 354.8516, 621.9479 355.6767, 626.3779 356.4222, 630.7892 357.1249, 635.2192 358.0813, 639.6491 359.0566, 644.0604 360.2975, 648.4904 361.1192, 652.9204 362.7107, 657.3504 363.6278, 661.7616 364.8188, 666.1916 365.9907, 670.6216 367.3514, 675.0329 368.3838, 679.4629 369.411, 683.8929 370.0659, 688.3041 371.2047, 692.7341 371.9142, 697.1641 373.0247, 701.5754 374.1148, 706.0054 375.4255, 710.4353 375.1926, 714.8466 376.0375, 719.2766 376.8991, 723.7093 376.765, 728.1176 376.789, 732.5503 376.776, 736.983 376.406, 741.3913 376.4911, 745.824 376.7334, 750.2567 377.0569, 754.665 377.4241, 759.0977 378.0189, 763.5304 378.4541, 767.9388 379.2039, 772.3628 379.7454" style="stroke: rgb(0%,44%,69%); stroke-linecap: round; stroke-width: 2; fill: None; fill-rule: evenodd;"/>
+					<polyline points="99.91276 335.0122, 113.1995 334.0885, 126.4674 332.7749, 139.7354 332.7598, 153.0033 332.3199, 166.2713 332.3152, 179.558 331.904, 192.8259 330.8137, 206.0983 328.7408, 219.3822 327.4814, 232.6339 327.4279, 245.9178 325.7593, 259.2018 324.963, 272.4534 324.3551, 285.7373 323.8422, 299.0213 324.9491, 312.2729 326.2621, 325.5568 327.7856, 338.8085 327.5495, 352.0924 328.9887, 365.3764 329.4875, 378.628 330.3825, 391.9119 330.8574, 405.1959 330.4286, 418.4475 331.8336, 431.7314 335.554, 444.9831 341.7886, 458.267 346.625, 471.551 354.8684, 484.8026 364.2523, 498.0865 372.2345, 511.3705 378.3866, 524.6221 386.5439, 537.906 395.5561, 551.1577 406.3712, 564.4416 413.8676, 577.7256 417.983, 590.9772 422.5814, 604.2611 426.932, 617.5451 427.7461, 630.7967 429.654, 644.0807 430.4726, 657.3323 432.6507, 670.6162 433.2641, 683.9002 433.3865, 688.3282 434.2628, 692.7561 434.194, 697.1518 434.9215, 701.5798 433.2579, 706.0078 432.142, 710.4357 431.4016, 714.8637 429.3614, 719.2917 428.2349, 723.7197 427.0648, 728.1477 427.2017, 732.5433 425.6355, 736.9713 424.9533, 741.3993 425.4046, 745.8273 426.1013, 750.2553 424.323, 754.6832 424.7381, 759.1112 425.4377, 763.5392 425.1336, 767.9349 424.9924, 772.3628 424.9771" style="stroke: rgb(83%,36%,0%); stroke-linecap: round; stroke-width: 2; fill: None; fill-rule: evenodd;"/>
+				</g>
+			</g>
+			<path d="M 92,412.2 L 785,412.2 Z" style="stroke: rgb(26%,26%,26%); stroke-linecap: butt; stroke-width: 0.6; stroke-dasharray: 3, 3;"/>
+			<text x="92" y="453" style="font-family: Helvetica-Bold; font-size: 12px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,906) scale(1,-1)">1500-2000 solar radii</text>
+			<text x="25" y="341.0" style="font-family: Helvetica; font-size: 10px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,682) scale(1,-1)">Net flux</text>
+			<g transform="">
+				<g transform="">
+					<g transform="">
+						<path d="M 92,107 L 785,107 Z" style="stroke: rgb(46%,46%,46%); stroke-linecap: butt; stroke-width: 1;"/>
+					</g>
+					<g transform="">
+						<path d="M 113.323077,107 L 113.323077,102 Z" style="stroke: rgb(46%,46%,46%); stroke-linecap: butt; stroke-width: 1;"/>
+						<path d="M 241.261538,107 L 241.261538,102 Z" style="stroke: rgb(46%,46%,46%); stroke-linecap: butt; stroke-width: 1;"/>
+						<path d="M 369.2,107 L 369.2,102 Z" style="stroke: rgb(46%,46%,46%); stroke-linecap: butt; stroke-width: 1;"/>
+						<path d="M 497.138462,107 L 497.138462,102 Z" style="stroke: rgb(46%,46%,46%); stroke-linecap: butt; stroke-width: 1;"/>
+						<path d="M 625.076923,107 L 625.076923,102 Z" style="stroke: rgb(46%,46%,46%); stroke-linecap: butt; stroke-width: 1;"/>
+						<path d="M 753.015385,107 L 753.015385,102 Z" style="stroke: rgb(46%,46%,46%); stroke-linecap: butt; stroke-width: 1;"/>
+					</g>
+					<g transform="">
+						<g transform=" matrix(1,0,0,1,113.323077,102)">
+							<text x="-6.950000000000001" y="-10.0" style="font-family: Helvetica; font-size: 10px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,-20) scale(1,-1)">7.2</text>
+						</g>
+						<g transform=" matrix(1,0,0,1,241.261538,102)">
+							<text x="-6.950000000000001" y="-10.0" style="font-family: Helvetica; font-size: 10px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,-20) scale(1,-1)">7.8</text>
+						</g>
+						<g transform=" matrix(1,0,0,1,369.2,102)">
+							<text x="-6.950000000000001" y="-10.0" style="font-family: Helvetica; font-size: 10px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,-20) scale(1,-1)">8.4</text>
+						</g>
+						<g transform=" matrix(1,0,0,1,497.138462,102)">
+							<text x="-6.950000000000001" y="-10.0" style="font-family: Helvetica; font-size: 10px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,-20) scale(1,-1)">9.0</text>
+						</g>
+						<g transform=" matrix(1,0,0,1,625.076923,102)">
+							<text x="-6.950000000000001" y="-10.0" style="font-family: Helvetica; font-size: 10px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,-20) scale(1,-1)">9.6</text>
+						</g>
+						<g transform=" matrix(1,0,0,1,753.015385,102)">
+							<text x="-9.73" y="-10.0" style="font-family: Helvetica; font-size: 10px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,-20) scale(1,-1)">10.2</text>
+						</g>
+					</g>
+				</g>
+				<g transform="">
+					<g transform="">
+						<path d="M 92,107 L 92,251 Z" style="stroke: rgb(46%,46%,46%); stroke-linecap: butt; stroke-width: 1;"/>
+					</g>
+					<g transform="">
+						<path d="M 92,107 L 87,107 Z" style="stroke: rgb(46%,46%,46%); stroke-linecap: butt; stroke-width: 1;"/>
+						<path d="M 92,140.230769 L 87,140.230769 Z" style="stroke: rgb(46%,46%,46%); stroke-linecap: butt; stroke-width: 1;"/>
+						<path d="M 92,173.461538 L 87,173.461538 Z" style="stroke: rgb(46%,46%,46%); stroke-linecap: butt; stroke-width: 1;"/>
+						<path d="M 92,206.692308 L 87,206.692308 Z" style="stroke: rgb(46%,46%,46%); stroke-linecap: butt; stroke-width: 1;"/>
+						<path d="M 92,239.923077 L 87,239.923077 Z" style="stroke: rgb(46%,46%,46%); stroke-linecap: butt; stroke-width: 1;"/>
+					</g>
+					<g transform="">
+						<g transform=" matrix(1,0,0,1,87,107)">
+							<text x="-5.5600000000000005" y="-4.0" style="font-family: Helvetica; font-size: 10px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,-8) scale(1,-1)">0</text>
+						</g>
+						<g transform=" matrix(1,0,0,1,87,140.230769)">
+							<text x="-5.5600000000000005" y="-4.0" style="font-family: Helvetica; font-size: 10px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,-8) scale(1,-1)">3</text>
+						</g>
+						<g transform=" matrix(1,0,0,1,87,173.461538)">
+							<text x="-5.5600000000000005" y="-4.0" style="font-family: Helvetica; font-size: 10px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,-8) scale(1,-1)">6</text>
+						</g>
+						<g transform=" matrix(1,0,0,1,87,206.692308)">
+							<text x="-5.5600000000000005" y="-4.0" style="font-family: Helvetica; font-size: 10px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,-8) scale(1,-1)">9</text>
+						</g>
+						<g transform=" matrix(1,0,0,1,87,239.923077)">
+							<text x="-11.120000000000001" y="-4.0" style="font-family: Helvetica; font-size: 10px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,-8) scale(1,-1)">12</text>
+						</g>
+					</g>
+				</g>
+				<path d="M 113.323077,107 L 113.323077,251 Z" style="stroke: rgb(90%,90%,90%); stroke-linecap: butt; stroke-width: 0.25;"/>
+				<path d="M 241.261538,107 L 241.261538,251 Z" style="stroke: rgb(90%,90%,90%); stroke-linecap: butt; stroke-width: 0.25;"/>
+				<path d="M 369.2,107 L 369.2,251 Z" style="stroke: rgb(90%,90%,90%); stroke-linecap: butt; stroke-width: 0.25;"/>
+				<path d="M 497.138462,107 L 497.138462,251 Z" style="stroke: rgb(90%,90%,90%); stroke-linecap: butt; stroke-width: 0.25;"/>
+				<path d="M 625.076923,107 L 625.076923,251 Z" style="stroke: rgb(90%,90%,90%); stroke-linecap: butt; stroke-width: 0.25;"/>
+				<path d="M 753.015385,107 L 753.015385,251 Z" style="stroke: rgb(90%,90%,90%); stroke-linecap: butt; stroke-width: 0.25;"/>
+				<path d="M 92,140.230769 L 785,140.230769 Z" style="stroke: rgb(90%,90%,90%); stroke-linecap: butt; stroke-width: 0.25;"/>
+				<path d="M 92,173.461538 L 785,173.461538 Z" style="stroke: rgb(90%,90%,90%); stroke-linecap: butt; stroke-width: 0.25;"/>
+				<path d="M 92,206.692308 L 785,206.692308 Z" style="stroke: rgb(90%,90%,90%); stroke-linecap: butt; stroke-width: 0.25;"/>
+				<path d="M 92,239.923077 L 785,239.923077 Z" style="stroke: rgb(90%,90%,90%); stroke-linecap: butt; stroke-width: 0.25;"/>
+				<g transform="">
+					<polyline points="99.91276 244.2219, 99.92061 244.2206, 104.3506 243.759, 108.7619 241.885, 113.1919 241.09, 117.6218 241.0425, 122.0331 239.2181, 126.4631 237.8597, 130.8931 237.4584, 135.3044 235.0953, 139.7344 234.4944, 144.1643 231.5014, 148.5756 231.4145, 153.0056 228.1711, 157.4356 227.386, 161.8469 226.2528, 166.2768 226.2357, 170.7068 225.4792, 175.1368 225.232, 179.5481 224.4393, 183.9781 223.1401, 188.4081 222.5375, 192.8193 222.323, 197.2493 221.1876, 201.6793 218.6896, 206.0906 216.6732, 210.5206 215.0477, 214.9505 215.1724, 219.3618 214.5089, 223.7918 213.3786, 228.2218 211.6136, 232.6331 210.5352, 237.0631 208.4838, 241.493 207.3773, 245.9043 206.932, 250.3343 205.1394, 254.7643 204.2832, 259.1756 202.6221, 263.6056 201.727, 268.0355 201.142, 272.4468 199.4534, 276.8768 199.3412, 281.3068 198.7669, 285.7181 197.1725, 290.148 196.5394, 294.578 196.4627, 299.008 195.6828, 303.4193 195.4055, 307.8493 194.1637, 312.2793 193.7538, 316.6905 192.9442, 321.1205 192.2766, 325.5505 191.4194, 329.9618 190.3667, 334.3918 190.0052, 338.8217 189.5033, 343.233 189.4507, 347.663 188.6299, 352.093 187.9148, 356.5043 186.6468, 360.9343 186.2097, 365.3642 185.4685, 369.7755 185.41, 374.2055 183.1671, 378.6355 181.8704, 383.0468 180.8319, 387.4768 180.9002, 391.9067 179.3891, 396.318 179.357, 400.748 178.8899, 405.178 178.864, 409.5893 177.9047, 414.0192 176.9645, 418.4492 176.8568, 422.8792 176.9651, 427.2905 177.215, 431.7205 177.5858, 436.1505 177.0105, 440.5617 176.8821, 444.9917 177.022, 449.4217 175.9299, 453.833 175.902, 458.263 175.4641, 462.6929 174.3395, 467.1042 174.0142, 471.5342 173.5039, 475.9642 173.0002, 480.3755 172.9013, 484.8055 171.9478, 489.2354 171.6533, 493.6467 171.8018, 498.0767 171.871, 502.5067 170.7102, 506.918 170.2336, 511.348 170.2656, 515.7779 169.2931, 520.1892 168.9045, 524.6192 168.4087, 529.0492 168.3831, 533.4792 166.9875, 537.8904 166.3867, 542.3204 165.655, 546.7504 165.642, 551.1617 164.4151, 555.5917 164.3981, 560.0217 164.2682, 564.4329 163.9222, 568.8629 163.1249, 573.2929 162.8928, 577.7042 162.8218, 582.1342 162.8513, 586.5641 162.2365, 590.9754 161.6914, 595.4054 162.0916, 599.8354 162.057, 604.2467 160.9212, 608.6767 161.2021, 613.1066 161.3326, 617.5179 160.6702, 621.9479 160.5775, 626.3779 159.7261, 630.7892 160.1871, 635.2192 159.7651, 639.6491 158.8463, 644.0604 158.8514, 648.4904 158.8917, 652.9204 159.0754, 657.3504 158.8152, 661.7616 158.96, 666.1916 158.3969, 670.6216 158.7457, 675.0329 158.8838, 679.4629 158.6796, 683.8929 158.3932, 688.3041 158.8261, 692.7341 158.4232, 697.1641 158.052, 701.5754 157.5431, 706.0054 156.6947, 710.4353 157.0444, 714.8466 157.0365, 719.2766 156.7349, 723.7093 156.0606, 728.1176 155.7849, 732.5503 155.0894, 736.983 154.4983, 741.3913 153.8874, 745.824 153.2833, 750.2567 152.6721, 754.665 152.7092, 759.0977 152.1296, 763.5304 151.9199, 767.9388 151.9638, 772.3628 151.9846" style="stroke: rgb(0%,44%,69%); stroke-linecap: round; stroke-width: 2; fill: None; fill-rule: evenodd;"/>
+					<polyline points="99.91276 236.4825, 113.1995 231.6531, 126.4674 226.3504, 139.7354 223.6242, 153.0033 219.1587, 166.2713 215.0289, 179.558 210.8456, 192.8259 208.1983, 206.0983 206.3976, 219.3822 203.8761, 232.6339 200.4105, 245.9178 197.4474, 259.2018 194.3077, 272.4534 190.6761, 285.7373 188.9952, 299.0213 185.4837, 312.2729 182.9472, 325.5568 180.2453, 338.8085 176.8805, 352.0924 174.5124, 365.3764 172.8879, 378.628 170.8334, 391.9119 168.2635, 405.1959 166.2293, 418.4475 164.9756, 431.7314 163.539, 444.9831 161.8531, 458.267 160.0121, 471.551 158.2892, 484.8026 157.6265, 498.0865 156.4986, 511.3705 155.0148, 524.6221 152.6003, 537.906 151.6716, 551.1577 150.8126, 564.4416 150.1364, 577.7256 148.8139, 590.9772 148.0853, 604.2611 147.2327, 617.5451 146.1624, 630.7967 145.3758, 644.0807 144.4678, 657.3323 143.4354, 670.6162 142.7247, 683.9002 141.7026, 688.3282 141.6748, 692.7561 141.3045, 697.1518 141.0517, 701.5798 141.2533, 706.0078 141.0848, 710.4357 140.869, 714.8637 140.9987, 719.2917 140.9482, 723.7197 140.9712, 728.1477 140.7231, 732.5433 140.4651, 736.9713 140.2586, 741.3993 139.9538, 745.8273 139.6397, 750.2553 139.693, 754.6832 139.5131, 759.1112 139.122, 763.5392 138.6174, 767.9349 138.1877, 772.3628 137.7996" style="stroke: rgb(83%,36%,0%); stroke-linecap: round; stroke-width: 2; fill: None; fill-rule: evenodd;"/>
+				</g>
+			</g>
+			<path d="M 92,107 L 785,107 Z" style="stroke: rgb(26%,26%,26%); stroke-linecap: butt; stroke-width: 0.6; stroke-dasharray: 3, 3;"/>
+			<text x="92" y="263" style="font-family: Helvetica-Bold; font-size: 12px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,526) scale(1,-1)">2000-3000 solar radii</text>
+			<text x="25" y="151.0" style="font-family: Helvetica; font-size: 10px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,302) scale(1,-1)">Net flux</text>
+			<text x="391.239" y="65" style="font-family: Helvetica; font-size: 11px;fill: rgb(0%,0%,0%); stroke:none;" transform="translate(0,130) scale(1,-1)">Simulation time [yr]</text>
+			<text x="55" y="36" style="font-family: Helvetica; font-size: 10px;fill: rgb(26%,26%,26%); stroke:none;" transform="translate(0,72) scale(1,-1)">All net-flux axes: 10^-6 solar masses / yr. Shells follow the core.</text>
+			<text x="55" y="19" style="font-family: Helvetica; font-size: 10px;fill: rgb(26%,26%,26%); stroke:none;" transform="translate(0,38) scale(1,-1)">Lines join saved measurements; the missing earlier no-Bowen interval is excluded.</text>
+		</g>
+	</g>
+</svg>

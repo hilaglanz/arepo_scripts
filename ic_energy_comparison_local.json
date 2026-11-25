@@ -1,0 +1,472 @@
+﻿{
+    "Method":  "Read-only bounded .NET scan of verified HDF5 contiguous LE f64 gas datasets; compensated sums. No source IC files modified. Pairing uses old rho \u003e= 1e-20 selection in donor order, checked against all retained density and mass values; selected positions checked relative to cores.",
+    "Old":  {
+                "File":  "C:\\Users\\hila\\Dropbox\\RMHD\\IDORT\\AGB\\1.5\\binary\\1.7rlof\\binary_ic.dat.ic.hdf5",
+                "Count":  27916750,
+                "NonfiniteU":  0,
+                "NonfiniteMass":  0,
+                "NonfiniteProduct":  0,
+                "NegativeU":  0,
+                "ZeroU":  0,
+                "NegativeMass":  0,
+                "ZeroMass":  0,
+                "MinU":  49984337263.687332,
+                "MaxU":  39709868403508184,
+                "MinMass":  9.387443152042392E+19,
+                "MaxMass":  2.0524787747987559E+28,
+                "SumFiniteMass":  1.5317604306329183E+33,
+                "SumFiniteU":  1.3128049706705925E+20,
+                "SumFiniteCellEnergy":  4.0084697962608884E+46,
+                "EnergyAbove1e20":  0,
+                "EnergyAbove1e25":  0,
+                "EnergyAbove1e30":  0,
+                "TopU":  [
+                             {
+                                 "Index":  17674278,
+                                 "ID":  17674279,
+                                 "U":  39709868403508184,
+                                 "Mass":  2.5960750157969905E+22,
+                                 "CellEnergy":  1.0308979724293392E+39
+                             },
+                             {
+                                 "Index":  17674277,
+                                 "ID":  17674278,
+                                 "U":  39709868403508184,
+                                 "Mass":  1.5415955706762706E+22,
+                                 "CellEnergy":  6.1216557242985805E+38
+                             },
+                             {
+                                 "Index":  522139,
+                                 "ID":  522140,
+                                 "U":  39709868403508112,
+                                 "Mass":  1.3110107077766467E+21,
+                                 "CellEnergy":  5.2060062681400671E+37
+                             },
+                             {
+                                 "Index":  22853900,
+                                 "ID":  22853901,
+                                 "U":  39709868403508088,
+                                 "Mass":  4.3083703409550164E+21,
+                                 "CellEnergy":  1.7108481927290096E+38
+                             },
+                             {
+                                 "Index":  22853773,
+                                 "ID":  22853774,
+                                 "U":  39709868403508080,
+                                 "Mass":  1.8662425180477583E+22,
+                                 "CellEnergy":  7.4108244800708034E+38
+                             }
+                         ],
+                "TopCellEnergy":  [
+                                      {
+                                          "Index":  7309975,
+                                          "ID":  7309976,
+                                          "U":  69133532127434.227,
+                                          "Mass":  1.9316855450571335E+28,
+                                          "CellEnergy":  1.3354424468930764E+42
+                                      },
+                                      {
+                                          "Index":  8264468,
+                                          "ID":  8264469,
+                                          "U":  72726115786274.4,
+                                          "Mass":  1.7338278776224616E+28,
+                                          "CellEnergy":  1.2609456698144156E+42
+                                      },
+                                      {
+                                          "Index":  8264391,
+                                          "ID":  8264392,
+                                          "U":  67422891099116.461,
+                                          "Mass":  1.8257968909846106E+28,
+                                          "CellEnergy":  1.2310050494996082E+42
+                                      },
+                                      {
+                                          "Index":  26689381,
+                                          "ID":  26689382,
+                                          "U":  74176134054297.859,
+                                          "Mass":  1.6525348171862789E+28,
+                                          "CellEnergy":  1.2257864412900403E+42
+                                      },
+                                      {
+                                          "Index":  20173936,
+                                          "ID":  20173937,
+                                          "U":  83165327540238.5,
+                                          "Mass":  1.4736790097937865E+28,
+                                          "CellEnergy":  1.2255899753867459E+42
+                                      }
+                                  ]
+            },
+    "New":  {
+                "File":  "C:\\Users\\hila\\Dropbox\\RMHD\\IDORT\\AGB\\1.5\\binary\\1.7rlof\\binary_1.7.dat.ic.hdf5",
+                "Count":  27916106,
+                "NonfiniteU":  0,
+                "NonfiniteMass":  0,
+                "NonfiniteProduct":  0,
+                "NegativeU":  0,
+                "ZeroU":  0,
+                "NegativeMass":  0,
+                "ZeroMass":  0,
+                "MinU":  111781589311.50449,
+                "MaxU":  1.1029187935416551E+39,
+                "MinMass":  9.387443152042392E+19,
+                "MaxMass":  2.0524787747987559E+28,
+                "SumFiniteMass":  1.5317604264948712E+33,
+                "SumFiniteU":  5.8148227243498813E+39,
+                "SumFiniteCellEnergy":  4.0009063968241498E+62,
+                "EnergyAbove1e20":  683,
+                "EnergyAbove1e25":  111,
+                "EnergyAbove1e30":  35,
+                "TopU":  [
+                             {
+                                 "Index":  17674216,
+                                 "ID":  17674217,
+                                 "U":  1.1029187935416551E+39,
+                                 "Mass":  1.2717614566613187E+22,
+                                 "CellEnergy":  1.4026496114536795E+61
+                             },
+                             {
+                                 "Index":  17673835,
+                                 "ID":  17673836,
+                                 "U":  1.0881910951525927E+39,
+                                 "Mass":  2.5960750157969905E+22,
+                                 "CellEnergy":  2.8250257145384116E+61
+                             },
+                             {
+                                 "Index":  17674215,
+                                 "ID":  17674216,
+                                 "U":  1.02674493129972E+39,
+                                 "Mass":  1.2330811779015659E+23,
+                                 "CellEnergy":  1.2660598492915213E+62
+                             },
+                             {
+                                 "Index":  17674202,
+                                 "ID":  17674203,
+                                 "U":  6.531002219622229E+38,
+                                 "Mass":  1.2044653010466938E+22,
+                                 "CellEnergy":  7.8663655545939128E+60
+                             },
+                             {
+                                 "Index":  17673573,
+                                 "ID":  17673574,
+                                 "U":  5.7705415435985244E+38,
+                                 "Mass":  4.643744239960961E+22,
+                                 "CellEnergy":  2.6796919054541083E+61
+                             }
+                         ],
+                "TopCellEnergy":  [
+                                      {
+                                          "Index":  17674215,
+                                          "ID":  17674216,
+                                          "U":  1.02674493129972E+39,
+                                          "Mass":  1.2330811779015659E+23,
+                                          "CellEnergy":  1.2660598492915213E+62
+                                      },
+                                      {
+                                          "Index":  17674200,
+                                          "ID":  17674201,
+                                          "U":  8.0812897581921187E+37,
+                                          "Mass":  8.0522437925556789E+23,
+                                          "CellEnergy":  6.5072515291246271E+61
+                                      },
+                                      {
+                                          "Index":  17673572,
+                                          "ID":  17673573,
+                                          "U":  1.3801209338729217E+38,
+                                          "Mass":  4.3520183659871992E+23,
+                                          "CellEnergy":  6.0063116514983608E+61
+                                      },
+                                      {
+                                          "Index":  17673835,
+                                          "ID":  17673836,
+                                          "U":  1.0881910951525927E+39,
+                                          "Mass":  2.5960750157969905E+22,
+                                          "CellEnergy":  2.8250257145384116E+61
+                                      },
+                                      {
+                                          "Index":  17673573,
+                                          "ID":  17673574,
+                                          "U":  5.7705415435985244E+38,
+                                          "Mass":  4.643744239960961E+22,
+                                          "CellEnergy":  2.6796919054541083E+61
+                                      }
+                                  ]
+            },
+    "Matched":  {
+                    "OldCount":  27916750,
+                    "NewCount":  27916106,
+                    "Dropped":  644,
+                    "Matched":  27916106,
+                    "DensityMismatch":  0,
+                    "MassMismatch":  0,
+                    "UnchangedU":  2450756,
+                    "IncreasedU":  25465350,
+                    "DecreasedU":  0,
+                    "MaxRelativeDensityError":  0,
+                    "MaxRelativeMassError":  0,
+                    "MaxURatio":  2.8016725398964819E+22,
+                    "Selected":  [
+                                     {
+                                         "NewIndex":  17673572,
+                                         "OldIndex":  17673984,
+                                         "RhoOld":  2.3522259513997375E-20,
+                                         "RhoNew":  2.3522259513997375E-20,
+                                         "MassOld":  4.3520183659871992E+23,
+                                         "MassNew":  4.3520183659871992E+23,
+                                         "UOld":  28578904273193996,
+                                         "UNew":  1.3801209338729217E+38,
+                                         "Ratio":  4.8291597210304056E+21,
+                                         "InferredRestorationTemperature":  143924155.53934437,
+                                         "OldPosition":  [
+                                                             91250088332477,
+                                                             6.21897456880599E+15,
+                                                             6873535212279782
+                                                         ],
+                                         "NewPosition":  [
+                                                             91250088332477,
+                                                             6.21897457006485E+15,
+                                                             6873535212974796
+                                                         ],
+                                         "RelativeCoreResidual":  [
+                                                                      0,
+                                                                      -0.5,
+                                                                      0
+                                                                  ]
+                                     },
+                                     {
+                                         "NewIndex":  17673573,
+                                         "OldIndex":  17673985,
+                                         "RhoOld":  2.0969646284430619E-20,
+                                         "RhoNew":  2.0969646284430619E-20,
+                                         "MassOld":  4.643744239960961E+22,
+                                         "MassNew":  4.643744239960961E+22,
+                                         "UOld":  39709868403507712,
+                                         "UNew":  5.7705415435985244E+38,
+                                         "Ratio":  1.4531756904761719E+22,
+                                         "InferredRestorationTemperature":  199980000,
+                                         "OldPosition":  [
+                                                             88789030310660,
+                                                             6.22413229034803E+15,
+                                                             6869746605272004
+                                                         ],
+                                         "NewPosition":  [
+                                                             88789030310660,
+                                                             6224132291606891,
+                                                             6869746605967018
+                                                         ],
+                                         "RelativeCoreResidual":  [
+                                                                      0,
+                                                                      0.5,
+                                                                      0
+                                                                  ]
+                                     },
+                                     {
+                                         "NewIndex":  17673835,
+                                         "OldIndex":  17674278,
+                                         "RhoOld":  1.1119941669978941E-20,
+                                         "RhoNew":  1.1119941669978941E-20,
+                                         "MassOld":  2.5960750157969905E+22,
+                                         "MassNew":  2.5960750157969905E+22,
+                                         "UOld":  39709868403508184,
+                                         "UNew":  1.0881910951525927E+39,
+                                         "Ratio":  2.7403543222431229E+22,
+                                         "InferredRestorationTemperature":  199980000,
+                                         "OldPosition":  [
+                                                             267097150242121.5,
+                                                             6382656429205674,
+                                                             6931800923426686
+                                                         ],
+                                         "NewPosition":  [
+                                                             267097150242121.5,
+                                                             6382656430464534,
+                                                             6.9318009241217E+15
+                                                         ],
+                                         "RelativeCoreResidual":  [
+                                                                      0,
+                                                                      -0.5,
+                                                                      0
+                                                                  ]
+                                     },
+                                     {
+                                         "NewIndex":  17674200,
+                                         "OldIndex":  17674710,
+                                         "RhoOld":  2.3223928300894751E-20,
+                                         "RhoNew":  2.3223928300894751E-20,
+                                         "MassOld":  8.0522437925556789E+23,
+                                         "MassNew":  8.0522437925556789E+23,
+                                         "UOld":  24920148091631232,
+                                         "UNew":  8.0812897581921187E+37,
+                                         "Ratio":  3.2428738900255593E+21,
+                                         "InferredRestorationTemperature":  125498557.80746368,
+                                         "OldPosition":  [
+                                                             732882312312797,
+                                                             6966996531120304,
+                                                             88447846302602
+                                                         ],
+                                         "NewPosition":  [
+                                                             732882312312797,
+                                                             6966996532379164,
+                                                             88447846997616
+                                                         ],
+                                         "RelativeCoreResidual":  [
+                                                                      0,
+                                                                      -0.5,
+                                                                      0
+                                                                  ]
+                                     },
+                                     {
+                                         "NewIndex":  17674202,
+                                         "OldIndex":  17674720,
+                                         "RhoOld":  1.0769167722794539E-20,
+                                         "RhoNew":  1.0769167722794539E-20,
+                                         "MassOld":  1.2044653010466938E+22,
+                                         "MassNew":  1.2044653010466938E+22,
+                                         "UOld":  34672648883749852,
+                                         "UNew":  6.531002219622229E+38,
+                                         "Ratio":  1.8836179034141046E+22,
+                                         "InferredRestorationTemperature":  174612422.61784586,
+                                         "OldPosition":  [
+                                                             480003637038755,
+                                                             6608105864204876,
+                                                             77226287409954
+                                                         ],
+                                         "NewPosition":  [
+                                                             480003637038755,
+                                                             6608105865463736,
+                                                             77226288104968
+                                                         ],
+                                         "RelativeCoreResidual":  [
+                                                                      0,
+                                                                      -0.5,
+                                                                      0
+                                                                  ]
+                                     },
+                                     {
+                                         "NewIndex":  17674215,
+                                         "OldIndex":  17674735,
+                                         "RhoOld":  1.17854212229415E-20,
+                                         "RhoNew":  1.17854212229415E-20,
+                                         "MassOld":  1.2330811779015659E+23,
+                                         "MassNew":  1.2330811779015659E+23,
+                                         "UOld":  39709868403507720,
+                                         "UNew":  1.02674493129972E+39,
+                                         "Ratio":  2.5856165547227648E+22,
+                                         "InferredRestorationTemperature":  199980000,
+                                         "OldPosition":  [
+                                                             136860852063649.5,
+                                                             6.26457941497169E+15,
+                                                             124624335955741.5
+                                                         ],
+                                         "NewPosition":  [
+                                                             136860852063649.5,
+                                                             6.26457941623055E+15,
+                                                             124624336650755.5
+                                                         ],
+                                         "RelativeCoreResidual":  [
+                                                                      0,
+                                                                      -0.5,
+                                                                      0
+                                                                  ]
+                                     },
+                                     {
+                                         "NewIndex":  17674216,
+                                         "OldIndex":  17674736,
+                                         "RhoOld":  1.059680646877403E-20,
+                                         "RhoNew":  1.059680646877403E-20,
+                                         "MassOld":  1.2717614566613187E+22,
+                                         "MassNew":  1.2717614566613187E+22,
+                                         "UOld":  39366441931947064,
+                                         "UNew":  1.1029187935416551E+39,
+                                         "Ratio":  2.8016725398964819E+22,
+                                         "InferredRestorationTemperature":  198250494.75246653,
+                                         "OldPosition":  [
+                                                             184220255649498,
+                                                             6.37950800123732E+15,
+                                                             132189186784655
+                                                         ],
+                                         "NewPosition":  [
+                                                             184220255649498,
+                                                             6379508002496181,
+                                                             132189187479669
+                                                         ],
+                                         "RelativeCoreResidual":  [
+                                                                      0,
+                                                                      0.5,
+                                                                      0
+                                                                  ]
+                                     }
+                                 ]
+                },
+    "Summary":  {
+                    "StoredEnergyRatio":  9.98113145459199E+15,
+                    "MaximumSpecificEnergyRatio":  2.777442580102374E+22,
+                    "Top5NewEnergyFraction":  0.76679822646895923,
+                    "RemovedGasMass":  4.1380471293604453E+24,
+                    "RemovedGasMassFraction":  2.7014976014562654E-09
+                },
+    "DatasetStorage":  {
+                           "Layout":  "HDF5 contiguous, unfiltered; IEEE754 float64 little-endian for Density, Masses, InternalEnergy, Coordinates; uint32 little-endian ParticleIDs",
+                           "OldOffsets":  {
+                                              "Density":  3908353720,
+                                              "Masses":  1451677672,
+                                              "InternalEnergy":  1675011672,
+                                              "ParticleIDs":  1340010672,
+                                              "Coordinates":  4624
+                                          },
+                           "NewOffsets":  {
+                                              "Density":  3908263560,
+                                              "Masses":  1451644184,
+                                              "InternalEnergy":  1674973032,
+                                              "ParticleIDs":  1339979760,
+                                              "Coordinates":  4624
+                                          }
+                       },
+    "Limitations":  [
+                        "The sums are of stored IC InternalEnergy times physical gas Masses, not evolved radiation or conserved energy after AREPO initialization.",
+                        "InferredRestorationTemperature is algebraically inferred from the Python correction with IrtStarPhDensity=2.4096e-9, not read as a temperature dataset.",
+                        "Old and new gas IDs were regenerated; cells were aligned by the density-filter ordering and independently checked against every retained mass and density. Selected relative positions also agree within 0.5 cm.",
+                        "This compares IC energy, mass, and density; it does not validate every IC field or by itself prove the exact runtime failure mechanism."
+                    ],
+    "IndependentlyVerifiedWorstCell":  {
+                                           "OldGasIndexZeroBased":  17674736,
+                                           "NewGasIndexZeroBased":  17674216,
+                                           "OldParticleID":  17674737,
+                                           "NewParticleID":  17674217,
+                                           "Density":  1.059680646877403E-20,
+                                           "Mass":  1.2717614566613187E+22,
+                                           "OldInternalEnergy":  39366441931947064,
+                                           "NewInternalEnergy":  1.1029187935416551E+39
+                                       },
+    "HeaderComparison":  {
+                             "SameInBoth":  {
+                                                "Time":  0,
+                                                "BoxSize":  0,
+                                                "HubbleParam":  0,
+                                                "MassTable":  [
+                                                                  0,
+                                                                  0,
+                                                                  0,
+                                                                  0,
+                                                                  0,
+                                                                  0
+                                                              ],
+                                                "Flag_Entropy_ICs":  0,
+                                                "Flag_DoublePrecision":  1
+                                            },
+                             "OldNumPart":  [
+                                                27916750,
+                                                1,
+                                                0,
+                                                0,
+                                                0,
+                                                1
+                                            ],
+                             "NewNumPart":  [
+                                                27916106,
+                                                1,
+                                                0,
+                                                0,
+                                                0,
+                                                1
+                                            ],
+                             "Note":  "Identical zero header BoxSize is a pre-existing property of both files; no change in this comparison."
+                         }
+}

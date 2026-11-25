@@ -1,0 +1,268 @@
+{
+  "assumptions": {
+    "material": "Jena amorphous Mg2SiO4 mg2.txt",
+    "solidDensity": 3.27,
+    "stellarTemperature": 3060.752,
+    "stellarRadiusCm": 17483427990000,
+    "subdivisions": 4,
+    "illumination": "unattenuated finite-disc blackbody",
+    "opacity": "flux-mean Qsca*(1-g), per gram gas"
+  },
+  "validation": {
+    "referenceCases": [
+      {
+        "m": [
+          1.5,
+          -0.5
+        ],
+        "x": 2.5,
+        "result": {
+          "extinction": 2.5628734974130833,
+          "scattering": 1.0970718190883928,
+          "absorption": 1.4658016783246905,
+          "asymmetry": 0.7489059789485073,
+          "backscatter": 0.12358646816583072
+        },
+        "maximumAbsoluteError": 4.165068290262752e-11,
+        "tolerance": 1e-7
+      },
+      {
+        "m": [
+          1.55,
+          -0.1
+        ],
+        "x": 5.212819668567135,
+        "result": {
+          "extinction": 2.8616518824310093,
+          "scattering": 1.6642491199079723,
+          "absorption": 1.197402762523037,
+          "asymmetry": 0.8012897263853509,
+          "backscatter": 0.20599534079829418
+        },
+        "maximumAbsoluteError": 4.649058915617843e-12,
+        "tolerance": 1e-7
+      },
+      {
+        "m": [
+          1.55,
+          0
+        ],
+        "x": 5.212819668567135,
+        "result": {
+          "extinction": 3.1054255314658774,
+          "scattering": 3.1054255314658774,
+          "absorption": 0,
+          "asymmetry": 0.633136758040895,
+          "backscatter": 2.92534064965901
+        },
+        "maximumAbsoluteError": 0.0000044685341227257425,
+        "tolerance": 0.00001
+      },
+      {
+        "m": [
+          1.5,
+          -1
+        ],
+        "x": 1,
+        "result": {
+          "extinction": 2.336320984672381,
+          "scattering": 0.6634537615162461,
+          "absorption": 1.672867223156135,
+          "asymmetry": 0.1921363958918863,
+          "backscatter": 0.5730025552391783
+        },
+        "maximumAbsoluteError": 3.9589188630118066e-7,
+        "tolerance": 0.000001
+      },
+      {
+        "m": [
+          1.33,
+          -0.00001
+        ],
+        "x": 1,
+        "result": {
+          "extinction": 0.09395198374978005,
+          "scattering": 0.09392330272759626,
+          "absorption": 0.00002868102218378521,
+          "asymmetry": 0.18451734695272975,
+          "backscatter": 0.08462444677539821
+        },
+        "maximumAbsoluteError": 3.4695272976836833e-7,
+        "tolerance": 0.000001
+      },
+      {
+        "m": [
+          1.33,
+          -0.00001
+        ],
+        "x": 100,
+        "result": {
+          "extinction": 2.1013207058577947,
+          "scattering": 2.096593506393959,
+          "absorption": 0.004727199463835596,
+          "asymmetry": 0.868959272002197,
+          "backscatter": 2.1463264828710904
+        },
+        "maximumAbsoluteError": 4.936060409299614e-7,
+        "tolerance": 0.000001
+      },
+      {
+        "m": [
+          1.5,
+          -0.1
+        ],
+        "x": 0.0665,
+        "result": {
+          "extinction": 0.013287676455681505,
+          "scattering": 0.000004699313237177355,
+          "absorption": 0.013282977142444327,
+          "asymmetry": 0.0008751937358673857,
+          "backscatter": 0.000007034285554941212
+        },
+        "maximumAbsoluteError": 2.3544318494828076e-8,
+        "tolerance": 1e-7
+      }
+    ],
+    "rayleigh": {
+      "small": {
+        "extinction": 0.000019925170029710692,
+        "scattering": 2.40223752455182e-17,
+        "absorption": 0.00001992517002968667,
+        "asymmetry": 1.979751264899518e-9,
+        "backscatter": 3.603356269838894e-17
+      },
+      "rayleighScattering": 2.4022375227848012e-17,
+      "rayleighAbsorption": 0.00001992516991742124
+    }
+  },
+  "results": [
+    {
+      "radiusUm": 0.1,
+      "solidDensity": 3.27,
+      "stellarTemperature": 3060.752,
+      "coefficient": 1288.0636846526772,
+      "rawScatteringCoefficient": 1706.8060680990695,
+      "absorptionCoefficient": 17.184462462707884,
+      "meanTransportEfficiency": 0.05615957665085673,
+      "spectralCoverage": 1.0000002910424568,
+      "minimumAbsorption": 0.000010051341885819033,
+      "minimumAsymmetry": 1.335524682574948e-7,
+      "maximumAsymmetry": 0.6888372704139167,
+      "wavelengthRangeCm": [
+        0.00001956944811795058,
+        0.09485308206119542
+      ],
+      "count": 19385,
+      "kappaAtDustRatio1e3": 1.2880636846526772,
+      "dustRatioForPreviousKappa": 0.011506418647301932,
+      "temperatures": {
+        "1": 2194.2583228355415,
+        "2": 792.0418957765932,
+        "3": 565.4033156031422,
+        "4": 462.7119265885584,
+        "5": 402.62499063989355,
+        "10": 278.46166039852835,
+        "2.5": 651.9017422143614
+      },
+      "condensationRadius1100": 1.4585518231577947,
+      "condensationRadius1000": 1.586661833597529,
+      "condensationRadius1200": 1.3577693303453728
+    },
+    {
+      "radiusUm": 0.3,
+      "solidDensity": 3.27,
+      "stellarTemperature": 3060.752,
+      "coefficient": 4536.337354527952,
+      "rawScatteringCoefficient": 11176.700130162735,
+      "absorptionCoefficient": 21.52831959512264,
+      "meanTransportEfficiency": 0.5933529259722562,
+      "spectralCoverage": 1.0000002910424568,
+      "minimumAbsorption": 0.000030154181351066203,
+      "minimumAsymmetry": 0.0000012019719933699705,
+      "maximumAsymmetry": 0.7830143100196417,
+      "wavelengthRangeCm": [
+        0.00001956944811795058,
+        0.09485308206119542
+      ],
+      "count": 19385,
+      "kappaAtDustRatio1e3": 4.536337354527952,
+      "dustRatioForPreviousKappa": 0.003267173237282804,
+      "temperatures": {
+        "1": 2319.8348197434198,
+        "2": 865.6872063905643,
+        "3": 610.3704025673138,
+        "4": 495.52033851308806,
+        "5": 428.8813078587408,
+        "10": 293.1983791453878,
+        "2.5": 707.683113979862
+      },
+      "condensationRadius1100": 1.5855319544592257,
+      "condensationRadius1000": 1.7320499145247679,
+      "condensationRadius1200": 1.4691668652880432
+    },
+    {
+      "radiusUm": 0.5,
+      "solidDensity": 3.27,
+      "stellarTemperature": 3060.752,
+      "coefficient": 4383.205026997562,
+      "rawScatteringCoefficient": 11876.395772211763,
+      "absorptionCoefficient": 24.711183581978986,
+      "meanTransportEfficiency": 0.9555386958854685,
+      "spectralCoverage": 1.0000002910424568,
+      "minimumAbsorption": 0.000050257487896407225,
+      "minimumAsymmetry": 0.0000033388098584242433,
+      "maximumAsymmetry": 0.792617261535882,
+      "wavelengthRangeCm": [
+        0.00001956944811795058,
+        0.09485308206119542
+      ],
+      "count": 19385,
+      "kappaAtDustRatio1e3": 4.383205026997562,
+      "dustRatioForPreviousKappa": 0.0033813157059076,
+      "temperatures": {
+        "1": 2338.932148860904,
+        "2": 903.639925224515,
+        "3": 635.3583445018795,
+        "4": 514.102082917179,
+        "5": 443.8536861372826,
+        "10": 301.65162264714866,
+        "2.5": 737.9651190666284
+      },
+      "condensationRadius1100": 1.6466957885152442,
+      "condensationRadius1000": 1.8047772717002148,
+      "condensationRadius1200": 1.5206076154739885
+    },
+    {
+      "radiusUm": 1,
+      "solidDensity": 3.27,
+      "stellarTemperature": 3060.752,
+      "coefficient": 2489.396496264436,
+      "rawScatteringCoefficient": 6527.90898683402,
+      "absorptionCoefficient": 29.4854616582362,
+      "meanTransportEfficiency": 1.085376872371294,
+      "spectralCoverage": 1.0000002910424568,
+      "minimumAbsorption": 0.00010051984124454031,
+      "minimumAsymmetry": 0.000013355216297257828,
+      "maximumAsymmetry": 0.845049338252573,
+      "wavelengthRangeCm": [
+        0.00001956944811795058,
+        0.09485308206119542
+      ],
+      "count": 19385,
+      "kappaAtDustRatio1e3": 2.489396496264436,
+      "dustRatioForPreviousKappa": 0.005953651827758353,
+      "temperatures": {
+        "1": 2323.8541318874895,
+        "2": 925.7082866645759,
+        "3": 655.1087262238449,
+        "4": 530.2592530012386,
+        "5": 457.39995398591805,
+        "10": 309.6099885550143,
+        "2.5": 759.5540625393588
+      },
+      "condensationRadius1100": 1.674833097205567,
+      "condensationRadius1000": 1.8438472291015202,
+      "condensationRadius1200": 1.5403253349793864
+    }
+  ]
+}

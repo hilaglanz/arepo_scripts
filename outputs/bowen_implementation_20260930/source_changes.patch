@@ -1,0 +1,345 @@
+diff --git a/src/IDORT/IDORT_run.c b/src/IDORT/IDORT_run.c
+index c615ae14f9..7869f4aaf5 100644
+--- a/src/IDORT/IDORT_run.c
++++ b/src/IDORT/IDORT_run.c
+@@ -143,7 +143,9 @@ void update_primitive_variables_IRT(int ic)
+ #endif
+     
+ #ifdef OPACITY_MESA
+-      update_opacity();
++      /* Snapshot/checkpoint restarts already have radiation. Only fresh ICs
++       * may bootstrap cells whose radiation has not yet been initialized. */
++      update_opacity(ic == 1 && RestartFlag == RESTART_IC);
+ #ifdef OPACITY_RP_OPTHIN
+     if(ic != 1)
+     {
+diff --git a/src/allvars.h b/src/allvars.h
+index 35a89150c5..c532445da7 100644
+--- a/src/allvars.h
++++ b/src/allvars.h
+@@ -3431,6 +3431,7 @@ extern struct global_data_all_processes
+     double BowenOpacitydT;
+     double BowenOpacityKappamax;
+     double BowenOpacityRhomin;
++    int BowenTemperatureMode; /* 0: gas temperature (default); 1: grey radiation temperature */
+ #endif
+ 
+ #endif
+diff --git a/src/init.c b/src/init.c
+index 67e90bcb67..88079b5d4c 100644
+--- a/src/init.c
++++ b/src/init.c
+@@ -2226,6 +2226,20 @@ int init(void)
+   if(RestartFlag != RESTART_SNAPSHOT && RestartFlag != RESTART_RESTART)
+     {
+       run_IDORT(&Mesh, 1);
++#if defined(OPACITY_MESA) && defined(BOWEN_OPACITY)
++      if(All.BowenTemperatureMode == 1)
++        {
++          update_opacity(0); /* Replace the bootstrap opacity using solved radiation. */
++          for(int idx = 0; idx < TimeBinsHydro.NActiveParticles; idx++)
++            {
++              int cell = TimeBinsHydro.ActiveParticleList[idx];
++              if(cell < 0)
++                continue;
++              SphP[cell].tau = (SphP[cell].KappaRoss + SphP[cell].KappaScatter) *
++                  SphP[cell].Density * All.UnitDensity_in_cgs * get_cell_radius(cell);
++            }
++        }
++#endif
+     }
+ #ifdef OUTPUT_IDORT_NO_IV
+   if(RestartFlag == RESTART_SNAPSHOT) {
+diff --git a/src/mesa_opacity.c b/src/mesa_opacity.c
+index 45da7694a6..8cccd39592 100644
+--- a/src/mesa_opacity.c
++++ b/src/mesa_opacity.c
+@@ -663,7 +663,46 @@ int get_opal_opacity_global(double rho, double t, struct opal_opacity_result *re
+     return get_opal_opacity_local(opal_table, rho, t, result);
+ }
+ 
+-void set_opacity(struct sph_particle_data *SphP, int i)
++#ifdef BOWEN_OPACITY
++/* Returns NaN on invalid input so errors can be reported outside OpenMP. */
++static double get_bowen_opacity(const struct sph_particle_data *cell, int allow_radiation_bootstrap)
++{
++  if(!(cell->Density > All.BowenOpacityRhomin))
++    return 0.0;
++
++  if(All.BowenTemperatureMode == 0)
++    /* Preserve the legacy expression, including its rounding. */
++    return All.BowenOpacityKappamax /
++        (1.0 + exp((cell->EOSTemperature - All.DustCondensationTemp) / All.BowenOpacitydT));
++
++  double temperature_for_dust = cell->EOSTemperature;
++#ifdef IDORT
++  const double radiation_energy = cell->E_rad;
++  if(isfinite(radiation_energy) && radiation_energy > 0.0)
++    {
++      /* E_rad is already an energy density in physical CGS units.
++       * This is a grey proxy, not a spectral Mie grain temperature. */
++      temperature_for_dust = sqrt(sqrt(radiation_energy / RAD_CONST));
++    }
++  else if(!(allow_radiation_bootstrap && radiation_energy == 0.0))
++    return NAN;
++#else
++  /* check_parameters() rejects radiation mode without IDORT. */
++  return NAN;
++#endif
++  if(!isfinite(temperature_for_dust) || temperature_for_dust <= 0.0)
++    return NAN;
++
++  const double temperature_offset =
++      (temperature_for_dust - All.DustCondensationTemp) / All.BowenOpacitydT;
++  const double exponential = exp(-fabs(temperature_offset));
++  const double condensation_fraction = temperature_offset >= 0.0
++      ? exponential / (1.0 + exponential) : 1.0 / (1.0 + exponential);
++  return All.BowenOpacityKappamax * condensation_fraction;
++}
++#endif
++
++void set_opacity(struct sph_particle_data *SphP, int i, int allow_radiation_bootstrap)
+ {
+ //    double Temperature = SphP[i].EOSTemperature;
+ //#ifdef IRT_OPACITY_T_RAD
+@@ -731,16 +770,13 @@ void set_opacity(struct sph_particle_data *SphP, int i)
+     SphP[i].KappaScatter = 0.0;//0.34;
+     
+ #ifdef BOWEN_OPACITY
+-    /* Dynamically adds large-grain silicate scattering purely as momentum */    
+-if (SphP[i].Density > All.BowenOpacityRhomin) 
+-    {
+-        double dust_kappa = All.BowenOpacityKappamax / (1.0 + exp((SphP[i].EOSTemperature - All.DustCondensationTemp) / All.BowenOpacitydT));
+-        SphP[i].KappaScatter += dust_kappa; 
+-    }
++    /* Effective transport scattering: changes radiation transport and momentum. */
++    SphP[i].KappaScatter += get_bowen_opacity(&SphP[i], allow_radiation_bootstrap);
+ #endif
+ }
+ 
+-void update_opacity(void)
++/* Bootstrap is allowed only before the first radiation solve of a fresh IC. */
++void update_opacity(int allow_radiation_bootstrap)
+ {
+     int err;
+ //    struct opal_opacity_result res;
+@@ -749,20 +785,58 @@ void update_opacity(void)
+     mpi_printf("IDORT: Updating opacity... \n");
+ #endif
+     
++#ifdef BOWEN_OPACITY
++    int invalid_dust_temperatures = 0;
++#pragma omp parallel for private(idx, i) reduction(+:invalid_dust_temperatures)
++#else
+ #pragma omp parallel for private(idx, i)
++#endif
+     for(idx = 0; idx < TimeBinsHydro.NActiveParticles; idx++)
+       {
+         i = TimeBinsHydro.ActiveParticleList[idx];
+         if(i < 0)
+           continue;
+-        set_opacity(SphP, i);
++        set_opacity(SphP, i, allow_radiation_bootstrap);
++#ifdef BOWEN_OPACITY
++        if(All.BowenTemperatureMode == 1 && !isfinite(SphP[i].KappaScatter))
++          invalid_dust_temperatures++;
++#endif
+     }
++#ifdef BOWEN_OPACITY
++    if(invalid_dust_temperatures)
++      terminate("BOWEN: invalid dust temperature in %d active cells on this task. "
++                "Radiation mode requires finite positive E_rad; gas-temperature bootstrap "
++                "is allowed only for zero E_rad before a fresh-IC radiation solve.",
++                invalid_dust_temperatures);
++#endif
+ #ifdef OPACITY_MESA_DEBUG
+     mpi_printf("IDORT: Finish updating opacity... \n");
+ #endif
+ }
+ 
+ 
++#ifdef BOWEN_OPACITY
++/* A changed checkpoint prescription must also update inactive cells before
++ * the next RT solve. Baseline table opacities and gas state are untouched. */
++void refresh_bowen_opacity(void)
++{
++  int invalid_dust_temperatures = 0;
++#pragma omp parallel for reduction(+:invalid_dust_temperatures)
++  for(int i = 0; i < NumGas; i++)
++    {
++      SphP[i].KappaScatter = get_bowen_opacity(&SphP[i], 0);
++      if(!isfinite(SphP[i].KappaScatter))
++        invalid_dust_temperatures++;
++      else
++        SphP[i].tau = (SphP[i].KappaRoss + SphP[i].KappaScatter) *
++            SphP[i].Density * All.UnitDensity_in_cgs * get_cell_radius(i);
++    }
++  if(invalid_dust_temperatures)
++    terminate("BOWEN: cannot refresh changed checkpoint opacity: %d cells have invalid dust temperatures.",
++              invalid_dust_temperatures);
++}
++#endif
++
+ //void IDORT(void)
+ //{
+ //#ifdef OPACITY_MESA_DEBUG
+diff --git a/src/mesa_opacity.h b/src/mesa_opacity.h
+index 7bbb248c8c..faa0975570 100644
+--- a/src/mesa_opacity.h
++++ b/src/mesa_opacity.h
+@@ -119,8 +119,11 @@ void opalopacity_get_logT_limits(double *lower, double *upper);
+ int get_opacitytable_value(struct opal_opacity_table *opal_table, opacitytable var, double rho, double t, double *result);
+ int get_opal_opacity_local(struct opal_opacity_table *opal_table, double rho, double t, struct opal_opacity_result *result);
+ int get_opal_opacity_global(double rho, double t, struct opal_opacity_result *result);
+-void set_opacity(struct sph_particle_data *SphP, int i);
+-void update_opacity(void);
++void set_opacity(struct sph_particle_data *SphP, int i, int allow_radiation_bootstrap);
++void update_opacity(int allow_radiation_bootstrap);
++#ifdef BOWEN_OPACITY
++void refresh_bowen_opacity(void);
++#endif
+ //void IDORT(void);
+ //#endif
+ //int opaleos(struct opal_eos_table *opal_table, double x, double rho, double t, int mode, struct opal_eos_result *result);
+diff --git a/src/parameters.c b/src/parameters.c
+index dadc0ff2bd..74f5c0f360 100644
+--- a/src/parameters.c
++++ b/src/parameters.c
+@@ -2588,6 +2588,13 @@ void read_parameter_file(const char *const fname)
+ #endif
+ 
+ #ifdef BOWEN_OPACITY
++      /* Optional for backwards compatibility with existing parameter files. */
++      All.BowenTemperatureMode = 0;
++      const int bowen_temperature_mode_parameter = nt;
++      strcpy(tag[nt], "BowenTemperatureMode");
++      addr[nt] = &All.BowenTemperatureMode;
++      id[nt++] = PARAM_INT;
++
+       strcpy(tag[nt], "DustCondensationTemp");
+       addr[nt] = &All.DustCondensationTemp;
+       id[nt++] = PARAM_REAL;
+@@ -4226,6 +4233,14 @@ void read_parameter_file(const char *const fname)
+ #endif
+                     }
+                 }
++#if defined(OPACITY_MESA) && defined(BOWEN_OPACITY)
++              if(!param_handled[bowen_temperature_mode_parameter])
++                {
++                  param_handled[bowen_temperature_mode_parameter] = 1;
++                  fprintf(fdout, "%-*s%d\n", MAXLEN_PARAM_TAG, "BowenTemperatureMode", All.BowenTemperatureMode);
++                  printf("        %-*s%d (default)\n", MAXLEN_PARAM_TAG, "BowenTemperatureMode", All.BowenTemperatureMode);
++                }
++#endif
+               fclose(fd);
+               fclose(fdout);
+               printf("\n");
+@@ -4598,6 +4613,40 @@ void read_parameter_file(const char *const fname)
+  */
+ void check_parameters(void)
+ {
++#if defined(OPACITY_MESA) && defined(BOWEN_OPACITY)
++  if(All.BowenTemperatureMode != 0 && All.BowenTemperatureMode != 1)
++    mpi_terminate("BowenTemperatureMode must be 0 (gas) or 1 (grey radiation).");
++
++  if(!isfinite(All.DustCondensationTemp) || All.DustCondensationTemp <= 0.0 ||
++     !isfinite(All.BowenOpacitydT) || All.BowenOpacitydT <= 0.0 ||
++     !isfinite(All.BowenOpacityKappamax) || All.BowenOpacityKappamax < 0.0 ||
++     !isfinite(All.BowenOpacityRhomin) || All.BowenOpacityRhomin < 0.0)
++    mpi_terminate("BOWEN requires positive finite condensation temperature and width, "
++                  "and nonnegative finite maximum opacity and density threshold.");
++
++  if(All.BowenTemperatureMode == 1)
++    {
++#ifndef IDORT
++      mpi_terminate("BowenTemperatureMode=1 requires IDORT.");
++#endif
++#ifdef IDORT_TEST
++      mpi_terminate("BowenTemperatureMode=1 uses physical RAD_CONST and does not support IDORT_TEST.");
++#endif
++      if(All.ComovingIntegrationOn || All.UnitLength_in_cm != 1.0 ||
++         All.UnitMass_in_g != 1.0 || All.UnitVelocity_in_cm_per_s != 1.0)
++        mpi_terminate("BowenTemperatureMode=1 currently requires non-comoving CGS units (all base units equal to 1).");
++#ifdef IDORT_NO_INI
++      if(RestartFlag == RESTART_IC)
++        mpi_terminate("BowenTemperatureMode=1 requires the initial radiation solve for fresh ICs; disable IDORT_NO_INI.");
++#endif
++#if !defined(OUTPUT_IDORT) || defined(OUTPUT_IDORT_NO_IV)
++      if(RestartFlag == RESTART_SNAPSHOT)
++        mpi_terminate("BowenTemperatureMode=1 snapshot restarts require OUTPUT_IDORT and saved IV (without OUTPUT_IDORT_NO_IV).");
++#endif
++      mpi_printf("BOWEN: using grey radiation temperature with lagged opacity; kappa_max=%g cm^2/g.\n",
++                 All.BowenOpacityKappamax);
++    }
++#endif
+   /* check whether time max is larger than max timestep */
+   if(All.TimeMax - All.TimeBegin <= All.MaxSizeTimestep)
+     mpi_terminate(
+diff --git a/src/read_ic.c b/src/read_ic.c
+index f60f9191d3..579bf7b890 100644
+--- a/src/read_ic.c
++++ b/src/read_ic.c
+@@ -1788,6 +1788,12 @@ void read_file(const char *const fname, const int filenr, const int readTask, co
+ 
+                                       if(hdf5_dataset < 0)
+                                         {
++#if defined(OPACITY_MESA) && defined(BOWEN_OPACITY) && defined(IDORT)
++                                          if(All.BowenTemperatureMode == 1 && RestartFlag == RESTART_SNAPSHOT &&
++                                             type == 0 && (blocknr == IO_IDORT_E_RAD || blocknr == IO_IDORT_IV))
++                                            terminate("BOWEN radiation-temperature mode requires gas dataset %s "
++                                                      "in the input snapshot; refusing to replace it with zeros.", buf);
++#endif
+                                           /* no, pad with zeros */
+                                           if(ThisTask == readTask && task == ThisTask)
+                                             mpi_printf("\tDataset %s not present for particle type %d, using zero.\n", buf, type);
+diff --git a/src/restart.c b/src/restart.c
+index 436935f1aa..b5c1629ad4 100644
+--- a/src/restart.c
++++ b/src/restart.c
+@@ -753,6 +753,46 @@ void reread_params_after_loading_restart(void)
+     warn("OpacityPlanckTable modified from %s to %s while restarting at Time=%g", All.OpacityPlanckTable, all.OpacityPlanckTable, All.Time);
+   strcpy(All.OpacityPlanckTable, all.OpacityPlanckTable);
+ #endif
++#ifdef BOWEN_OPACITY
++  const int bowen_parameters_changed =
++      All.BowenTemperatureMode != all.BowenTemperatureMode || All.DustCondensationTemp != all.DustCondensationTemp ||
++      All.BowenOpacitydT != all.BowenOpacitydT || All.BowenOpacityKappamax != all.BowenOpacityKappamax ||
++      All.BowenOpacityRhomin != all.BowenOpacityRhomin;
++  if(ThisTask == 0 && All.BowenTemperatureMode != all.BowenTemperatureMode)
++    warn("BowenTemperatureMode modified from %d to %d while restarting at Time=%g",
++         All.BowenTemperatureMode, all.BowenTemperatureMode, All.Time);
++  All.BowenTemperatureMode = all.BowenTemperatureMode;
++  if(ThisTask == 0 && All.DustCondensationTemp != all.DustCondensationTemp)
++    warn("DustCondensationTemp modified from %g to %g while restarting at Time=%g",
++         All.DustCondensationTemp, all.DustCondensationTemp, All.Time);
++  All.DustCondensationTemp = all.DustCondensationTemp;
++  if(ThisTask == 0 && All.BowenOpacitydT != all.BowenOpacitydT)
++    warn("BowenOpacitydT modified from %g to %g while restarting at Time=%g",
++         All.BowenOpacitydT, all.BowenOpacitydT, All.Time);
++  All.BowenOpacitydT = all.BowenOpacitydT;
++  if(ThisTask == 0 && All.BowenOpacityKappamax != all.BowenOpacityKappamax)
++    warn("BowenOpacityKappamax modified from %g to %g while restarting at Time=%g",
++         All.BowenOpacityKappamax, all.BowenOpacityKappamax, All.Time);
++  All.BowenOpacityKappamax = all.BowenOpacityKappamax;
++  if(ThisTask == 0 && All.BowenOpacityRhomin != all.BowenOpacityRhomin)
++    warn("BowenOpacityRhomin modified from %g to %g while restarting at Time=%g",
++         All.BowenOpacityRhomin, all.BowenOpacityRhomin, All.Time);
++  All.BowenOpacityRhomin = all.BowenOpacityRhomin;
++  /* The checkpoint restores units after the initial parameter validation. */
++  if(All.BowenTemperatureMode == 1 &&
++     (All.ComovingIntegrationOn || All.UnitLength_in_cm != 1.0 ||
++      All.UnitMass_in_g != 1.0 || All.UnitVelocity_in_cm_per_s != 1.0))
++    terminate("BOWEN radiation-temperature mode requires a non-comoving CGS checkpoint.");
++  if(bowen_parameters_changed)
++    {
++#ifdef ONEDIMS_SPHERICAL
++      /* Spherical cell radii need mesh faces, which are not restored here. */
++      terminate("Changing Bowen parameters in ONEDIMS_SPHERICAL requires a snapshot restart (mode 2).");
++#else
++      refresh_bowen_opacity();
++#endif
++    }
++#endif
+ #endif
+     
+ #ifdef IDORT_TEST

@@ -1,0 +1,160 @@
+{
+  "sources": {
+    "bowen_flux.csv": {
+      "path": "C:\\Users\\hila\\Dropbox\\RMHD\\IDORT\\AGB\\1.5\\bowen_flux.csv",
+      "rows": 618,
+      "sha256": "fd02be7dbec00fed116eb5958cd06a8499c97dfb52cd3de9e3abde1950e54a9e"
+    },
+    "no_bowen_flux_291_295.csv": {
+      "path": "C:\\Users\\hila\\Dropbox\\RMHD\\IDORT\\AGB\\1.5\\no_bowen_flux_291_295.csv",
+      "rows": 15,
+      "sha256": "2da2974676badeeacdda8600e7b73e966c889f2d2e7a37f46cc3bc5f0e95af1d"
+    },
+    "no_bowen_flux_344_496.csv": {
+      "path": "C:\\Users\\hila\\Dropbox\\RMHD\\IDORT\\AGB\\1.5\\no_bowen_flux_344_496.csv",
+      "rows": 195,
+      "sha256": "87af286e7cc5be88ea2e2885d5cd1c2533a521bae59425613c88ab747818a90e"
+    }
+  },
+  "method": "Linear interpolation of Bowen onto no-Bowen physical times; trapezoidal time weighting. No interpolation across missing snapshots 295-344. Rates are finite-shell transport averages, not an escape criterion.",
+  "statistics": [
+    {
+      "inner_Rsun": 1000,
+      "period": "shared later interval",
+      "time_yr": [
+        7.137108882193099,
+        10.290734848816456
+      ],
+      "bowen_mean": {
+        "outward_Msun_per_yr": 4.901963862597269e-09,
+        "inward_Msun_per_yr": 8.889536309063666e-06,
+        "net_Msun_per_yr": -8.884634345201074e-06
+      },
+      "no_bowen_mean": {
+        "outward_Msun_per_yr": 4.525934400712677e-06,
+        "inward_Msun_per_yr": 8.40575529701101e-06,
+        "net_Msun_per_yr": -3.879820896298332e-06
+      },
+      "bowen_full_cadence_mean": {
+        "outward_Msun_per_yr": 4.870928868609258e-09,
+        "inward_Msun_per_yr": 8.887015023262397e-06,
+        "net_Msun_per_yr": -8.882144094393787e-06
+      }
+    },
+    {
+      "inner_Rsun": 1000,
+      "period": "last year",
+      "time_yr": [
+        9.290734848816456,
+        10.290734848816456
+      ],
+      "bowen_mean": {
+        "outward_Msun_per_yr": 6.730072766840149e-09,
+        "inward_Msun_per_yr": 5.362568163342478e-06,
+        "net_Msun_per_yr": -5.355838090575634e-06
+      },
+      "no_bowen_mean": {
+        "outward_Msun_per_yr": 2.513533397287144e-06,
+        "inward_Msun_per_yr": 6.664091162263919e-06,
+        "net_Msun_per_yr": -4.150557764976776e-06
+      },
+      "bowen_full_cadence_mean": {
+        "outward_Msun_per_yr": 6.69096406113606e-09,
+        "inward_Msun_per_yr": 5.363853010488692e-06,
+        "net_Msun_per_yr": -5.357162046427554e-06
+      }
+    },
+    {
+      "inner_Rsun": 1500,
+      "period": "shared later interval",
+      "time_yr": [
+        7.137108882193099,
+        10.290734848816456
+      ],
+      "bowen_mean": {
+        "outward_Msun_per_yr": 5.215137717003036e-07,
+        "inward_Msun_per_yr": 3.236286222232339e-06,
+        "net_Msun_per_yr": -2.7147724505320333e-06
+      },
+      "no_bowen_mean": {
+        "outward_Msun_per_yr": 1.333088803300523e-06,
+        "inward_Msun_per_yr": 2.8608323836600526e-06,
+        "net_Msun_per_yr": -1.5277435803595328e-06
+      },
+      "bowen_full_cadence_mean": {
+        "outward_Msun_per_yr": 5.21856755446364e-07,
+        "inward_Msun_per_yr": 3.239344522307731e-06,
+        "net_Msun_per_yr": -2.717487766861367e-06
+      }
+    },
+    {
+      "inner_Rsun": 1500,
+      "period": "last year",
+      "time_yr": [
+        9.290734848816456,
+        10.290734848816456
+      ],
+      "bowen_mean": {
+        "outward_Msun_per_yr": 4.646539199158846e-07,
+        "inward_Msun_per_yr": 2.1243666091659963e-06,
+        "net_Msun_per_yr": -1.6597126892501118e-06
+      },
+      "no_bowen_mean": {
+        "outward_Msun_per_yr": 2.7457710216628353e-06,
+        "inward_Msun_per_yr": 2.2202733733985993e-06,
+        "net_Msun_per_yr": 5.254976482642355e-07
+      },
+      "bowen_full_cadence_mean": {
+        "outward_Msun_per_yr": 4.6473098078826264e-07,
+        "inward_Msun_per_yr": 2.1248172670793014e-06,
+        "net_Msun_per_yr": -1.660086286291038e-06
+      }
+    },
+    {
+      "inner_Rsun": 2000,
+      "period": "shared later interval",
+      "time_yr": [
+        7.137108882193099,
+        10.290734848816456
+      ],
+      "bowen_mean": {
+        "outward_Msun_per_yr": 7.054820421906057e-06,
+        "inward_Msun_per_yr": 1.023987528972445e-07,
+        "net_Msun_per_yr": 6.952421669008814e-06
+      },
+      "no_bowen_mean": {
+        "outward_Msun_per_yr": 5.870828911792868e-06,
+        "inward_Msun_per_yr": 8.394039959077292e-08,
+        "net_Msun_per_yr": 5.7868885122020956e-06
+      },
+      "bowen_full_cadence_mean": {
+        "outward_Msun_per_yr": 7.055386384563179e-06,
+        "inward_Msun_per_yr": 1.0242317062199474e-07,
+        "net_Msun_per_yr": 6.952963213941177e-06
+      }
+    },
+    {
+      "inner_Rsun": 2000,
+      "period": "last year",
+      "time_yr": [
+        9.290734848816456,
+        10.290734848816456
+      ],
+      "bowen_mean": {
+        "outward_Msun_per_yr": 4.759812954079278e-06,
+        "inward_Msun_per_yr": 1.2106809403723857e-07,
+        "net_Msun_per_yr": 4.638744860042038e-06
+      },
+      "no_bowen_mean": {
+        "outward_Msun_per_yr": 3.43975364459714e-06,
+        "inward_Msun_per_yr": 1.3266896240819643e-07,
+        "net_Msun_per_yr": 3.307084682188943e-06
+      },
+      "bowen_full_cadence_mean": {
+        "outward_Msun_per_yr": 4.763286920784175e-06,
+        "inward_Msun_per_yr": 1.210096665869309e-07,
+        "net_Msun_per_yr": 4.642277254197246e-06
+      }
+    }
+  ]
+}

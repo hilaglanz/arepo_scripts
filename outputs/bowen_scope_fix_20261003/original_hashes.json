@@ -1,0 +1,7 @@
+{
+  "src/mesa_opacity.c": "bc6788412a1559581827a08eadf3021ac96fa96b7e688048fbc1395e7049774b",
+  "src/mesa_opacity.h": "30b8a2933163df4cecebd9945c05d0490df929bcd78e5139df540ba17b677f76",
+  "src/IDORT/IDORT_run.c": "0583916f8fc4f47b1baa481f9df2fa266ff3284dd7262843658d92ad9d5d50e2",
+  "documentation/bowen_opacity.md": "938914137e503a103b2fc7099bf4fe5b2156bc0175fafa65e7722d55b6b3d276",
+  "tests/check_bowen_opacity.py": "4a60321bb4e8121f6054cbaa118936c51de2a6968adb1cd1460400a5c9980eee"
+}

@@ -1,0 +1,5 @@
+{
+  "src/mesa_opacity.c": "0e5d35e15d4c8c241d332abbfe107ee719d805870986253a2ef591fdb291cea5",
+  "documentation/bowen_opacity.md": "9fdc9c6282b5de314864f104f896f313b8f6c9fc14576bc43723ff9b1f0cb07f",
+  "tests/check_bowen_opacity.py": "d88fbc1c810e8b7023186878cbd48b9f52bfcd564e4553ebd1b6ab725ba6c5af"
+}
