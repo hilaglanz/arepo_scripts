@@ -73,7 +73,7 @@ def calculate_max_value(snapshot, value, ind=[]):
 
         return snapshot.data[value][ind].max()
 
-def calculate_value(snapshot, value, sink_value=False, sink_id=0, ind=[], center=None):
+def calculate_value(snapshot, value, sink_value=False, sink_id=0, ind=[], center=None, center_velocity=None):
     if len(ind) == 0:
         ind, = np.where(snapshot.data['mass'] != 0)
     if center is None:
@@ -110,15 +110,22 @@ def calculate_value(snapshot, value, sink_value=False, sink_id=0, ind=[], center
             print("no shells provided, using 2000 - 3000 Rsun")
             inner_shell = 2000
             outer_shell = 3000
-        sort_indices = np.argsort(snapshot.r(center)[ind])
-        indgas = snapshot.type == 0
-        r = snapshot.r()[indgas]
+        gas = snapshot.type == 0
+        radius = snapshot.r() if center_velocity is None else snapshot.r(center)
+        in_shell = gas & (radius >= inner_shell * rsol) & (radius <= outer_shell * rsol)
+        if center_velocity is None:
+            snapshot.computeValueGas("vr")
+            radial_velocity = snapshot.vr[in_shell[gas]]
+        else:
+            in_shell &= radius > 0
+            displacement = snapshot.pos[in_shell] - center
+            relative_velocity = snapshot.vel[in_shell] - center_velocity
+            radial_velocity = np.einsum("ij,ij->i", displacement, relative_velocity) / radius[in_shell]
+
+        outward = radial_velocity > 0
+        masses_in_shell = snapshot.mass[in_shell][outward]
         dr = (outer_shell-inner_shell) * rsol
-        snapshot.computeValueGas("vr")
-        mask = (r >= inner_shell * rsol) & (r <= outer_shell * rsol) & (snapshot.vr > 0)
-        masses_in_shell = snapshot.mass[indgas][mask]
-        vr_in_shell = snapshot.vr[mask]
-        mass_loss_rate_cgs = (masses_in_shell * vr_in_shell).sum() / dr
+        mass_loss_rate_cgs = (masses_in_shell * radial_velocity[outward]).sum() / dr
         mass_loss_rate = mass_loss_rate_cgs / (msol/yr)
 
         return mass_loss_rate
@@ -201,14 +208,13 @@ def calculate_value_over_time(snapshots_number_list, snapshot_dir="output", valu
                     mean=False, max=False, sink_value=False, sink_id=0, around_objects=False, around_density_peak=False,
                               object_num=0, motion_axis=0, along_axis_line=False, relative_to_motion=None,
                                loadonlytype=[0,5], center_on_id=None):
-    if center_on_id is not None and (not value.startswith("radius_mass_shell_") or around_objects or along_axis_line
-                                    or mean or max or sink_value or relative_to_motion is not None):
-        raise ValueError("--center_on_id requires a full-sphere radius_mass_shell_<mass> calculation.")
+    is_mass_loss_rate = value == "mass_loss_rate" or value.startswith("mass_loss_rate_")
 
     value_over_time = []
     times = []
     value_to_calc = value
     for snapshot_num in snapshots_number_list:
+        center_velocity = None
         if around_objects:
             snapshot, cell_indices, center, suffix = get_relevant_plotting_parameters_around_object(around_density_peak,
                                                                                              motion_axis,
@@ -228,7 +234,13 @@ def calculate_value_over_time(snapshots_number_list, snapshot_dir="output", valu
                 if center_indices.size != 1:
                     raise ValueError(f"Snapshot {snapshot_num}: expected one loaded particle with ID {center_on_id}, "
                                      f"found {center_indices.size}. Check the ID and --ignore_types.")
-                center = snapshot.pos[center_indices[0]]
+                center_index = center_indices[0]
+                center = snapshot.pos[center_index]
+                if is_mass_loss_rate:
+                    center_velocity = snapshot.vel[center_index]
+                    if snapshot.type[center_index] == 1 and "DMFIXED" in getattr(snapshot, "config", {}):
+                        # The fixed core's shell is stationary in the simulation frame.
+                        center_velocity = np.zeros(3)
         times.append(snapshot.time)
         if "dot" in value:
             print("plotting time different")
@@ -259,8 +271,8 @@ def calculate_value_over_time(snapshots_number_list, snapshot_dir="output", valu
             if max:
                 value_over_time.append(calculate_max_value(snapshot, value_to_calc, ind=cell_indices))
             else:
-                value_over_time.append(calculate_value(snapshot, value_to_calc, sink_value, sink_id, ind=cell_indices
-                                                       , center=center))
+                value_over_time.append(calculate_value(snapshot, value_to_calc, sink_value, sink_id, ind=cell_indices,
+                                                       center=center, center_velocity=center_velocity))
     print("added ", value_to_calc, " to the time evolution")
     if "diff" in value or "dot" in value:
         value_diff_over_time = []
@@ -351,7 +363,7 @@ def InitParser():
     parser.add_argument('--plotting_dir', type=str, help='diretory to plot to', default="plots")
     parser.add_argument('--value', type=str, help='value to plot and compare profile', default="rho")
     parser.add_argument('--center_on_id', type=int, default=None, metavar='ID',
-                        help='Center radius_mass_shell_<mass> on this particle ID (default: box center)')
+                        help='Center radius_mass_shell and mass_loss_rate on this particle ID (default: box center)')
     parser.add_argument('--logplot', type=lambda x: (str(x).lower() in ['true', '1', 'yes']), help='logplot',
                         default=True)
     parser.add_argument('--mean', type=lambda x: (str(x).lower() in ['true', '1', 'yes']),
